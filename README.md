@@ -10,7 +10,10 @@ You will need the following software to build this tool:
   * [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) (version 8 or later)
   * [Apache ANT](http://ant.apache.org/)
 
-Invoke `ant` in the root directory of the project. It will compile the sources and create file `bin/zbt.jar`.
+Invoke `ant` in the root directory of the project. It will compile the sources and create file `bin/buildsystem.jar`.
+
+It is also recommended to run tests after compilation. This can be achieved by invoking the `ant run-tests` command
+in the root directory of the project.
 
 Also, projects files for [IntelliJ IDEA](https://www.jetbrains.com/idea/) are included.
 
