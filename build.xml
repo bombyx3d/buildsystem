@@ -65,7 +65,7 @@ THE SOFTWARE.
             optimize="on"
             debuglevel="lines,vars,source">
             <classpath>
-                <file name="bin/buildsystem.jar" />
+                <fileset dir="bin"><include name="buildsystem.jar" /></fileset>
                 <fileset dir="tests/lib"><include name="**/*.jar" /></fileset>
             </classpath>
         </javac>

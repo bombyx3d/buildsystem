@@ -26,7 +26,7 @@ import com.zapolnov.zbt.generators.cmake.CMakeGenerator;
 import com.zapolnov.zbt.gui.FatalErrorDialog;
 import com.zapolnov.zbt.gui.MainDialog;
 import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.utility.Database;
+import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.util.LinkedHashMap;
