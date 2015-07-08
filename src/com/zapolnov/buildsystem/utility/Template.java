@@ -72,7 +72,7 @@ public class Template
         }
     }
 
-    private final List<Command> commands = new ArrayList<Command>();
+    private final List<Command> commands = new ArrayList<>();
     private Map<String, String> variables;
 
     /**
