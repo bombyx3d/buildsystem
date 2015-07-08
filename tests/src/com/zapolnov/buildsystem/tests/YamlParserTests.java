@@ -33,15 +33,27 @@ import org.junit.Test;
 
 public class YamlParserTests extends Assert
 {
-    @Test public void testYamlParserZero()
+    @Test public void testYamlParserNonExistent() throws IOException
     {
-        File yamlFile;
-        try {
-            yamlFile = File.createTempFile("YamlParserTestZero", ".yml");
-            if (!yamlFile.delete())
-                throw new IOException("Unable to delete temporary file.");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        File yamlFile = File.createTempFile("YamlParserTestNonExistent", ".yml");
+        if (!yamlFile.delete())
+            throw new IOException("Unable to delete temporary file.");
+
+        boolean thrown = false;
+        try { YamlParser.readFile(yamlFile); } catch (RuntimeException e) { thrown = true; }
+        assertTrue(thrown);
+    }
+
+    @Test public void testYamlParserSyntaxError() throws IOException
+    {
+        File yamlFile = File.createTempFile("YamlParserTestSyntaxError", ".yml");
+        yamlFile.deleteOnExit();
+
+        try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
+            try (PrintWriter writer = new PrintWriter(stream)) {
+                writer.println(":");
+                writer.flush();
+            }
         }
 
         boolean thrown = false;
@@ -49,39 +61,30 @@ public class YamlParserTests extends Assert
         assertTrue(thrown);
     }
 
-    @Test public void testYamlParserOne()
+    @Test public void testYamlParserOne() throws IOException
     {
-        File yamlFile;
-        try {
-            yamlFile = File.createTempFile("YamlParserTestOne", ".yml");
-            yamlFile.deleteOnExit();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        File yamlFile = File.createTempFile("YamlParserTestOne", ".yml");
+        yamlFile.deleteOnExit();
 
         YamlValue value = YamlParser.readFile(yamlFile);
-        assertEquals(value, null);
+        assertNull(value);
     }
 
-    @Test public void testYamlParserTwo()
+    @Test public void testYamlParserTwo() throws IOException
     {
-        File yamlFile;
-        try {
-            yamlFile = File.createTempFile("YamlParserTestTwo", ".yml");
-            yamlFile.deleteOnExit();
+        File yamlFile = File.createTempFile("YamlParserTestTwo", ".yml");
+        yamlFile.deleteOnExit();
 
-            try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
-                try (PrintWriter writer = new PrintWriter(stream)) {
-                    writer.println("item1");
-                }
+        try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
+            try (PrintWriter writer = new PrintWriter(stream)) {
+                writer.println("item1");
+                writer.flush();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         YamlValue value = YamlParser.readFile(yamlFile);
 
-        assertNotEquals(value, null);
+        assertNotNull(value);
         assertFalse(value.isMapping());
         assertFalse(value.isSequence());
         assertTrue(value.isString());
@@ -94,24 +97,20 @@ public class YamlParserTests extends Assert
         assertTrue(thrown);
     }
 
-    @Test public void testYamlParserThree()
+    @Test public void testYamlParserThree() throws IOException
     {
-        File yamlFile;
-        try {
-            yamlFile = File.createTempFile("YamlParserTestThree", ".yml");
-            yamlFile.deleteOnExit();
+        File yamlFile = File.createTempFile("YamlParserTestThree", ".yml");
+        yamlFile.deleteOnExit();
 
-            try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
-                try (PrintWriter writer = new PrintWriter(stream)) {
-                    writer.println("[ item1, item2 ]");
-                }
+        try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
+            try (PrintWriter writer = new PrintWriter(stream)) {
+                writer.println("[ item1, item2 ]");
+                writer.flush();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         YamlValue value = YamlParser.readFile(yamlFile);
-        assertNotEquals(value, null);
+        assertNotNull(value);
         assertFalse(value.isMapping());
         assertTrue(value.isSequence());
         assertFalse(value.isString());
@@ -129,24 +128,20 @@ public class YamlParserTests extends Assert
         assertTrue(thrown);
     }
 
-    @Test public void testYamlParserFour()
+    @Test public void testYamlParserFour() throws IOException
     {
-        File yamlFile;
-        try {
-            yamlFile = File.createTempFile("YamlParserTestFour", ".yml");
-            yamlFile.deleteOnExit();
+        File yamlFile = File.createTempFile("YamlParserTestFour", ".yml");
+        yamlFile.deleteOnExit();
 
-            try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
-                try (PrintWriter writer = new PrintWriter(stream)) {
-                    writer.println("item1: value1\nitem2: value2");
-                }
+        try (FileOutputStream stream = new FileOutputStream(yamlFile)) {
+            try (PrintWriter writer = new PrintWriter(stream)) {
+                writer.println("item1: value1\nitem2: value2");
+                writer.flush();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         YamlValue value = YamlParser.readFile(yamlFile);
-        assertNotEquals(value, null);
+        assertNotNull(value);
         assertTrue(value.isMapping());
         assertFalse(value.isSequence());
         assertFalse(value.isString());

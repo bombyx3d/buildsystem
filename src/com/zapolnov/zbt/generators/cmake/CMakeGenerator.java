@@ -30,14 +30,15 @@ import com.zapolnov.zbt.project.parser.directives.CMakeUseOpenGLDirective;
 import com.zapolnov.zbt.project.parser.directives.CMakeUseQt5Directive;
 import com.zapolnov.zbt.project.parser.directives.TargetNameDirective;
 import com.zapolnov.zbt.utility.CommandInvoker;
-import com.zapolnov.zbt.utility.Database;
-import com.zapolnov.zbt.utility.FileBuilder;
+import com.zapolnov.buildsystem.utility.Database;
+import com.zapolnov.buildsystem.utility.FileBuilder;
 import com.zapolnov.zbt.utility.GuiUtility;
-import com.zapolnov.zbt.utility.Template;
+import com.zapolnov.buildsystem.utility.Template;
 import com.zapolnov.zbt.utility.Utility;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -182,6 +183,7 @@ public class CMakeGenerator extends Generator
     }
 
     @Override public void generate(final Project project, CommandInvoker.Printer printer, boolean build)
+        throws Throwable
     {
         try {
             this.project = project;
@@ -335,6 +337,7 @@ public class CMakeGenerator extends Generator
     }
 
     private void writeCMakeLists(BuildTool selectedBuildTool, String selectedBuildType, String qt5Path)
+        throws NoSuchAlgorithmException, IOException
     {
         // Build list of ADD_DEFINITIONS() commands
 

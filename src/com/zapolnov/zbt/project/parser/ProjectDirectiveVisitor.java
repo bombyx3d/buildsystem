@@ -150,6 +150,10 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
 
     @Override public void visitCustomDirectiveWrapper(CustomDirectiveWrapper directive)
     {
-        directive.directive.run(project, outputDirectory);
+        try {
+            directive.directive.run(project, outputDirectory);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
     }
 }

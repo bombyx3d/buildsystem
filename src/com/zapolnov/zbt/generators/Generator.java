@@ -25,7 +25,7 @@ import com.zapolnov.zbt.generators.cmake.CMakeGenerator;
 import com.zapolnov.zbt.generators.dummy.DummyGenerator;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.utility.CommandInvoker;
-import com.zapolnov.zbt.utility.Database;
+import com.zapolnov.buildsystem.utility.Database;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.JPanel;
@@ -39,7 +39,7 @@ public abstract class Generator
 
     public abstract String id();
     public abstract String name();
-    public abstract void generate(Project project, CommandInvoker.Printer printer, boolean build);
+    public abstract void generate(Project project, CommandInvoker.Printer printer, boolean build) throws Throwable;
 
     public JPanel createSettingsPanel(Database database) { return null; }
     public void validateAndSaveSettings(Database database) { assert(createSettingsPanel(database) == null); }

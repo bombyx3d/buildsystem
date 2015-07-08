@@ -19,16 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.utility;
+package com.zapolnov.buildsystem.utility;
 
+import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentNavigableMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
+/** A database. */
 public class Database
 {
+    /** File name for the database. */
     public final static String FILE_NAME = "database";
 
     public static final String OPTION_GENERATOR_NAME = "Generator";
@@ -41,9 +44,15 @@ public class Database
     private final static String OUTPUT_FILES_TABLE = "<OutputFiles>";
     private final static String OPTIONS_TABLE = "<Options>";
 
+    /** Directory containing the database file. */
     public final File directory;
+    /** Database. */
     protected DB db;
 
+    /**
+     * Constructor.
+     * @param directory Directory where database should be created.
+     */
     public Database(File directory)
     {
         this.directory = directory;
@@ -52,16 +61,25 @@ public class Database
             .make();
     }
 
+    /** Saves all uncommitted changes to the file. */
     public void commit()
     {
         db.commit();
     }
 
+    /**
+     * Reverts all uncommitted changes.
+     * This method may throw an exception.
+     */
     public void rollback()
     {
         db.rollback();
     }
 
+    /**
+     * Reverts all uncommitted changes.
+     * This method attempts not to throw an exception in case of failure.
+     */
     public void rollbackSafe()
     {
         try {
@@ -71,6 +89,10 @@ public class Database
         }
     }
 
+    /**
+     * Closes the database.
+     * Database can't be used after this method has been invoked.
+     */
     public void close()
     {
         if (db != null) {
@@ -79,6 +101,10 @@ public class Database
         }
     }
 
+    /**
+     * Retrieves value of the specified option.
+     * @param key Name of the option.
+     */
     public String getOption(String key)
     {
         try {
@@ -90,36 +116,25 @@ public class Database
         return null;
     }
 
+    /**
+     * Sets value of the specified option.
+     * @param key Name of the option.
+     * @param value Option value.
+     */
     public void setOption(String key, String value)
     {
         ConcurrentNavigableMap<String, String> table = db.getTreeMap(OPTIONS_TABLE);
         table.put(key, value);
     }
 
-    public boolean didInputFileChange(File file)
-    {
-        if (!file.exists())
-            return true;
-
-        try {
-            ConcurrentNavigableMap<String, Long> table = db.getTreeMap(INPUT_FILES_TABLE);
-
-            String path = Utility.getCanonicalPath(file);
-            Long expectedLastModificationTime = table.get(path);
-            long actualLastModificationTime = file.lastModified();
-
-            if (expectedLastModificationTime != null && expectedLastModificationTime == actualLastModificationTime)
-                return false;
-
-            table.put(path, actualLastModificationTime);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
-        return true;
-    }
-
-    public boolean didInputFileChange(File file, byte[] optionsHash)
+    /**
+     * Checks whether the specified input file has changed from the time of previous check.
+     * @param file Input file.
+     * @param extraData Additional metadata for the file.
+     * File is considered modified if this data differs from the previously specified data.
+     * @return `true` if file has been modified or if it has not been processed yet, otherwise returns `false`.
+     */
+    public boolean didInputFileChange(File file, byte[] extraData)
     {
         boolean result = false;
 
@@ -131,8 +146,8 @@ public class Database
 
             ConcurrentNavigableMap<String, byte[]> hashesTable = db.getTreeMap(INPUT_FILES_OPTIONS_HASHES_TABLE);
             byte[] previousHash = hashesTable.get(path);
-            if (previousHash == null || !Arrays.equals(optionsHash, previousHash)) {
-                hashesTable.put(path, optionsHash);
+            if (previousHash == null || !Arrays.equals(extraData, previousHash)) {
+                hashesTable.put(path, extraData);
                 result = true;
             }
 
@@ -151,6 +166,13 @@ public class Database
         }
     }
 
+    /**
+     * Checks whether new contents for the output file differ from the previously written contents.
+     * @param file Ouptut file.
+     * @param md5 MD5 hash of the data.
+     * @return `true` if the provided MD5 hash differs from the previously written one, or if file has never
+     * been written, otherwise returns `false`.
+     */
     public boolean didOutputFileChange(File file, byte[] md5)
     {
         try {

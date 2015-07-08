@@ -19,24 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.utility;
+package com.zapolnov.buildsystem.utility;
 
+import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Writer for text files.
+ * Before writing file contents to disk, this class checks whether it differs from the previous contents and, if not,
+ * it does not overwrite the file.
+ */
 public final class FileBuilder
 {
     private final StringBuilder stringBuilder;
     private final File file;
 
+    /**
+     * Constructor.
+     * @param directory Target directory.
+     * @param fileName Name of the file.
+     */
     public FileBuilder(File directory, String fileName)
     {
         this(new File(directory, fileName));
     }
 
+    /**
+     * Constructor.
+     * @param file Path to the file.
+     */
     public FileBuilder(File file)
     {
         this.file = Utility.getCanonicalFile(file);
@@ -44,42 +59,57 @@ public final class FileBuilder
         Utility.ensureDirectoryExists(this.file.getParentFile());
     }
 
+    /**
+     * Appends character to the file.
+     * @param ch Character to append.
+     */
     public void append(char ch)
     {
         stringBuilder.append(ch);
     }
 
+    /**
+     * Appends string to the file.
+     * @param string String to append.
+     */
     public void append(String string)
     {
         stringBuilder.append(string);
     }
 
+    /**
+     * Appends hexadecimal representation of the given byte to the file.
+     * @param value Byte.
+     */
     public void appendHex(byte value)
     {
         stringBuilder.append(Utility.HEX_CHARACTERS[(value >> 4) & 0xF]);
         stringBuilder.append(Utility.HEX_CHARACTERS[value & 0xF]);
     }
 
-    public void commit(Database database)
+    /**
+     * Writes file data to disk.
+     * @param database Database instance to check for file modifications.
+     * @return `true` if file has been overwritten, or `false` if file contents did not change.
+     */
+    public boolean commit(Database database) throws NoSuchAlgorithmException, IOException
     {
-        try {
-            String text = stringBuilder.toString();
-            byte[] bytes = text.getBytes(Utility.UTF8_CHARSET);
+        String text = stringBuilder.toString();
+        byte[] bytes = text.getBytes(Utility.UTF8_CHARSET);
 
-            if (file.exists()) {
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                byte[] md5 = md.digest(bytes);
-                if (!database.didOutputFileChange(file, md5))
-                    return;
-            }
-
-            System.out.println(String.format("Writing %s", Utility.getRelativePath(database.directory, file)));
-            try (FileOutputStream stream = new FileOutputStream(file)) {
-                stream.write(bytes);
-                stream.flush();
-            }
-        } catch (NoSuchAlgorithmException|IOException e) {
-            throw new RuntimeException(e);
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] md5 = md.digest(bytes);
+        if (!database.didOutputFileChange(file, md5)) {
+            Log.trace(String.format("Keeping %s", Utility.getRelativePath(database.directory, file)));
+            return false;
         }
+
+        Log.info(String.format("Writing %s", Utility.getRelativePath(database.directory, file)));
+        try (FileOutputStream stream = new FileOutputStream(file)) {
+            stream.write(bytes);
+            stream.flush();
+        }
+
+        return true;
     }
 }

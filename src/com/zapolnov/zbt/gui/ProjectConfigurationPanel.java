@@ -21,6 +21,7 @@
  */
 package com.zapolnov.zbt.gui;
 
+import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
@@ -30,7 +31,6 @@ import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.ImportDirective;
 import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
-import com.zapolnov.zbt.utility.Database;
 import com.zapolnov.zbt.utility.GuiUtility;
 import java.awt.Container;
 import java.util.ArrayList;

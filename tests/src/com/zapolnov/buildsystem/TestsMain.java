@@ -21,7 +21,10 @@
  */
 package com.zapolnov.buildsystem;
 
+import com.zapolnov.buildsystem.tests.DatabaseTests;
+import com.zapolnov.buildsystem.tests.FileBuilderTests;
 import com.zapolnov.buildsystem.tests.LogTests;
+import com.zapolnov.buildsystem.tests.TemplateTests;
 import com.zapolnov.buildsystem.tests.YamlParserTests;
 import org.junit.internal.TextListener;
 import org.junit.runner.JUnitCore;
@@ -41,7 +44,10 @@ public final class TestsMain
 
         Result result = junit.run(
             LogTests.class,
-            YamlParserTests.class
+            YamlParserTests.class,
+            DatabaseTests.class,
+            FileBuilderTests.class,
+            TemplateTests.class
         );
 
         System.exit(!result.wasSuccessful() ? 1 : 0);

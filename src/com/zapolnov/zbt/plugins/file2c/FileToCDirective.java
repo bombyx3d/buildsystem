@@ -23,7 +23,7 @@ package com.zapolnov.zbt.plugins.file2c;
 
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.project.parser.directives.CustomDirective;
-import com.zapolnov.zbt.utility.FileBuilder;
+import com.zapolnov.buildsystem.utility.FileBuilder;
 import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 
@@ -44,7 +44,7 @@ public class FileToCDirective extends CustomDirective
         this.compressionMethod = compressionMethod;
     }
 
-    @Override public void run(Project project, File outputDirectory)
+    @Override public void run(Project project, File outputDirectory) throws Throwable
     {
         File headerFile = new File(outputDirectory, String.format("file2c/include/%s", output));
         File sourceFile = new File(outputDirectory, String.format("file2c/%s.cpp", output));

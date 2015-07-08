@@ -26,5 +26,5 @@ import java.io.File;
 
 public abstract class CustomDirective
 {
-    public abstract void run(Project project, File outputDirectory);
+    public abstract void run(Project project, File outputDirectory) throws Throwable;
 }

@@ -29,7 +29,7 @@ import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
 import com.zapolnov.zbt.project.parser.ProjectFileParser;
 import com.zapolnov.zbt.project.parser.directives.ImportDirective;
 import com.zapolnov.zbt.utility.CommandInvoker;
-import com.zapolnov.zbt.utility.Database;
+import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.util.Collections;

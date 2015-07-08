@@ -19,21 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.utility;
+package com.zapolnov.buildsystem.utility;
 
+import com.zapolnov.zbt.utility.Utility;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/** Template file processor. */
 public class Template
 {
+    /** A command in the template. */
     private interface Command
     {
         void emit(FileBuilder builder);
     }
 
+    /** Raw text block in the template. */
     private final static class Text implements Command
     {
         private final String text;
@@ -49,6 +53,7 @@ public class Template
         }
     }
 
+    /** Variable reference in the template. */
     private final class Variable implements Command
     {
         private final String name;
@@ -70,6 +75,10 @@ public class Template
     private final List<Command> commands = new ArrayList<Command>();
     private Map<String, String> variables;
 
+    /**
+     * Constructor.
+     * @param stream Input stream with template file contents.
+     */
     public Template(InputStream stream)
     {
         String text = Utility.stringFromInputStream(stream);
@@ -97,6 +106,11 @@ public class Template
             commands.add(new Text(text.substring(offset, text.length())));
     }
 
+    /**
+     * Generates document from the template with the given values of variables.
+     * @param fileBuilder File builder.
+     * @param variables Variable values.
+     */
     public void emit(FileBuilder fileBuilder, Map<String, String> variables)
     {
         try {
