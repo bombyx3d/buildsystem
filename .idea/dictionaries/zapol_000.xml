@@ -15,6 +15,7 @@
       <w>opengl</w>
       <w>pathext</w>
       <w>rdparty</w>
+      <w>stacktraces</w>
       <w>unistd</w>
       <w>wconversion</w>
       <w>wextra</w>

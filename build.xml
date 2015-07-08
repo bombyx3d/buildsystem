@@ -25,13 +25,13 @@ THE SOFTWARE.
 
     <target name="build">
         <!-- Create output directory -->
-        <mkdir dir="bin/classes" />
+        <mkdir dir="bin/out/production/buildsystem" />
         <!-- Compile source code -->
         <javac
             includeantruntime="false"
             depend="off"
             srcdir="src"
-            destdir="bin/classes"
+            destdir="bin/out/production/buildsystem"
             encoding="UTF-8"
             debug="on"
             optimize="on"
@@ -41,8 +41,8 @@ THE SOFTWARE.
             </classpath>
         </javac>
         <!-- Create JAR file -->
-        <jar destfile="bin/zbt.jar" basedir="bin/classes">
-            <manifest><attribute name="Main-Class" value="com.zapolnov.zbt.Main" /></manifest>
+        <jar destfile="bin/buildsystem.jar" basedir="bin/out/production/buildsystem">
+            <manifest><attribute name="Main-Class" value="com.zapolnov.buildsystem.Main" /></manifest>
             <fileset dir="src">
                 <include name="com/zapolnov/zbt/generators/cmake/root-CMakeLists.template" />
                 <include name="com/zapolnov/zbt/generators/cmake/src-CMakeLists.template" />
@@ -51,13 +51,42 @@ THE SOFTWARE.
         </jar>
     </target>
 
+    <target name="build-tests" depends="build">
+        <!-- Create output directory -->
+        <mkdir dir="bin/out/test/buildsystem" />
+        <!-- Compile tests code -->
+        <javac
+            includeantruntime="false"
+            depend="off"
+            srcdir="tests/src"
+            destdir="bin/out/test/buildsystem"
+            encoding="UTF-8"
+            debug="on"
+            optimize="on"
+            debuglevel="lines,vars,source">
+            <classpath>
+                <file name="bin/buildsystem.jar" />
+                <fileset dir="tests/lib"><include name="**/*.jar" /></fileset>
+            </classpath>
+        </javac>
+        <!-- Create tests JAR file -->
+        <jar destfile="bin/buildsystem-tests.jar" basedir="bin/out/test/buildsystem">
+            <manifest><attribute name="Main-Class" value="com.zapolnov.buildsystem.TestsMain" /></manifest>
+            <zipgroupfileset dir="bin" includes="buildsystem.jar" />
+            <zipgroupfileset dir="tests/lib" includes="**/*.jar" />
+        </jar>
+    </target>
+
     <target name="run" depends="build">
-        <java jar="bin/zbt.jar" fork="true" />
+        <java jar="bin/buildsystem.jar" failonerror="true" fork="true" />
+    </target>
+
+    <target name="run-tests" depends="build-tests">
+        <java jar="bin/buildsystem-tests.jar" failonerror="true" fork="true" />
     </target>
 
     <target name="clean">
-        <delete dir="bin/classes" />
-        <delete file="bin/zbt.jar" />
+        <delete dir="bin" />
     </target>
 
 </project>
