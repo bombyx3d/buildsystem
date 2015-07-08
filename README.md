@@ -1,15 +1,18 @@
 ﻿
-Bombyx3D Game Engine
-====================
+Bombyx3D Build System
+=====================
 
-<a href="https://travis-ci.org/bombyx3d/bombyx3d" target="_blank">
- <img src="https://travis-ci.org/bombyx3d/bombyx3d.svg?branch=master" alt="Build Status" />
-</a>
+Building
+--------
 
-This is a game engine.
+You will need the following software to build this tool:
 
-Doxygen documentation: <a href="http://www.bombyx3d.com/bombyx3d/doxygen/html/"
-    target="_blank">https://www.bombyx3d.com/bombyx3d/doxygen/html/</a>
+  * [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) (version 8 or later)
+  * [Apache ANT](http://ant.apache.org/)
+
+Invoke `ant` in the root directory of the project. It will compile the sources and create file `bin/zbt.jar`.
+
+Also, projects files for [IntelliJ IDEA](https://www.jetbrains.com/idea/) are included.
 
 License
 -------
