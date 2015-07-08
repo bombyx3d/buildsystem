@@ -50,7 +50,7 @@ public final class Log
 
 
     /** Printer for log messages. */
-    private static Printer printer = new ConsolePrinter();
+    private static Printer printer;
 
 
     /**
@@ -104,9 +104,9 @@ public final class Log
      */
     public static void setPrinter(Printer printer)
     {
-        Log.printer = printer;
+        Log.printer = (printer != null ? printer : new ConsolePrinter());
     }
 
-    // Instances of this class should not be constructed
     private Log() {}
+    static { new Log(); setPrinter(null); }
 }
