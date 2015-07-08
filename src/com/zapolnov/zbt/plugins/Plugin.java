@@ -21,15 +21,15 @@
  */
 package com.zapolnov.zbt.plugins;
 
+import com.zapolnov.buildsystem.utility.yaml.YamlValue;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.project.parser.directives.CustomDirective;
-import com.zapolnov.zbt.utility.YamlParser;
 import java.io.File;
 
 public abstract class Plugin
 {
     public CustomDirective processDirective(Project project, File basePath, String key,
-        YamlParser.Option keyOption, YamlParser.Option valueOption)
+        YamlValue keyOption, YamlValue valueOption)
     {
         return null;
     }

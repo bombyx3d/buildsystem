@@ -19,8 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.utility;
+package com.zapolnov.buildsystem.utility.yaml;
 
+import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Field;
@@ -35,83 +36,17 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.reader.StreamReader;
 
+/** Parser for YAML files. */
 public final class YamlParser
 {
-    public final static class Error extends RuntimeException
+    /**
+     * Parses the specified file.
+     * @param file YAML file.
+     * @return Root value of the YAML file.
+     */
+    public static YamlValue readFile(File file)
     {
-        public Error(Option option, String message)
-        {
-            super(makeMessage(option, message, null));
-        }
-
-        public Error(Option option, Throwable t)
-        {
-            super(makeMessage(option, null, t));
-        }
-
-        private static String makeMessage(Option option, String message, Throwable t)
-        {
-            if (message == null && t != null)
-                message = Utility.getExceptionMessage(t);
-
-            if (option == null) {
-                if (t instanceof RuntimeException)
-                    throw (RuntimeException)t;
-                throw new RuntimeException(message, t);
-            }
-
-            return String.format("Problem%s %s", option.node.getStartMark().toString(), message);
-        }
-    }
-
-    public final static class Option
-    {
-        public final Node node;
-        public final Object value;
-
-        public Option(Node node, Object value)
-        {
-            this.node = node;
-            this.value = value;
-        }
-
-        public boolean isSequence()
-        {
-            return this.value != null && this.value instanceof List;
-        }
-
-        public boolean isMapping()
-        {
-            return this.value != null && this.value instanceof Map;
-        }
-
-        @SuppressWarnings("unchecked") public List<Option> toSequence()
-        {
-            if (!isSequence())
-                throw new Error(this, "Value is not a sequence.");
-            return (List<Option>)this.value;
-        }
-
-        @SuppressWarnings("unchecked") public Map<Option, Option> toMapping()
-        {
-            if (!isMapping())
-                throw new Error(this, "Value is not a mapping.");
-            return (Map<Option, Option>)this.value;
-        }
-
-        @Override public String toString()
-        {
-            if (value == null || isSequence() || isMapping())
-                return null;
-            return value.toString();
-        }
-    }
-
-    private YamlParser() {}
-
-    public static Option readFile(File file)
-    {
-        Option root;
+        YamlValue root;
 
         try (FileReader fileReader = new FileReader(file)) {
             // Construct the YAML parser
@@ -123,7 +58,7 @@ public final class YamlParser
                     return new LinkedHashMap<>();
                 }
                 @Override protected Object constructObject(Node node) {
-                    return new Option(node, super.constructObject(node));
+                    return new YamlValue(node, super.constructObject(node));
                 }
             });
 
@@ -137,12 +72,10 @@ public final class YamlParser
             try {
                 Method method = yaml.getClass().getDeclaredMethod("loadFromReader", StreamReader.class, Class.class);
                 method.setAccessible(true);
-                root = (Option)method.invoke(yaml, reader, Object.class);
+                root = (YamlValue)method.invoke(yaml, reader, Object.class);
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
-                if (cause == null)
-                    throw e;
-                throw cause;
+                throw (cause != null ? cause : e);
             }
         } catch (Throwable t) {
             String fileName = Utility.getCanonicalPath(file);
@@ -152,4 +85,7 @@ public final class YamlParser
 
         return root;
     }
+
+    private YamlParser() {}
+    static { new YamlParser(); }
 }

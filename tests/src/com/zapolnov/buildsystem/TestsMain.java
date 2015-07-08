@@ -22,10 +22,10 @@
 package com.zapolnov.buildsystem;
 
 import com.zapolnov.buildsystem.tests.LogTests;
+import com.zapolnov.buildsystem.tests.YamlParserTests;
 import org.junit.internal.TextListener;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
 
 /** Entry point for tests. */
 public final class TestsMain
@@ -40,7 +40,8 @@ public final class TestsMain
         junit.addListener(new TextListener(System.out));
 
         Result result = junit.run(
-            LogTests.class
+            LogTests.class,
+            YamlParserTests.class
         );
 
         System.exit(!result.wasSuccessful() ? 1 : 0);

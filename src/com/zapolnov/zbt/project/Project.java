@@ -31,7 +31,6 @@ import com.zapolnov.zbt.project.parser.directives.ImportDirective;
 import com.zapolnov.zbt.utility.CommandInvoker;
 import com.zapolnov.zbt.utility.Database;
 import com.zapolnov.zbt.utility.Utility;
-import com.zapolnov.zbt.utility.YamlParser;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;

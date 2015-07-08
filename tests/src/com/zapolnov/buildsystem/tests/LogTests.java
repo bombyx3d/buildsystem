@@ -26,9 +26,7 @@ import com.zapolnov.buildsystem.utility.LogLevel;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class LogTests extends Assert
@@ -120,11 +118,11 @@ public class LogTests extends Assert
             Log.debug(TEST_DEBUG_MESSAGE);
             Log.trace(TEST_TRACE_MESSAGE);
 
-            assertEquals("Invalid error message", printer.errorMessage, TEST_ERROR_MESSAGE);
-            assertEquals("Invalid warning message", printer.warningMessage, TEST_WARNING_MESSAGE);
-            assertEquals("Invalid informational message", printer.infoMessage, TEST_INFO_MESSAGE);
-            assertEquals("Invalid debug message", printer.debugMessage, TEST_DEBUG_MESSAGE);
-            assertEquals("Invalid trace message", printer.traceMessage, TEST_TRACE_MESSAGE);
+            assertEquals(printer.errorMessage, TEST_ERROR_MESSAGE);
+            assertEquals(printer.warningMessage, TEST_WARNING_MESSAGE);
+            assertEquals(printer.infoMessage, TEST_INFO_MESSAGE);
+            assertEquals(printer.debugMessage, TEST_DEBUG_MESSAGE);
+            assertEquals(printer.traceMessage, TEST_TRACE_MESSAGE);
         } finally {
             Log.setPrinter(null);
         }

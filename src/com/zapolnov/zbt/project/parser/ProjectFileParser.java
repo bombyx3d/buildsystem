@@ -21,6 +21,8 @@
  */
 package com.zapolnov.zbt.project.parser;
 
+import com.zapolnov.buildsystem.utility.yaml.YamlError;
+import com.zapolnov.buildsystem.utility.yaml.YamlValue;
 import com.zapolnov.zbt.plugins.Plugin;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.project.parser.directives.CMakeUseOpenGLDirective;
@@ -39,7 +41,7 @@ import com.zapolnov.zbt.project.parser.directives.SourceDirectoriesDirective;
 import com.zapolnov.zbt.project.parser.directives.ThirdPartyHeaderPathsDirective;
 import com.zapolnov.zbt.project.parser.directives.ThirdPartySourceDirectoriesDirective;
 import com.zapolnov.zbt.utility.Utility;
-import com.zapolnov.zbt.utility.YamlParser;
+import com.zapolnov.buildsystem.utility.yaml.YamlParser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,7 +79,7 @@ public final class ProjectFileParser
 
     private void parseFile(ProjectDirectiveList directiveList, File file)
     {
-        YamlParser.Option root = YamlParser.readFile(file);
+        YamlValue root = YamlParser.readFile(file);
         if (root == null)
             return;
 
@@ -86,9 +88,9 @@ public final class ProjectFileParser
             moduleImportStack.add(moduleName);
             try {
                 if (!root.isMapping())
-                    throw new YamlParser.Error(root, "Expected mapping at the root level.");
+                    throw new YamlError(root, "Expected mapping at the root level.");
                 processOptions(file.getAbsoluteFile().getParentFile(), directiveList, root.toMapping());
-            } catch (YamlParser.Error e) {
+            } catch (YamlError e) {
                 throw e;
             } catch (Throwable t) {
                 String fileName = Utility.getCanonicalPath(file);
@@ -101,15 +103,15 @@ public final class ProjectFileParser
     }
 
     private void processOptions(File basePath, ProjectDirectiveList directiveList,
-        Map<YamlParser.Option, YamlParser.Option> options)
+        Map<YamlValue, YamlValue> options)
     {
-        for (Map.Entry<YamlParser.Option, YamlParser.Option> item : options.entrySet()) {
-            YamlParser.Option keyOption = item.getKey();
-            YamlParser.Option valueOption = item.getValue();
+        for (Map.Entry<YamlValue, YamlValue> item : options.entrySet()) {
+            YamlValue keyOption = item.getKey();
+            YamlValue valueOption = item.getValue();
 
             String key = keyOption.toString();
             if (key == null)
-                throw new YamlParser.Error(keyOption, "Mapping key should be a string.");
+                throw new YamlError(keyOption, "Mapping key should be a string.");
 
             ProjectDirective directive = null;
 
@@ -144,7 +146,7 @@ public final class ProjectFileParser
                         }
                     }
                     if (directive == null)
-                        throw new YamlParser.Error(keyOption, String.format("Unknown option \"%s\".", key));
+                        throw new YamlError(keyOption, String.format("Unknown option \"%s\".", key));
                 }
             }
 
@@ -154,14 +156,14 @@ public final class ProjectFileParser
     }
 
     private ProjectDirective processSelector(File basePath, ProjectDirectiveList directiveList,
-        String key, YamlParser.Option keyOption, YamlParser.Option valueOption)
+        String key, YamlValue keyOption, YamlValue valueOption)
     {
         Matcher matcher = ENUM_REG_EXP.matcher(key);
         if (!matcher.matches() || matcher.groupCount() != 3)
-            throw new YamlParser.Error(keyOption, "Invalid selector.");
+            throw new YamlError(keyOption, "Invalid selector.");
 
         if (!valueOption.isMapping())
-            throw new YamlParser.Error(valueOption, "Expected mapping.");
+            throw new YamlError(valueOption, "Expected mapping.");
 
         String enumID = matcher.group(1);
 
@@ -175,13 +177,13 @@ public final class ProjectFileParser
     }
 
     private ProjectDirective processGeneratorSelector(File basePath, ProjectDirectiveList directiveList,
-        YamlParser.Option valueOption)
+        YamlValue valueOption)
     {
         if (!valueOption.isMapping())
-            throw new YamlParser.Error(valueOption, "Expected mapping.");
+            throw new YamlError(valueOption, "Expected mapping.");
 
         Map<String, ProjectDirectiveList> mapping = new HashMap<>();
-        for (Map.Entry<YamlParser.Option, YamlParser.Option> item : valueOption.toMapping().entrySet()) {
+        for (Map.Entry<YamlValue, YamlValue> item : valueOption.toMapping().entrySet()) {
             String key = item.getKey().toString();
             if (key == null)
                 throw new RuntimeException("Expected string.");
@@ -191,13 +193,13 @@ public final class ProjectFileParser
 
             String name = key.substring(1);
             if (!item.getValue().isMapping())
-                throw new YamlParser.Error(item.getValue(), "Expected mapping.");
+                throw new YamlError(item.getValue(), "Expected mapping.");
 
             ProjectDirectiveList innerDirectives = new ProjectDirectiveList(directiveList, false);
             processOptions(basePath, innerDirectives, item.getValue().toMapping());
 
             if (mapping.containsKey(name))
-                throw new YamlParser.Error(item.getKey(), String.format("Duplicate key \"%s\".", name));
+                throw new YamlError(item.getKey(), String.format("Duplicate key \"%s\".", name));
             mapping.put(name, innerDirectives);
         }
 
@@ -205,10 +207,10 @@ public final class ProjectFileParser
     }
 
     private ProjectDirective processRootProjectSelector(File basePath, ProjectDirectiveList directiveList,
-        YamlParser.Option valueOption)
+        YamlValue valueOption)
     {
         if (!valueOption.isMapping())
-            throw new YamlParser.Error(valueOption, "Expected mapping.");
+            throw new YamlError(valueOption, "Expected mapping.");
 
         ProjectDirectiveList innerDirectives = new ProjectDirectiveList(directiveList, false);
         processOptions(basePath, innerDirectives, valueOption.toMapping());
@@ -217,50 +219,50 @@ public final class ProjectFileParser
     }
 
     private ProjectDirective processEnum(ProjectDirectiveList directiveList,
-        YamlParser.Option keyOption, YamlParser.Option valueOption)
+        YamlValue keyOption, YamlValue valueOption)
     {
         if (!valueOption.isMapping())
-            throw new YamlParser.Error(valueOption, "Expected mapping.");
+            throw new YamlError(valueOption, "Expected mapping.");
 
         String defaultValue = null;
         String id = null;
         String title = null;
         Map<String, String> values = new LinkedHashMap<>();
-        YamlParser.Option defaultValueOption = null;
+        YamlValue defaultValueOption = null;
 
-        for (Map.Entry<YamlParser.Option, YamlParser.Option> item : valueOption.toMapping().entrySet()) {
-            YamlParser.Option subKeyOption = item.getKey();
-            YamlParser.Option subValueOption = item.getValue();
+        for (Map.Entry<YamlValue, YamlValue> item : valueOption.toMapping().entrySet()) {
+            YamlValue subKeyOption = item.getKey();
+            YamlValue subValueOption = item.getValue();
 
             String subKey = subKeyOption.toString();
             if (subKey == null)
-                throw new YamlParser.Error(subKeyOption, "Mapping key should be a string.");
+                throw new YamlError(subKeyOption, "Mapping key should be a string.");
 
             switch (subKey)
             {
             case "id":
                 id = subValueOption.toString();
                 if (id == null)
-                    throw new YamlParser.Error(subValueOption, "Expected string.");
+                    throw new YamlError(subValueOption, "Expected string.");
                 if (!EnumerationDirective.NAME_PATTERN.matcher(id).matches())
-                    throw new YamlParser.Error(subValueOption, String.format("Invalid enumeration id \"%s\".", id));
+                    throw new YamlError(subValueOption, String.format("Invalid enumeration id \"%s\".", id));
                 if (!directiveList.reserveEnumerationID(id))
-                    throw new YamlParser.Error(subValueOption, String.format("Duplicate enumeration id \"%s\".", id));
+                    throw new YamlError(subValueOption, String.format("Duplicate enumeration id \"%s\".", id));
                 break;
 
             case "title":
                 title = subValueOption.toString();
                 if (title == null)
-                    throw new YamlParser.Error(subValueOption, "Expected string.");
+                    throw new YamlError(subValueOption, "Expected string.");
                 if (title.length() == 0)
-                    throw new YamlParser.Error(subValueOption, "Title should not be empty.");
+                    throw new YamlError(subValueOption, "Title should not be empty.");
                 break;
 
             case "default":
                 defaultValue = subValueOption.toString();
                 defaultValueOption = subValueOption;
                 if (defaultValue == null)
-                    throw new YamlParser.Error(subValueOption, "Expected string.");
+                    throw new YamlError(subValueOption, "Expected string.");
                 break;
 
             case "values":
@@ -268,74 +270,74 @@ public final class ProjectFileParser
                 break;
 
             default:
-                throw new YamlParser.Error(subKeyOption, String.format("Unknown option \"%s\".", subKey));
+                throw new YamlError(subKeyOption, String.format("Unknown option \"%s\".", subKey));
             }
         }
 
         if (id == null)
-            throw new YamlParser.Error(keyOption, "Missing enumeration id.");
+            throw new YamlError(keyOption, "Missing enumeration id.");
         if (title == null)
-            throw new YamlParser.Error(keyOption, "Missing enumeration title.");
+            throw new YamlError(keyOption, "Missing enumeration title.");
         if (values.isEmpty())
-            throw new YamlParser.Error(keyOption, "Missing enumeration values.");
+            throw new YamlError(keyOption, "Missing enumeration values.");
 
         if (defaultValue != null && !values.containsKey(defaultValue))
-            throw new YamlParser.Error(defaultValueOption, String.format("Invalid default value \"%s\".", defaultValue));
+            throw new YamlError(defaultValueOption, String.format("Invalid default value \"%s\".", defaultValue));
 
         return new EnumerationDirective(id, title, defaultValue, values);
     }
 
-    private void processEnumValues(Map<String, String> values, YamlParser.Option valueOption)
+    private void processEnumValues(Map<String, String> values, YamlValue valueOption)
     {
         if (!valueOption.isMapping())
-            throw new YamlParser.Error(valueOption, "Expected mapping.");
+            throw new YamlError(valueOption, "Expected mapping.");
 
-        for (Map.Entry<YamlParser.Option, YamlParser.Option> value : valueOption.toMapping().entrySet()) {
-            YamlParser.Option nameOption = value.getKey();
-            YamlParser.Option descriptionOption = value.getValue();
+        for (Map.Entry<YamlValue, YamlValue> value : valueOption.toMapping().entrySet()) {
+            YamlValue nameOption = value.getKey();
+            YamlValue descriptionOption = value.getValue();
 
             String name = nameOption.toString();
             if (name == null)
-                throw new YamlParser.Error(nameOption, "Mapping key should be a string.");
+                throw new YamlError(nameOption, "Mapping key should be a string.");
 
             String description = descriptionOption.toString();
             if (description == null)
-                throw new YamlParser.Error(descriptionOption, "Expected string.");
+                throw new YamlError(descriptionOption, "Expected string.");
 
             if (!EnumerationDirective.VALUE_PATTERN.matcher(name).matches())
-                throw new YamlParser.Error(nameOption, String.format("Invalid enumeration value \"%s\".", name));
+                throw new YamlError(nameOption, String.format("Invalid enumeration value \"%s\".", name));
 
             if (values.get(name) != null)
-                throw new YamlParser.Error(nameOption, String.format("Duplicate enumeration value \"%s\".", name));
+                throw new YamlError(nameOption, String.format("Duplicate enumeration value \"%s\".", name));
             values.put(name, description);
         }
     }
 
     private ProjectDirective processImport(File basePath, ProjectDirectiveList directiveList,
-        YamlParser.Option valueOption)
+        YamlValue valueOption)
     {
-        List<YamlParser.Option> modules;
+        List<YamlValue> modules;
         if (valueOption.isSequence())
             modules = valueOption.toSequence();
         else {
             if (valueOption.toString() == null)
-                throw new YamlParser.Error(valueOption, "Expected string or sequence of strings.");
+                throw new YamlError(valueOption, "Expected string or sequence of strings.");
             modules = new ArrayList<>(1);
             modules.add(valueOption);
         }
 
         ImportDirective importDirective = null;
 
-        for (YamlParser.Option module : modules) {
+        for (YamlValue module : modules) {
             String name = module.toString();
             if (name == null)
-                throw new YamlParser.Error(module, "Expected string.");
+                throw new YamlError(module, "Expected string.");
 
             File moduleDirectory = new File(basePath, name);
             File moduleFile = new File(moduleDirectory, PROJECT_FILE_NAME);
             if (!moduleFile.exists()) {
                 String fileName = Utility.getCanonicalPath(moduleFile);
-                throw new YamlParser.Error(module, String.format("File \"%s\" does not exist.", fileName));
+                throw new YamlError(module, String.format("File \"%s\" does not exist.", fileName));
             }
 
             if (importDirective != null)
@@ -355,55 +357,55 @@ public final class ProjectFileParser
         return importDirective;
     }
 
-    private ProjectDirective processDefine(YamlParser.Option valueOption)
+    private ProjectDirective processDefine(YamlValue valueOption)
     {
-        List<YamlParser.Option> defines;
+        List<YamlValue> defines;
         if (valueOption.isSequence())
             defines = valueOption.toSequence();
         else {
             if (valueOption.toString() == null)
-                throw new YamlParser.Error(valueOption, "Expected string or sequence of strings.");
+                throw new YamlError(valueOption, "Expected string or sequence of strings.");
             defines = new ArrayList<>(1);
             defines.add(valueOption);
         }
 
         List<String> defineList = new ArrayList<>();
-        for (YamlParser.Option define : defines) {
+        for (YamlValue define : defines) {
             String name = define.toString();
             if (name == null)
-                throw new YamlParser.Error(define, "Expected string.");
+                throw new YamlError(define, "Expected string.");
             defineList.add(name);
         }
 
         return new DefineDirective(defineList);
     }
 
-    private ProjectDirective processSourceDirectories(File basePath, YamlParser.Option valueOption)
+    private ProjectDirective processSourceDirectories(File basePath, YamlValue valueOption)
     {
-        List<YamlParser.Option> paths;
+        List<YamlValue> paths;
         if (valueOption.isSequence())
             paths = valueOption.toSequence();
         else {
             if (valueOption.toString() == null)
-                throw new YamlParser.Error(valueOption, "Expected string or sequence of strings.");
+                throw new YamlError(valueOption, "Expected string or sequence of strings.");
             paths = new ArrayList<>(1);
             paths.add(valueOption);
         }
 
         List<File> directories = new ArrayList<>();
-        for (YamlParser.Option path : paths) {
+        for (YamlValue path : paths) {
             String name = path.toString();
             if (name == null)
-                throw new YamlParser.Error(path, "Expected string.");
+                throw new YamlError(path, "Expected string.");
 
             File file = new File(basePath, name);
             if (!file.exists()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("Directory \"%s\" does not exist.", fileName));
+                throw new YamlError(path, String.format("Directory \"%s\" does not exist.", fileName));
             }
             if (!file.isDirectory()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("\"%s\" is not a directory.", fileName));
+                throw new YamlError(path, String.format("\"%s\" is not a directory.", fileName));
             }
 
             directories.add(Utility.getCanonicalFile(file));
@@ -412,32 +414,32 @@ public final class ProjectFileParser
         return new SourceDirectoriesDirective(directories);
     }
 
-    private ProjectDirective processThirdPartySourceDirectories(File basePath, YamlParser.Option valueOption)
+    private ProjectDirective processThirdPartySourceDirectories(File basePath, YamlValue valueOption)
     {
-        List<YamlParser.Option> paths;
+        List<YamlValue> paths;
         if (valueOption.isSequence())
             paths = valueOption.toSequence();
         else {
             if (valueOption.toString() == null)
-                throw new YamlParser.Error(valueOption, "Expected string or sequence of strings.");
+                throw new YamlError(valueOption, "Expected string or sequence of strings.");
             paths = new ArrayList<>(1);
             paths.add(valueOption);
         }
 
         List<File> directories = new ArrayList<>();
-        for (YamlParser.Option path : paths) {
+        for (YamlValue path : paths) {
             String name = path.toString();
             if (name == null)
-                throw new YamlParser.Error(path, "Expected string.");
+                throw new YamlError(path, "Expected string.");
 
             File file = new File(basePath, name);
             if (!file.exists()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("Directory \"%s\" does not exist.", fileName));
+                throw new YamlError(path, String.format("Directory \"%s\" does not exist.", fileName));
             }
             if (!file.isDirectory()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("\"%s\" is not a directory.", fileName));
+                throw new YamlError(path, String.format("\"%s\" is not a directory.", fileName));
             }
 
             directories.add(Utility.getCanonicalFile(file));
@@ -446,32 +448,32 @@ public final class ProjectFileParser
         return new ThirdPartySourceDirectoriesDirective(directories);
     }
 
-    private ProjectDirective processHeaderSearchPaths(File basePath, YamlParser.Option valueOption)
+    private ProjectDirective processHeaderSearchPaths(File basePath, YamlValue valueOption)
     {
-        List<YamlParser.Option> paths;
+        List<YamlValue> paths;
         if (valueOption.isSequence())
             paths = valueOption.toSequence();
         else {
             if (valueOption.toString() == null)
-                throw new YamlParser.Error(valueOption, "Expected string or sequence of strings.");
+                throw new YamlError(valueOption, "Expected string or sequence of strings.");
             paths = new ArrayList<>(1);
             paths.add(valueOption);
         }
 
         List<File> directories = new ArrayList<>();
-        for (YamlParser.Option path : paths) {
+        for (YamlValue path : paths) {
             String name = path.toString();
             if (name == null)
-                throw new YamlParser.Error(path, "Expected string.");
+                throw new YamlError(path, "Expected string.");
 
             File file = new File(basePath, name);
             if (!file.exists()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("Directory \"%s\" does not exist.", fileName));
+                throw new YamlError(path, String.format("Directory \"%s\" does not exist.", fileName));
             }
             if (!file.isDirectory()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("\"%s\" is not a directory.", fileName));
+                throw new YamlError(path, String.format("\"%s\" is not a directory.", fileName));
             }
 
             directories.add(Utility.getCanonicalFile(file));
@@ -480,32 +482,32 @@ public final class ProjectFileParser
         return new HeaderPathsDirective(directories);
     }
 
-    private ProjectDirective processThirdPartyHeaderSearchPaths(File basePath, YamlParser.Option valueOption)
+    private ProjectDirective processThirdPartyHeaderSearchPaths(File basePath, YamlValue valueOption)
     {
-        List<YamlParser.Option> paths;
+        List<YamlValue> paths;
         if (valueOption.isSequence())
             paths = valueOption.toSequence();
         else {
             if (valueOption.toString() == null)
-                throw new YamlParser.Error(valueOption, "Expected string or sequence of strings.");
+                throw new YamlError(valueOption, "Expected string or sequence of strings.");
             paths = new ArrayList<>(1);
             paths.add(valueOption);
         }
 
         List<File> directories = new ArrayList<>();
-        for (YamlParser.Option path : paths) {
+        for (YamlValue path : paths) {
             String name = path.toString();
             if (name == null)
-                throw new YamlParser.Error(path, "Expected string.");
+                throw new YamlError(path, "Expected string.");
 
             File file = new File(basePath, name);
             if (!file.exists()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("Directory \"%s\" does not exist.", fileName));
+                throw new YamlError(path, String.format("Directory \"%s\" does not exist.", fileName));
             }
             if (!file.isDirectory()) {
                 String fileName = Utility.getCanonicalPath(file);
-                throw new YamlParser.Error(path, String.format("\"%s\" is not a directory.", fileName));
+                throw new YamlError(path, String.format("\"%s\" is not a directory.", fileName));
             }
 
             directories.add(Utility.getCanonicalFile(file));
@@ -514,20 +516,20 @@ public final class ProjectFileParser
         return new ThirdPartyHeaderPathsDirective(directories);
     }
 
-    private ProjectDirective processTargetName(YamlParser.Option valueOption)
+    private ProjectDirective processTargetName(YamlValue valueOption)
     {
         String name = valueOption.toString();
         if (name == null)
-            throw new YamlParser.Error(valueOption, "Expected string.");
+            throw new YamlError(valueOption, "Expected string.");
 
         Matcher matcher = EXE_NAME_REG_EXP.matcher(name);
         if (!matcher.matches())
-            throw new YamlParser.Error(valueOption, "Invalid target name.");
+            throw new YamlError(valueOption, "Invalid target name.");
 
         return new TargetNameDirective(name);
     }
 
-    private ProjectDirective processCMakeUseOpenGL(YamlParser.Option valueOption)
+    private ProjectDirective processCMakeUseOpenGL(YamlValue valueOption)
     {
         String name = valueOption.toString();
 
@@ -537,12 +539,12 @@ public final class ProjectFileParser
         else if ("false".equals(name))
             value = false;
         else
-            throw new YamlParser.Error(valueOption, "Expected 'true' or 'false'.");
+            throw new YamlError(valueOption, "Expected 'true' or 'false'.");
 
         return new CMakeUseOpenGLDirective(value);
     }
 
-    private ProjectDirective processCMakeUseQt5(YamlParser.Option valueOption)
+    private ProjectDirective processCMakeUseQt5(YamlValue valueOption)
     {
         String name = valueOption.toString();
 
@@ -552,22 +554,22 @@ public final class ProjectFileParser
         else if ("false".equals(name))
             value = false;
         else
-            throw new YamlParser.Error(valueOption, "Expected 'true' or 'false'.");
+            throw new YamlError(valueOption, "Expected 'true' or 'false'.");
 
         return new CMakeUseQt5Directive(value);
     }
 
-    private void processPlugin(YamlParser.Option valueOption)
+    private void processPlugin(YamlValue valueOption)
     {
         String className = valueOption.toString();
         if (className == null)
-            throw new YamlParser.Error(valueOption, "Expected string.");
+            throw new YamlError(valueOption, "Expected string.");
 
         try {
             Plugin plugin = project.loadPlugin(className);
             plugins.add(plugin);
         } catch (ClassNotFoundException|InstantiationException|IllegalAccessException e) {
-            throw new YamlParser.Error(valueOption, e);
+            throw new YamlError(valueOption, e);
         }
     }
 }
