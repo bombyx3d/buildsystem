@@ -1,0 +1,16 @@
+
+language: java
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+
+script:
+  - ant run-tests
+
+notifications:
+  email:
+    recipients:
+      - zapolnov@gmail.com
+    on_success: change
+    on_failure: always

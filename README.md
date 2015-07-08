@@ -2,6 +2,10 @@
 Bombyx3D Build System
 =====================
 
+<a href="https://travis-ci.org/bombyx3d/buildsystem" target="_blank">
+ <img src="https://travis-ci.org/bombyx3d/buildsystem.svg?branch=master" alt="Build Status" />
+</a>
+
 Building
 --------
 
@@ -15,7 +19,7 @@ Invoke `ant` in the root directory of the project. It will compile the sources a
 It is also recommended to run tests after compilation. This can be achieved by invoking the `ant run-tests` command
 in the root directory of the project.
 
-Also, projects files for [IntelliJ IDEA](https://www.jetbrains.com/idea/) are included.
+Projects files for [IntelliJ IDEA](https://www.jetbrains.com/idea/) are also included.
 
 License
 -------
