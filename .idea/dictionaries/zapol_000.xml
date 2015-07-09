@@ -2,6 +2,7 @@
   <dictionary name="zapol_000">
     <words>
       <w>automoc</w>
+      <w>bombyx</w>
       <w>cstddef</w>
       <w>cstdint</w>
       <w>dcmake</w>

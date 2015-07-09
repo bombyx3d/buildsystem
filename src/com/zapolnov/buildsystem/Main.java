@@ -19,17 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.gui;
+package com.zapolnov.buildsystem;
 
-import javax.swing.JFrame;
+import com.bulenkov.darcula.DarculaLaf;
+import com.zapolnov.buildsystem.gui.FatalErrorDialog;
+import com.zapolnov.buildsystem.gui.MainDialog;
+import javax.swing.UIManager;
 
-public final class DummyFrame extends JFrame
+/** Main class of the application. */
+public class Main
 {
-    public DummyFrame(String title)
+    /**
+     * Application entry point.
+     * @param args Command line arguments.
+     */
+    public static void main(String[] args)
     {
-        super(title);
-        setUndecorated(true);
-        setVisible(true);
-        setLocationRelativeTo(null);
+        boolean gui = true;
+
+        // Handle '--batch' command-line argument early
+        for (int i = 0; i < args.length; i++) {
+            if ("--batch".equals(args[i]) || "-b".equals(args[i])) {
+                gui = false;
+            }
+        }
+
+        if (gui) {
+            try {
+                try { UIManager.setLookAndFeel(new DarculaLaf()); } catch (Throwable ignored) {}
+                MainDialog.run();
+            } catch (Throwable t) {
+                FatalErrorDialog.run(t);
+            }
+        }
     }
 }

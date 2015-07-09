@@ -21,6 +21,8 @@
  */
 package com.zapolnov.zbt.gui;
 
+import com.zapolnov.buildsystem.gui.FatalErrorDialog;
+import com.zapolnov.buildsystem.gui.widgets.InvisibleFrame;
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.utility.GuiUtility;
@@ -33,7 +35,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Map;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -108,9 +109,6 @@ public class MainDialog extends JDialog
 
     private void generateProject(boolean build)
     {
-        final ConsoleDialog consoleDialog = new ConsoleDialog(this);
-        boolean consoleDialogInitialized = false;
-
         try {
             setEnabled(false);
 
@@ -127,26 +125,14 @@ public class MainDialog extends JDialog
                 throw t;
             }
 
-            consoleDialog.button.setEnabled(false);
-            consoleDialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-            consoleDialog.setModal(false);
-            consoleDialog.setVisible(true);
-            consoleDialog.setLocationRelativeTo(this);
-            consoleDialogInitialized = true;
-
-            project.generate(generator, options, consoleDialog, error ->
+            project.generate(generator, options, null, error ->
                 SwingUtilities.invokeLater(() -> {
                     if (error == null) {
-                        consoleDialog.dispose();
                         dispose();
                         System.exit(0);
                     } else {
-                        JDialog dialog = new FatalErrorDialog(consoleDialog, error);
+                        JDialog dialog = new FatalErrorDialog(this, error);
                         dialog.setVisible(true);
-                        consoleDialog.button.setEnabled(true);
-                        consoleDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                        consoleDialog.setModal(true);
-                        consoleDialog.setVisible(true);
                     }
                     setEnabled(true);
                 }),
@@ -154,20 +140,14 @@ public class MainDialog extends JDialog
             );
         } catch (Throwable t) {
             setEnabled(true);
-            if (consoleDialogInitialized) {
-                consoleDialog.button.setEnabled(true);
-                consoleDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                consoleDialog.setModal(true);
-                consoleDialog.setVisible(true);
-            }
-            FatalErrorDialog dialog = new FatalErrorDialog(consoleDialogInitialized ? consoleDialog : this, t);
+            FatalErrorDialog dialog = new FatalErrorDialog(this, t);
             dialog.setVisible(true);
         }
     }
 
     public static void run(Project project, Generator generator, Map<String, String> options)
     {
-        JFrame dummyFrame = new DummyFrame(TITLE);
+        JFrame dummyFrame = new InvisibleFrame(TITLE);
         MainDialog mainDialog = new MainDialog(dummyFrame, project, generator, options);
         mainDialog.setVisible(true);
     }

@@ -23,7 +23,7 @@ package com.zapolnov.zbt;
 
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.generators.cmake.CMakeGenerator;
-import com.zapolnov.zbt.gui.FatalErrorDialog;
+import com.zapolnov.buildsystem.gui.FatalErrorDialog;
 import com.zapolnov.zbt.gui.MainDialog;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.buildsystem.utility.Database;
