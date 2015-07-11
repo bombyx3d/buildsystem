@@ -21,19 +21,20 @@
  */
 package com.zapolnov.zbt.project.parser;
 
+import com.zapolnov.buildsystem.project.ProjectScope;
+import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.project.parser.directives.CustomDirectiveWrapper;
 import com.zapolnov.zbt.project.parser.directives.DefineDirective;
 import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.HeaderPathsDirective;
-import com.zapolnov.zbt.project.parser.directives.ImportDirective;
+import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.SourceDirectoriesDirective;
 import com.zapolnov.zbt.project.parser.directives.ThirdPartyHeaderPathsDirective;
 import com.zapolnov.zbt.project.parser.directives.ThirdPartySourceDirectoriesDirective;
-import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
@@ -78,7 +79,7 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
     @Override public void visitSourceDirectories(SourceDirectoriesDirective directive)
     {
         for (File file : directive.sourceFiles()) {
-            String canonicalPath = Utility.getCanonicalPath(file);
+            String canonicalPath = FileUtils.getCanonicalPath(file);
             if (visitedSourceFiles.add(canonicalPath)) {
                 if (!Utility.isFileInsideDirectory(file, project.outputDirectory()))
                     visitSourceFile(file);
@@ -89,7 +90,7 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
     @Override public void visitThirdPartySourceDirectories(ThirdPartySourceDirectoriesDirective directive)
     {
         for (File file : directive.sourceFiles()) {
-            String canonicalPath = Utility.getCanonicalPath(file);
+            String canonicalPath = FileUtils.getCanonicalPath(file);
             if (visitedSourceFiles.add(canonicalPath)) {
                 if (!Utility.isFileInsideDirectory(file, project.outputDirectory()))
                     visitThirdPartySourceFile(file);
@@ -100,7 +101,7 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
     @Override public void visitHeaderPaths(HeaderPathsDirective directive)
     {
         for (File file : directive.headerPaths()) {
-            String canonicalPath = Utility.getCanonicalPath(file);
+            String canonicalPath = FileUtils.getCanonicalPath(file);
             if (visitedHeaderPaths.add(canonicalPath))
                 visitHeaderPath(file);
         }
@@ -109,7 +110,7 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
     @Override public void visitThirdPartyHeaderPaths(ThirdPartyHeaderPathsDirective directive)
     {
         for (File file : directive.headerPaths()) {
-            String canonicalPath = Utility.getCanonicalPath(file);
+            String canonicalPath = FileUtils.getCanonicalPath(file);
             if (visitedHeaderPaths.add(canonicalPath))
                 visitThirdPartyHeaderPath(file);
         }
@@ -134,7 +135,7 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
     {
         String value = generator.id();
 
-        ProjectDirectiveList list = directive.mapping().get(value);
+        ProjectScope list = directive.mapping().get(value);
         if (list == null)
             list = directive.mapping().get(GeneratorSelectorDirective.DEFAULT);
 

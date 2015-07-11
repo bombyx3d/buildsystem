@@ -21,6 +21,7 @@
  */
 package com.zapolnov.zbt.utility;
 
+import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -75,7 +76,7 @@ public final class CommandInvoker
         int exitValue;
         try {
             System.out.println(String.format("Invoking command: %s", commandToString(command)));
-            System.out.println(String.format("Working directory: %s", Utility.getCanonicalPath(workingDirectory)));
+            System.out.println(String.format("Working directory: %s", FileUtils.getCanonicalPath(workingDirectory)));
 
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(workingDirectory);

@@ -26,6 +26,7 @@ import com.zapolnov.zbt.generators.dummy.DummyGenerator;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.utility.CommandInvoker;
 import com.zapolnov.buildsystem.utility.Database;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.JPanel;
@@ -47,11 +48,15 @@ public abstract class Generator
     private static Map<String, Generator> allGenerators;
     public static Map<String, Generator> allGenerators()
     {
-        if (allGenerators == null) {
-            Map<String, Generator> g = new LinkedHashMap<>();
-            g.put(DummyGenerator.NAME, new DummyGenerator());
-            g.put(CMakeGenerator.NAME, new CMakeGenerator());
-            allGenerators = g;
+        try {
+            if (allGenerators == null) {
+                Map<String, Generator> g = new LinkedHashMap<>();
+                g.put(DummyGenerator.NAME, new DummyGenerator());
+                g.put(CMakeGenerator.NAME, new CMakeGenerator());
+                allGenerators = g;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return allGenerators;
     }

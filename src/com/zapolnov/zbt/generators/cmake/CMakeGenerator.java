@@ -21,6 +21,7 @@
  */
 package com.zapolnov.zbt.generators.cmake;
 
+import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.zbt.Main;
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.project.Project;
@@ -103,7 +104,7 @@ public class CMakeGenerator extends Generator
     private String qt5Path;
     private String cmakeExecutable;
 
-    public CMakeGenerator()
+    public CMakeGenerator() throws IOException
     {
         rootTemplate = new Template(getClass().getResourceAsStream("root-CMakeLists.template"));
         srcTemplate = new Template(getClass().getResourceAsStream("src-CMakeLists.template"));
@@ -357,7 +358,7 @@ public class CMakeGenerator extends Generator
         if (!headerPaths.isEmpty()) {
             includeDirectories.append("include_directories(\n");
             for (File directory : headerPaths) {
-                String relativePath = Utility.getRelativePath(new File(outputDirectory, SOURCE_DIRECTORY), directory);
+                String relativePath = FileUtils.getRelativePath(new File(outputDirectory, SOURCE_DIRECTORY), directory);
                 includeDirectories.append(String.format("    \"%s\"\n", cmakeEscapePath(relativePath)));
             }
             includeDirectories.append(")\n");
@@ -365,7 +366,7 @@ public class CMakeGenerator extends Generator
         if (!thirdPartyHeaderPaths.isEmpty()) {
             includeDirectories.append("include_directories(SYSTEM\n");
             for (File directory : thirdPartyHeaderPaths) {
-                String relativePath = Utility.getRelativePath(new File(outputDirectory, SOURCE_DIRECTORY), directory);
+                String relativePath = FileUtils.getRelativePath(new File(outputDirectory, SOURCE_DIRECTORY), directory);
                 includeDirectories.append(String.format("    \"%s\"\n", cmakeEscapePath(relativePath)));
             }
             includeDirectories.append(")\n");
@@ -376,7 +377,7 @@ public class CMakeGenerator extends Generator
         Map<String, List<String>> projectFileGroups = new LinkedHashMap<>();
         StringBuilder projectFileList = new StringBuilder();
         projectFileList.append(String.format("\"%s\"\n", cmakeEscapePath(
-            Utility.getCanonicalPath(new File(project.projectDirectory(), ProjectFileParser.PROJECT_FILE_NAME)))));
+            FileUtils.getCanonicalPath(new File(project.projectDirectory(), ProjectFileParser.PROJECT_FILE_NAME)))));
         for (File projectDirectory : projectFiles) {
             List<String> items = new ArrayList<>();
             File projectFile = new File(projectDirectory, ProjectFileParser.PROJECT_FILE_NAME);
@@ -534,21 +535,22 @@ public class CMakeGenerator extends Generator
     }
 
     private void enumerateSourceFiles(List<File> inFiles, List<String> outPaths, Map<String, List<String>> outGroups)
+        throws IOException
     {
         File baseDirectory = new File(outputDirectory, SOURCE_DIRECTORY);
         for (File source : inFiles)
-            extractSourceFileRelativePaths(baseDirectory, Utility.getCanonicalFile(source), outPaths, outGroups);
+            extractSourceFileRelativePaths(baseDirectory, FileUtils.getCanonicalFile(source), outPaths, outGroups);
     }
 
     private void extractSourceFileRelativePaths(File baseDirectory, File file, List<String> outPaths,
-        Map<String, List<String>> outGroups)
+        Map<String, List<String>> outGroups) throws IOException
     {
-        String path = Utility.getRelativePath(baseDirectory, file);
+        String path = FileUtils.getRelativePath(baseDirectory, file);
 
         if (outPaths != null)
             outPaths.add(path);
 
-        String sourceGroup = Utility.getRelativePath(project.projectDirectory(), file.getParentFile());
+        String sourceGroup = FileUtils.getRelativePath(project.projectDirectory(), file.getParentFile());
         List<String> list = outGroups.get(sourceGroup);
         if (list == null) {
             list = new ArrayList<>();
@@ -588,20 +590,20 @@ public class CMakeGenerator extends Generator
                     programFiles = "C:/Program Files";
                 File file = new File(String.format("%s/CMake/bin", programFiles));
                 if (file.exists())
-                    return Utility.getCanonicalPath(file);
+                    return FileUtils.getCanonicalPath(file);
 
                 String programFilesX86 = System.getenv("ProgramFiles(x86)");
                 if (programFilesX86 == null)
                     programFilesX86 = "C:/Program Files (x86)";
                 file = new File(String.format("%s/CMake/bin", programFilesX86));
                 if (file.exists())
-                    return Utility.getCanonicalPath(file);
+                    return FileUtils.getCanonicalPath(file);
             }
 
             if (Utility.IS_OSX) {
                 File file = new File("/Applications/CMake.app/Contents/bin/cmake");
                 if (file.exists())
-                    return Utility.getCanonicalPath(file);
+                    return FileUtils.getCanonicalPath(file);
             }
         }
         return path;
@@ -647,7 +649,7 @@ public class CMakeGenerator extends Generator
                             continue;
 
                         if (isCMakePrefixPath(qtPrefixPath))
-                            return Utility.getCanonicalPath(qtPrefixPath);
+                            return FileUtils.getCanonicalPath(qtPrefixPath);
                     }
                 }
             }

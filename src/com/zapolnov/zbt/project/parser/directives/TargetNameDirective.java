@@ -22,7 +22,7 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectDirective;
 import java.util.regex.Pattern;
 
 public final class TargetNameDirective extends ProjectDirective
@@ -41,13 +41,8 @@ public final class TargetNameDirective extends ProjectDirective
         return name;
     }
 
-    @Override public void clearCaches()
+    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
     {
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
         visitor.visitTargetName(this);
     }
 }

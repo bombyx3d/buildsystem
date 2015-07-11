@@ -24,6 +24,7 @@ package com.zapolnov.buildsystem;
 import com.zapolnov.buildsystem.tests.DatabaseTests;
 import com.zapolnov.buildsystem.tests.FileBuilderTests;
 import com.zapolnov.buildsystem.tests.LogTests;
+import com.zapolnov.buildsystem.tests.StringUtilsTest;
 import com.zapolnov.buildsystem.tests.TemplateTests;
 import com.zapolnov.buildsystem.tests.YamlParserTests;
 import org.junit.internal.TextListener;
@@ -47,7 +48,8 @@ public final class TestsMain
             YamlParserTests.class,
             DatabaseTests.class,
             FileBuilderTests.class,
-            TemplateTests.class
+            TemplateTests.class,
+            StringUtilsTest.class
         );
 
         System.exit(!result.wasSuccessful() ? 1 : 0);

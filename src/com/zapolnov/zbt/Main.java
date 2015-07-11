@@ -21,13 +21,11 @@
  */
 package com.zapolnov.zbt;
 
+import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.utility.StringUtils;
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.generators.cmake.CMakeGenerator;
 import com.zapolnov.buildsystem.gui.FatalErrorDialog;
-import com.zapolnov.zbt.gui.MainDialog;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.buildsystem.utility.Database;
-import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -69,7 +67,7 @@ public class Main
             if (verbose)
                 t.printStackTrace();
             else
-                System.err.println(String.format("Error: %s", Utility.getExceptionMessage(t)));
+                System.err.println(String.format("Error: %s", StringUtils.getShortExceptionMessage(t)));
             System.exit(1);
         }
 
@@ -85,7 +83,7 @@ public class Main
     {
         try {
             Map<String, String> options = new LinkedHashMap<>();
-            File projectPath = Utility.getCanonicalFile(new File("."));
+            File projectPath = FileUtils.getCanonicalFile(new File("."));
             String cmakeBuildTool = null;
             String cmakeBuildType = null;
             String cmakeQt5Path = null;
@@ -109,7 +107,7 @@ public class Main
                 } else if ("--project".equals(args[i]) || "-p".equals(args[i])) {
                     if (i == args.length - 1)
                         throw new RuntimeException(String.format("Missing value after the \"%s\" option.", args[i]));
-                    projectPath = Utility.getCanonicalFile(new File(args[++i]));
+                    projectPath = FileUtils.getCanonicalFile(new File(args[++i]));
                     if (!projectPath.exists())
                         throw new RuntimeException(String.format("Directory does not exist: \"%s\".", projectPath));
                     if (!projectPath.isDirectory())

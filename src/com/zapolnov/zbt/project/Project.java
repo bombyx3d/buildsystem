@@ -21,22 +21,6 @@
  */
 package com.zapolnov.zbt.project;
 
-import com.zapolnov.zbt.generators.Generator;
-import com.zapolnov.zbt.plugins.Plugin;
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.ProjectDirective;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
-import com.zapolnov.zbt.project.parser.ProjectFileParser;
-import com.zapolnov.zbt.project.parser.directives.ImportDirective;
-import com.zapolnov.zbt.utility.CommandInvoker;
-import com.zapolnov.buildsystem.utility.Database;
-import com.zapolnov.zbt.utility.Utility;
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
 public class Project
 {
     public interface BuildCompletionListener
@@ -44,50 +28,9 @@ public class Project
         void onBuildFinished(Throwable error);
     }
 
-    public static final String BUILD_DIRECTORY_NAME = ".build";
-
-    private final File outputDirectory;
-    private final File projectDirectory;
-    private final Database database;
     private final Map<String, ImportDirective> importedModules = new HashMap<>();
     private final Map<String, Plugin> plugins = new HashMap<>();
-    private final ProjectDirectiveList directives = new ProjectDirectiveList(null, false);
     private Map<String, String> options = new HashMap<>();
-
-    public Project(File projectDirectory)
-    {
-        File projectFile = new File(projectDirectory, ProjectFileParser.PROJECT_FILE_NAME);
-        this.outputDirectory = new File(projectDirectory, BUILD_DIRECTORY_NAME);
-        this.projectDirectory = projectDirectory;
-
-        ProjectFileParser parser = new ProjectFileParser(this);
-        parser.parseFile(projectFile);
-
-        Utility.ensureDirectoryExists(outputDirectory);
-        Utility.makeDirectoryHidden(outputDirectory);
-
-        database = new Database(outputDirectory);
-    }
-
-    public Database database()
-    {
-        return database;
-    }
-
-    public void closeDatabase()
-    {
-        database.close();
-    }
-
-    public File projectDirectory()
-    {
-        return projectDirectory;
-    }
-
-    public File outputDirectory()
-    {
-        return outputDirectory;
-    }
 
     public String getConfigurationOption(String name)
     {
@@ -109,7 +52,7 @@ public class Project
         importedModules.put(directive.modulePath(), directive);
     }
 
-    public ProjectDirectiveList directives()
+    public ProjectScope directives()
     {
         return directives;
     }

@@ -21,6 +21,7 @@
  */
 package com.zapolnov.zbt.plugins.file2c;
 
+import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.yaml.YamlError;
 import com.zapolnov.buildsystem.utility.yaml.YamlValue;
 import com.zapolnov.zbt.plugins.Plugin;
@@ -66,9 +67,9 @@ public class FileToCPlugin extends Plugin
                     input = new File(basePath, subValue);
                     if (!input.exists()) {
                         throw new YamlError(subValueOption,
-                            String.format("File \"%s\" does not exist.", Utility.getCanonicalPath(input)));
+                            String.format("File \"%s\" does not exist.", FileUtils.getCanonicalPath(input)));
                     }
-                    input = Utility.getCanonicalFile(input);
+                    input = FileUtils.getCanonicalFile(input);
                     break;
 
                 case "output":

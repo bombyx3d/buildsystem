@@ -21,8 +21,8 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
-import com.zapolnov.zbt.project.parser.ProjectDirective;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
+import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectScope;
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import java.util.Set;
 
@@ -30,9 +30,9 @@ public final class SelectorDirective extends ProjectDirective
 {
     private final String enumerationID;
     private final Set<String> matchingValues;
-    private final ProjectDirectiveList innerDirectives;
+    private final ProjectScope innerDirectives;
 
-    public SelectorDirective(String enumerationID, Set<String> matchingValues, ProjectDirectiveList innerDirectives)
+    public SelectorDirective(String enumerationID, Set<String> matchingValues, ProjectScope innerDirectives)
     {
         this.enumerationID = enumerationID;
         this.matchingValues = matchingValues;
@@ -49,23 +49,13 @@ public final class SelectorDirective extends ProjectDirective
         return matchingValues;
     }
 
-    public ProjectDirectiveList innerDirectives()
+    public ProjectScope innerDirectives()
     {
         return innerDirectives;
     }
 
-    @Override public void clearCaches()
+    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
     {
-        innerDirectives.visitDirectives(new AbstractProjectDirectiveVisitor() {
-            @Override public void visitDirective(ProjectDirective directive) {
-                directive.clearCaches();
-            }
-        });
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
         visitor.visitSelector(this);
     }
 }

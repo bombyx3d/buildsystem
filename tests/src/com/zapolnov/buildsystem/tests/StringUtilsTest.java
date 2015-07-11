@@ -19,10 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser;
+package com.zapolnov.buildsystem.tests;
 
-public abstract class ProjectDirective
+import com.zapolnov.buildsystem.utility.StringUtils;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import org.junit.Assert;
+import org.junit.Test;
+
+public class StringUtilsTest extends Assert
 {
-    public abstract void clearCaches();
-    public abstract void visit(AbstractProjectDirectiveVisitor visitor);
+    @Test public void testExceptionMessage() throws IOException
+    {
+        String message = StringUtils.getShortExceptionMessage(new NullPointerException());
+        assertEquals(message, "NullPointerException");
+
+        message = StringUtils.getShortExceptionMessage(new FileNotFoundException("test.file"));
+        assertEquals(message, "File not found: test.fil");
+
+        message = StringUtils.getShortExceptionMessage(new ClassNotFoundException("TestClass"));
+        assertEquals(message, "Class not found: TestClass");
+
+        message = StringUtils.getShortExceptionMessage(new RuntimeException("Test message"));
+        assertEquals(message, "Test message");
+    }
 }

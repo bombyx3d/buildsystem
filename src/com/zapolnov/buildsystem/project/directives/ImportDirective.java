@@ -19,45 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project.directives;
 
-import com.zapolnov.zbt.project.parser.ProjectDirective;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
+import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectScope;
+import java.io.File;
 
+/** An 'import' directive in the project file. */
 public final class ImportDirective extends ProjectDirective
 {
-    private final String modulePath;
-    private final ProjectDirectiveList innerDirectives;
+    /** Path to the imported module. */
+    public final File path;
+    /** Scope of the imported project. */
+    public final ProjectScope scope;
 
-    public ImportDirective(String modulePath, ProjectDirectiveList innerDirectives)
+    /**
+     * Constructor.
+     * @param path Path to the imported module.
+     * @param scope Scope of the module.
+     */
+    public ImportDirective(File path, ProjectScope scope)
     {
-        this.modulePath = modulePath;
-        this.innerDirectives = innerDirectives;
-    }
-
-    public String modulePath()
-    {
-        return modulePath;
-    }
-
-    public ProjectDirectiveList innerDirectives()
-    {
-        return innerDirectives;
-    }
-
-    @Override public void clearCaches()
-    {
-        innerDirectives.visitDirectives(new AbstractProjectDirectiveVisitor() {
-            @Override public void visitDirective(ProjectDirective directive) {
-                directive.clearCaches();
-            }
-        });
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
-        visitor.visitImport(this);
+        this.path = path;
+        this.scope = scope;
     }
 }

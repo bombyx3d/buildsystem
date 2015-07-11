@@ -21,7 +21,7 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
-import com.zapolnov.zbt.project.parser.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectDirective;
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
@@ -32,7 +32,6 @@ import java.util.List;
 public final class SourceDirectoriesDirective extends ProjectDirective
 {
     private final List<File> sourceDirectories;
-    private List<File> sourceFiles;
 
     public SourceDirectoriesDirective(List<File> sourceDirectories)
     {
@@ -46,24 +45,16 @@ public final class SourceDirectoriesDirective extends ProjectDirective
 
     public List<File> sourceFiles()
     {
-        if (sourceFiles == null) {
-            sourceFiles = new ArrayList<>();
-            for (File directory : sourceDirectories) {
-                List<File> directoryFiles = Utility.recursivelyEnumerateFilesInDirectory(directory);
-                sourceFiles.addAll(directoryFiles);
-            }
+        List<File> sourceFiles = new ArrayList<>();
+        for (File directory : sourceDirectories) {
+            List<File> directoryFiles = Utility.recursivelyEnumerateFilesInDirectory(directory);
+            sourceFiles.addAll(directoryFiles);
         }
         return sourceFiles;
     }
 
-    @Override public void clearCaches()
+    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
     {
-        sourceFiles = null;
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
         visitor.visitSourceDirectories(this);
     }
 }

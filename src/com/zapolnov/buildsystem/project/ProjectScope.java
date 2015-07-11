@@ -19,50 +19,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser;
+package com.zapolnov.buildsystem.project;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ProjectDirectiveList
+/** An individual namespace of a project. */
+public class ProjectScope
 {
-    public final ProjectDirectiveList parent;
+    /** Parent scope or `null`. */
+    public final ProjectScope parent;
+
+    /** Set to `true` if this scope should share symbols with a parent scope. */
     private final boolean transparent;
+    /** List of directives in this scope. */
     private final List<ProjectDirective> directives = new ArrayList<>();
+    /** Set of enumeration identifiers used by directives in this scope. */
     private final Set<String> enumerationIDs = new HashSet<>();
 
-    public ProjectDirectiveList(ProjectDirectiveList parent, boolean transparent)
+    /**
+     * Constructor.
+     * @param parent Parent scope.
+     * @param transparent Set to `true` if this scope should share symbols with a parent scope.
+     */
+    public ProjectScope(ProjectScope parent, boolean transparent)
     {
         this.parent = parent;
         this.transparent = transparent;
     }
 
+    /**
+     * Checks whether the specified enumeration identifier is unused and reserves it if it does.
+     * @return `true` if identifier has been successfully reserved or `false` if it has already been reserved.
+     */
     public boolean reserveEnumerationID(String id)
     {
-        for (ProjectDirectiveList list = this; list != null; list = list.parent) {
-            if (list.enumerationIDs.contains(id))
+        for (ProjectScope scope = this; scope != null; scope = scope.parent) {
+            if (scope.enumerationIDs.contains(id))
                 return false;
         }
 
-        for (ProjectDirectiveList list = this; list != null; list = list.parent) {
-            list.enumerationIDs.add(id);
-            if (!list.transparent)
+        for (ProjectScope scope = this; scope != null; scope = scope.parent) {
+            scope.enumerationIDs.add(id);
+            if (!scope.transparent)
                 break;
         }
 
         return true;
     }
 
+    /**
+     * Adds directive to this scope.
+     * @param directive Directive to add.
+     */
     public void addDirective(ProjectDirective directive)
     {
         directives.add(directive);
-    }
-
-    public void visitDirectives(AbstractProjectDirectiveVisitor visitor)
-    {
-        for (ProjectDirective directive : directives)
-            directive.visit(visitor);
     }
 }

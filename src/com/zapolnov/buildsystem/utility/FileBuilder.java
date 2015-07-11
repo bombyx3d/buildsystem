@@ -21,7 +21,6 @@
  */
 package com.zapolnov.buildsystem.utility;
 
-import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,9 +53,9 @@ public final class FileBuilder
      */
     public FileBuilder(File file)
     {
-        this.file = Utility.getCanonicalFile(file);
+        this.file = FileUtils.getCanonicalFile(file);
         this.stringBuilder = new StringBuilder();
-        Utility.ensureDirectoryExists(this.file.getParentFile());
+        FileUtils.ensureDirectoryExists(this.file.getParentFile());
     }
 
     /**
@@ -83,8 +82,8 @@ public final class FileBuilder
      */
     public void appendHex(byte value)
     {
-        stringBuilder.append(Utility.HEX_CHARACTERS[(value >> 4) & 0xF]);
-        stringBuilder.append(Utility.HEX_CHARACTERS[value & 0xF]);
+        stringBuilder.append(StringUtils.HEX_CHARACTERS[(value >> 4) & 0xF]);
+        stringBuilder.append(StringUtils.HEX_CHARACTERS[value & 0xF]);
     }
 
     /**
@@ -95,16 +94,16 @@ public final class FileBuilder
     public boolean commit(Database database) throws NoSuchAlgorithmException, IOException
     {
         String text = stringBuilder.toString();
-        byte[] bytes = text.getBytes(Utility.UTF8_CHARSET);
+        byte[] bytes = text.getBytes(StringUtils.UTF8_CHARSET);
 
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] md5 = md.digest(bytes);
         if (!database.didOutputFileChange(file, md5)) {
-            Log.trace(String.format("Keeping %s", Utility.getRelativePath(database.directory, file)));
+            Log.trace(String.format("Keeping %s", FileUtils.getRelativePath(database.directory, file)));
             return false;
         }
 
-        Log.info(String.format("Writing %s", Utility.getRelativePath(database.directory, file)));
+        Log.info(String.format("Writing %s", FileUtils.getRelativePath(database.directory, file)));
         try (FileOutputStream stream = new FileOutputStream(file)) {
             stream.write(bytes);
             stream.flush();

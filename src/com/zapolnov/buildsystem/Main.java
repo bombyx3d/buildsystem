@@ -24,6 +24,7 @@ package com.zapolnov.buildsystem;
 import com.bulenkov.darcula.DarculaLaf;
 import com.zapolnov.buildsystem.gui.FatalErrorDialog;
 import com.zapolnov.buildsystem.gui.MainDialog;
+import com.zapolnov.buildsystem.utility.StringUtils;
 import javax.swing.UIManager;
 
 /** Main class of the application. */
@@ -49,6 +50,7 @@ public class Main
                 try { UIManager.setLookAndFeel(new DarculaLaf()); } catch (Throwable ignored) {}
                 MainDialog.run();
             } catch (Throwable t) {
+                System.err.println(StringUtils.getDetailedExceptionMessage(t));
                 FatalErrorDialog.run(t);
             }
         }

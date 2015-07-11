@@ -21,9 +21,9 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
+import com.zapolnov.buildsystem.project.ProjectScope;
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.ProjectDirective;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
+import com.zapolnov.buildsystem.project.ProjectDirective;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,32 +32,20 @@ public final class GeneratorSelectorDirective extends ProjectDirective
 {
     public static final String DEFAULT = "";
 
-    private final Map<String, ProjectDirectiveList> mapping;
+    private final Map<String, ProjectScope> mapping;
 
-    public GeneratorSelectorDirective(Map<String, ProjectDirectiveList> mapping)
+    public GeneratorSelectorDirective(Map<String, ProjectScope> mapping)
     {
         this.mapping = new HashMap<>(mapping);
     }
 
-    public Map<String, ProjectDirectiveList> mapping()
+    public Map<String, ProjectScope> mapping()
     {
         return Collections.unmodifiableMap(mapping);
     }
 
-    @Override public void clearCaches()
+    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
     {
-        for (ProjectDirectiveList innerDirectives : mapping.values()) {
-            innerDirectives.visitDirectives(new AbstractProjectDirectiveVisitor() {
-                @Override public void visitDirective(ProjectDirective directive) {
-                    directive.clearCaches();
-                }
-            });
-        }
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
         visitor.visitGeneratorSelector(this);
     }
 }

@@ -21,7 +21,6 @@
  */
 package com.zapolnov.buildsystem.utility;
 
-import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentNavigableMap;
@@ -39,10 +38,10 @@ public class Database
     public static final String OPTION_CMAKE_BUILD_TOOL = "CMakeBuildTool";
     public static final String PROJECT_OPTION_FORMAT = "ProjectOption:%s";
 
-    private final static String INPUT_FILES_TABLE = "<InputFiles>";
-    private final static String INPUT_FILES_OPTIONS_HASHES_TABLE = "<InputFilesOptionsHashes>";
-    private final static String OUTPUT_FILES_TABLE = "<OutputFiles>";
-    private final static String OPTIONS_TABLE = "<Options>";
+    private final static String INPUT_FILES_TABLE = "InputFiles";
+    private final static String INPUT_FILES_OPTIONS_HASHES_TABLE = "InputFilesOptionsHashes";
+    private final static String OUTPUT_FILES_TABLE = "OutputFiles";
+    private final static String OPTIONS_TABLE = "Options";
 
     /** Directory containing the database file. */
     public final File directory;
@@ -142,7 +141,7 @@ public class Database
             return true;
 
         try {
-            String path = Utility.getCanonicalPath(file);
+            String path = FileUtils.getCanonicalPath(file);
 
             ConcurrentNavigableMap<String, byte[]> hashesTable = db.getTreeMap(INPUT_FILES_OPTIONS_HASHES_TABLE);
             byte[] previousHash = hashesTable.get(path);
@@ -178,7 +177,7 @@ public class Database
         try {
             ConcurrentNavigableMap<String, byte[]> table = db.getTreeMap(OUTPUT_FILES_TABLE);
 
-            String path = Utility.getCanonicalPath(file);
+            String path = FileUtils.getCanonicalPath(file);
             byte[] previousMd5 = table.get(path);
             if (previousMd5 != null && Arrays.equals(md5, previousMd5))
                 return false;

@@ -21,7 +21,7 @@
  */
 package com.zapolnov.buildsystem.utility;
 
-import com.zapolnov.zbt.utility.Utility;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,16 +72,20 @@ public class Template
         }
     }
 
+
+    /** List of template commands. */
     private final List<Command> commands = new ArrayList<>();
+    /** Map of variable values. */
     private Map<String, String> variables;
+
 
     /**
      * Constructor.
      * @param stream Input stream with template file contents.
      */
-    public Template(InputStream stream)
+    public Template(InputStream stream) throws IOException
     {
-        String text = Utility.stringFromInputStream(stream);
+        String text = FileUtils.stringFromInputStream(stream);
 
         int offset = 0;
         for (;;) {

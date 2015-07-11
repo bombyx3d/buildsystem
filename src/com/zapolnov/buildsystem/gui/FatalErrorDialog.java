@@ -22,32 +22,41 @@
 package com.zapolnov.buildsystem.gui;
 
 import com.zapolnov.buildsystem.gui.widgets.InvisibleFrame;
-import com.zapolnov.buildsystem.utility.Log;
-import com.zapolnov.zbt.utility.Utility;
+import com.zapolnov.buildsystem.utility.StringUtils;
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
+import javax.swing.JTextPane;
+import javax.swing.UIManager;
 
 /** Dialog displaying fatal error messages. */
 public class FatalErrorDialog extends JDialog
 {
     public static final String TITLE = "Fatal Error";
-    public static final String OK_BUTTON_TITLE = "Close";
+    public static final String CLOSE_BUTTON_TITLE = "Close";
     public static final String DETAILS_BUTTON_TITLE_1 = "Show Details >>";
     public static final String DETAILS_BUTTON_TITLE_2 = "<< Hide Details";
+
+    public static final int TEXT_AREA_MAXIMUM_HEIGHT = 500;
+
+    private JPanel contentPanel;
+    private JPanel buttonPanel;
+    private JPanel buttonContainer;
+    private JTextPane messageText;
+    private JPanel messagePanel;
+    private JScrollPane scrollArea;
+    private JButton closeButton;
+    private JButton detailsButton;
 
     /**
      * Constructor.
@@ -57,7 +66,7 @@ public class FatalErrorDialog extends JDialog
     public FatalErrorDialog(JDialog parent, Throwable exception)
     {
         super(parent, TITLE, true);
-        init(Utility.getExceptionMessage(exception), makeMessageForException(exception));
+        init(StringUtils.getShortExceptionMessage(exception), StringUtils.getDetailedExceptionMessage(exception));
     }
 
     /**
@@ -68,7 +77,7 @@ public class FatalErrorDialog extends JDialog
     public FatalErrorDialog(Frame parent, Throwable exception)
     {
         super(parent, TITLE, true);
-        init(Utility.getExceptionMessage(exception), makeMessageForException(exception));
+        init(StringUtils.getShortExceptionMessage(exception), StringUtils.getDetailedExceptionMessage(exception));
     }
 
     /**
@@ -78,81 +87,104 @@ public class FatalErrorDialog extends JDialog
      */
     private void init(String shortMessage, String longMessage)
     {
-        try { Log.error(longMessage); } catch (Throwable ignored) {}
-
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setContentPane(contentPanel);
 
-        JPanel messagePanel = new JPanel(new BorderLayout());
+        messagePanel = new JPanel(new BorderLayout());
         messagePanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
         contentPanel.add(messagePanel, BorderLayout.CENTER);
 
-        JLabel messageLabel = new JLabel(shortMessage);
-        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        messagePanel.add(messageLabel, BorderLayout.CENTER);
+        messageText = new JTextPane();
+        messageText.setText(shortMessage);
+        messageText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        messageText.setEditable(false);
+        messageText.setAlignmentX(Container.CENTER_ALIGNMENT);
+        messageText.setBackground(UIManager.getColor("Label.background"));
+        messagePanel.add(messageText, BorderLayout.PAGE_START);
 
         JTextArea textArea = new JTextArea();
         textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         textArea.setEditable(false);
         textArea.setLineWrap(false);
         textArea.setWrapStyleWord(true);
-        textArea.setRows(20);
         textArea.append(longMessage);
+        textArea.setBackground(UIManager.getColor("Label.background"));
+        textArea.setRows(30);
         textArea.setCaretPosition(0);
 
-        final JScrollPane scrollArea = new JScrollPane(textArea);
+        scrollArea = new JScrollPane(textArea);
         scrollArea.setVisible(false);
         scrollArea.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        JPanel buttonContainer = new JPanel(new GridBagLayout());
+        buttonContainer = new JPanel(new GridBagLayout());
         buttonContainer.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
         contentPanel.add(buttonContainer, BorderLayout.PAGE_END);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 0));
-        buttonContainer.add(buttonPanel);
+        closeButton = new JButton(CLOSE_BUTTON_TITLE);
+        closeButton.addActionListener(e -> dispose());
 
-        JButton button = new JButton(OK_BUTTON_TITLE);
-        button.addActionListener(e ->
-            dispose()
-        );
-        buttonPanel.add(button, BorderLayout.CENTER);
+        detailsButton = new JButton(DETAILS_BUTTON_TITLE_1);
+        detailsButton.addActionListener(e -> setDetailsVisible(!scrollArea.isVisible()));
 
-        final JButton detailsButton = new JButton(DETAILS_BUTTON_TITLE_1);
-        detailsButton.addActionListener(e -> {
-            boolean visible = !scrollArea.isVisible();
-            messagePanel.remove(scrollArea);
-            contentPanel.remove(messagePanel);
-            if (!visible)
-                contentPanel.add(messagePanel, BorderLayout.CENTER);
-            else {
-                contentPanel.add(messagePanel, BorderLayout.PAGE_START);
-                contentPanel.add(scrollArea, BorderLayout.CENTER);
-            }
-            scrollArea.setVisible(visible);
-            detailsButton.setText(visible ? DETAILS_BUTTON_TITLE_2 : DETAILS_BUTTON_TITLE_1);
-            pack();
-            setLocationRelativeTo(getParent());
-        });
-        buttonPanel.add(detailsButton);
+        createButtonPanel(true);
 
         pack();
         setLocationRelativeTo(getParent());
     }
 
     /**
-     * Creates detailed description message for exception.
-     * @param exception Exception.
-     * @return Detailed error message.
+     * Shows or hides the "Show details" button.
+     * @param visible Set to `true` to make the "Show details" button visible or to `false` to make it hidden.
      */
-    private static String makeMessageForException(Throwable exception)
+    public void setDetailsButtonVisible(boolean visible)
     {
-        StringWriter writer = new StringWriter();
-        exception.printStackTrace(new PrintWriter(writer));
-        return writer.toString();
+        createButtonPanel(visible);
+        pack();
+        setLocationRelativeTo(getParent());
+    }
+
+    /**
+     * Shows or hides detailed message.
+     * @param visible Set to `true` to show details message or to `false` to hide details message.
+     */
+    public void setDetailsVisible(boolean visible)
+    {
+        contentPanel.remove(scrollArea);
+        contentPanel.remove(messagePanel);
+
+        if (!visible)
+            contentPanel.add(messagePanel, BorderLayout.CENTER);
+        else
+            contentPanel.add(scrollArea, BorderLayout.CENTER);
+
+        messagePanel.setVisible(!visible);
+        scrollArea.setVisible(visible);
+
+        detailsButton.setText(visible ? DETAILS_BUTTON_TITLE_2 : DETAILS_BUTTON_TITLE_1);
+
+        pack();
+        setLocationRelativeTo(getParent());
+    }
+
+    /**
+     * Creates the button panel.
+     * @param detailsButtonVisible Set to `true` to include the "Show details" button.
+     */
+    private void createButtonPanel(boolean detailsButtonVisible)
+    {
+        if (buttonPanel != null)
+            buttonPanel.removeAll();
+
+        buttonPanel = new JPanel(new GridLayout(1, detailsButtonVisible ? 2 : 1, 5, 0));
+        buttonContainer.add(buttonPanel);
+
+        buttonPanel.add(closeButton);
+        if (detailsButtonVisible)
+            buttonPanel.add(detailsButton);
     }
 
     /**

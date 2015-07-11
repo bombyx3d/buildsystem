@@ -19,31 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public final class HeaderPathsDirective extends ProjectDirective
+/** An in-memory representation of the project. */
+public class Project
 {
-    private final List<File> headerPaths;
+    /** Name of a project file. */
+    public static final String PROJECT_FILE_NAME = "project.yml";
 
-    public HeaderPathsDirective(List<File> headerPaths)
-    {
-        this.headerPaths = new ArrayList<>(headerPaths);
-    }
+    /** Project file. */
+    public final File file;
+    /** Project directory. */
+    public final File directory;
+    /** Root scope of the project. */
+    public final ProjectScope scope;
 
-    public List<File> headerPaths()
+    /**
+     * Constructor.
+     * @param file Project file.
+     */
+    public Project(File file)
     {
-        return Collections.unmodifiableList(headerPaths);
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitHeaderPaths(this);
+        this.file = FileUtils.getCanonicalFile(file);
+        this.directory = this.file.getParentFile();
+        this.scope = new ProjectScope(null, false);
     }
 }

@@ -30,7 +30,7 @@ import com.zapolnov.zbt.project.parser.directives.HeaderPathsDirective;
 import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.TargetNameDirective;
 import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.ImportDirective;
+import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.SourceDirectoriesDirective;
 import com.zapolnov.zbt.project.parser.directives.ThirdPartyHeaderPathsDirective;
@@ -38,7 +38,6 @@ import com.zapolnov.zbt.project.parser.directives.ThirdPartySourceDirectoriesDir
 
 public abstract class AbstractProjectDirectiveVisitor
 {
-    public void visitDirective(ProjectDirective directive) {}
     public void visitDefine(DefineDirective directive) {}
     public void visitSourceDirectories(SourceDirectoriesDirective directive) {}
     public void visitThirdPartySourceDirectories(ThirdPartySourceDirectoriesDirective directive) {}

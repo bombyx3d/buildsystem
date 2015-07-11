@@ -21,6 +21,7 @@
  */
 package com.zapolnov.zbt.plugins.file2c;
 
+import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.zbt.project.Project;
 import com.zapolnov.zbt.project.parser.directives.CustomDirective;
 import com.zapolnov.buildsystem.utility.FileBuilder;
@@ -72,7 +73,7 @@ public class FileToCDirective extends CustomDirective
             headerBuilder.append('\n');
 
             sourceBuilder.append(String.format("#include \"%s\"\n",
-                Utility.getRelativePath(sourceFile.getParentFile(), headerFile)));
+                FileUtils.getRelativePath(sourceFile.getParentFile(), headerFile)));
             sourceBuilder.append('\n');
 
             writeNamespaceBegin(headerBuilder);

@@ -21,50 +21,13 @@
  */
 package com.zapolnov.zbt.project.parser;
 
-import com.zapolnov.buildsystem.utility.yaml.YamlError;
-import com.zapolnov.buildsystem.utility.yaml.YamlValue;
-import com.zapolnov.zbt.plugins.Plugin;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.project.parser.directives.CMakeUseOpenGLDirective;
-import com.zapolnov.zbt.project.parser.directives.CMakeUseQt5Directive;
-import com.zapolnov.zbt.project.parser.directives.CustomDirective;
-import com.zapolnov.zbt.project.parser.directives.CustomDirectiveWrapper;
-import com.zapolnov.zbt.project.parser.directives.DefineDirective;
-import com.zapolnov.zbt.project.parser.directives.EnumerationDirective;
-import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.HeaderPathsDirective;
-import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.TargetNameDirective;
-import com.zapolnov.zbt.project.parser.directives.ImportDirective;
-import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.SourceDirectoriesDirective;
-import com.zapolnov.zbt.project.parser.directives.ThirdPartyHeaderPathsDirective;
-import com.zapolnov.zbt.project.parser.directives.ThirdPartySourceDirectoriesDirective;
-import com.zapolnov.zbt.utility.Utility;
-import com.zapolnov.buildsystem.utility.yaml.YamlParser;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public final class ProjectFileParser
 {
-    public static final String PROJECT_FILE_NAME = "project.yml";
-
     private static final Pattern ENUM_REG_EXP = Pattern.compile(String.format("^\\^(%s)\\((%s(,%s)*)\\)$",
         EnumerationDirective.NAME_PATTERN, EnumerationDirective.VALUE_PATTERN, EnumerationDirective.VALUE_PATTERN));
     private static final Pattern EXE_NAME_REG_EXP = Pattern.compile(String.format("^%s$",
         TargetNameDirective.PATTERN));
 
-    private final Project project;
-    private final Set<String> moduleImportStack = new LinkedHashSet<>();
     private final Set<Plugin> plugins = new LinkedHashSet<>();
 
     public ProjectFileParser(Project project)
@@ -72,37 +35,7 @@ public final class ProjectFileParser
         this.project = project;
     }
 
-    public void parseFile(File file)
-    {
-        parseFile(project.directives(), file);
-    }
-
-    private void parseFile(ProjectDirectiveList directiveList, File file)
-    {
-        YamlValue root = YamlParser.readFile(file);
-        if (root == null)
-            return;
-
-        String moduleName = Utility.getCanonicalPath(file);
-        if (!moduleImportStack.contains(moduleName)) {
-            moduleImportStack.add(moduleName);
-            try {
-                if (!root.isMapping())
-                    throw new YamlError(root, "Expected mapping at the root level.");
-                processOptions(file.getAbsoluteFile().getParentFile(), directiveList, root.toMapping());
-            } catch (YamlError e) {
-                throw e;
-            } catch (Throwable t) {
-                String fileName = Utility.getCanonicalPath(file);
-                String msg = Utility.getExceptionMessage(t);
-                throw new RuntimeException(String.format("Unable to parse YAML file \"%s\".\nError: %s", fileName, msg), t);
-            } finally {
-                moduleImportStack.remove(moduleName);
-            }
-        }
-    }
-
-    private void processOptions(File basePath, ProjectDirectiveList directiveList,
+    private void processOptions(File basePath, ProjectScope directiveList,
         Map<YamlValue, YamlValue> options)
     {
         for (Map.Entry<YamlValue, YamlValue> item : options.entrySet()) {
@@ -155,7 +88,7 @@ public final class ProjectFileParser
         }
     }
 
-    private ProjectDirective processSelector(File basePath, ProjectDirectiveList directiveList,
+    private ProjectDirective processSelector(File basePath, ProjectScope directiveList,
         String key, YamlValue keyOption, YamlValue valueOption)
     {
         Matcher matcher = ENUM_REG_EXP.matcher(key);
@@ -170,19 +103,19 @@ public final class ProjectFileParser
         Set<String> matchingValues = new LinkedHashSet<>();
         Collections.addAll(matchingValues, matcher.group(2).split(","));
 
-        ProjectDirectiveList innerDirectives = new ProjectDirectiveList(directiveList, false);
+        ProjectScope innerDirectives = new ProjectScope(directiveList, false);
         processOptions(basePath, innerDirectives, valueOption.toMapping());
 
         return new SelectorDirective(enumID, matchingValues, innerDirectives);
     }
 
-    private ProjectDirective processGeneratorSelector(File basePath, ProjectDirectiveList directiveList,
+    private ProjectDirective processGeneratorSelector(File basePath, ProjectScope directiveList,
         YamlValue valueOption)
     {
         if (!valueOption.isMapping())
             throw new YamlError(valueOption, "Expected mapping.");
 
-        Map<String, ProjectDirectiveList> mapping = new HashMap<>();
+        Map<String, ProjectScope> mapping = new HashMap<>();
         for (Map.Entry<YamlValue, YamlValue> item : valueOption.toMapping().entrySet()) {
             String key = item.getKey().toString();
             if (key == null)
@@ -195,7 +128,7 @@ public final class ProjectFileParser
             if (!item.getValue().isMapping())
                 throw new YamlError(item.getValue(), "Expected mapping.");
 
-            ProjectDirectiveList innerDirectives = new ProjectDirectiveList(directiveList, false);
+            ProjectScope innerDirectives = new ProjectScope(directiveList, false);
             processOptions(basePath, innerDirectives, item.getValue().toMapping());
 
             if (mapping.containsKey(name))
@@ -206,19 +139,19 @@ public final class ProjectFileParser
         return new GeneratorSelectorDirective(mapping);
     }
 
-    private ProjectDirective processRootProjectSelector(File basePath, ProjectDirectiveList directiveList,
+    private ProjectDirective processRootProjectSelector(File basePath, ProjectScope directiveList,
         YamlValue valueOption)
     {
         if (!valueOption.isMapping())
             throw new YamlError(valueOption, "Expected mapping.");
 
-        ProjectDirectiveList innerDirectives = new ProjectDirectiveList(directiveList, false);
+        ProjectScope innerDirectives = new ProjectScope(directiveList, false);
         processOptions(basePath, innerDirectives, valueOption.toMapping());
 
         return new RootProjectSelectorDirective(innerDirectives, moduleImportStack.size() == 1);
     }
 
-    private ProjectDirective processEnum(ProjectDirectiveList directiveList,
+    private ProjectDirective processEnum(ProjectScope directiveList,
         YamlValue keyOption, YamlValue valueOption)
     {
         if (!valueOption.isMapping())
@@ -313,7 +246,7 @@ public final class ProjectFileParser
         }
     }
 
-    private ProjectDirective processImport(File basePath, ProjectDirectiveList directiveList,
+    private ProjectDirective processImport(File basePath, ProjectScope directiveList,
         YamlValue valueOption)
     {
         List<YamlValue> modules;
@@ -346,7 +279,7 @@ public final class ProjectFileParser
             String modulePath =  Utility.getCanonicalPath(moduleDirectory);
             importDirective = project.getImportedModule(modulePath);
             if (importDirective == null) {
-                ProjectDirectiveList innerDirectiveList = new ProjectDirectiveList(directiveList, true);
+                ProjectScope innerDirectiveList = new ProjectScope(directiveList, true);
                 parseFile(innerDirectiveList, moduleFile);
 
                 importDirective = new ImportDirective(modulePath, innerDirectiveList);

@@ -21,14 +21,13 @@
  */
 package com.zapolnov.zbt.gui;
 
-import com.zapolnov.buildsystem.utility.Database;
+import com.zapolnov.buildsystem.project.ProjectScope;
 import com.zapolnov.zbt.generators.Generator;
 import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.zbt.project.parser.directives.EnumerationDirective;
 import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.ImportDirective;
+import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
 import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
 import com.zapolnov.zbt.utility.GuiUtility;
@@ -100,7 +99,7 @@ public final class ProjectConfigurationPanel extends JPanel
         createWidgets(project.directives());
     }
 
-    private void createWidgets(ProjectDirectiveList directives)
+    private void createWidgets(ProjectScope directives)
     {
         directives.visitDirectives(new AbstractProjectDirectiveVisitor() {
             @Override public void visitEnumeration(EnumerationDirective directive) {
@@ -189,7 +188,7 @@ public final class ProjectConfigurationPanel extends JPanel
         listenerList.forEach(ProjectConfigurationPanel.Listener::onProjectConfigurationPanelChanged);
     }
 
-    private void updateWidgetsVisibility(final Set<Container> visible, ProjectDirectiveList directives)
+    private void updateWidgetsVisibility(final Set<Container> visible, ProjectScope directives)
     {
         directives.visitDirectives(new AbstractProjectDirectiveVisitor() {
             @Override public void visitEnumeration(EnumerationDirective directive) {
@@ -212,7 +211,7 @@ public final class ProjectConfigurationPanel extends JPanel
                 Generator selectedGenerator = selectedGenerator();
                 if (selectedGenerator == null)
                     return;
-                ProjectDirectiveList directives = directive.mapping().get(selectedGenerator.id());
+                ProjectScope directives = directive.mapping().get(selectedGenerator.id());
                 if (directives == null)
                     directives = directive.mapping().get(GeneratorSelectorDirective.DEFAULT);
                 if (directives != null)

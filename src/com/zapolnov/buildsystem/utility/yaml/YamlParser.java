@@ -21,7 +21,8 @@
  */
 package com.zapolnov.buildsystem.utility.yaml;
 
-import com.zapolnov.zbt.utility.Utility;
+import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.utility.StringUtils;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Field;
@@ -66,7 +67,7 @@ public final class YamlParser
             StreamReader reader = new StreamReader(fileReader);
             Field field = reader.getClass().getDeclaredField("name");
             field.setAccessible(true);
-            field.set(reader, Utility.getCanonicalPath(file));
+            field.set(reader, FileUtils.getCanonicalPath(file));
 
             // Read the file
             try {
@@ -78,8 +79,8 @@ public final class YamlParser
                 throw (cause != null ? cause : e);
             }
         } catch (Throwable t) {
-            String fileName = Utility.getCanonicalPath(file);
-            String msg = Utility.getExceptionMessage(t);
+            String fileName = FileUtils.getCanonicalPath(file);
+            String msg = StringUtils.getShortExceptionMessage(t);
             throw new RuntimeException(String.format("Unable to parse YAML file \"%s\".\nError: %s", fileName, msg), t);
         }
 

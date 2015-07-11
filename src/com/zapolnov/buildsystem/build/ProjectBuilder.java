@@ -19,31 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.build;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.Project;
+import com.zapolnov.buildsystem.utility.Database;
+import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public final class HeaderPathsDirective extends ProjectDirective
+/** Project builder. */
+public class ProjectBuilder
 {
-    private final List<File> headerPaths;
+    public static final String BUILD_DIRECTORY_NAME = ".build";
 
-    public HeaderPathsDirective(List<File> headerPaths)
-    {
-        this.headerPaths = new ArrayList<>(headerPaths);
-    }
+    /** A project being built. */
+    public final Project project;
+    /** Path to the output directory for generated files. */
+    public final File outputDirectory;
+    /** Build database. */
+    public final Database database;
 
-    public List<File> headerPaths()
+    /**
+     * Constructor.
+     * @param project Project to build.
+     */
+    public ProjectBuilder(Project project)
     {
-        return Collections.unmodifiableList(headerPaths);
-    }
+        this.project = project;
+        this.outputDirectory = new File(project.directory, BUILD_DIRECTORY_NAME);
+        this.database = new Database(outputDirectory);
 
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitHeaderPaths(this);
+        FileUtils.ensureDirectoryExists(outputDirectory);
+        FileUtils.makeDirectoryHidden(outputDirectory);
     }
 }

@@ -22,7 +22,7 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectDirective;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,13 +42,8 @@ public final class ThirdPartyHeaderPathsDirective extends ProjectDirective
         return Collections.unmodifiableList(headerPaths);
     }
 
-    @Override public void clearCaches()
+    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
     {
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
         visitor.visitThirdPartyHeaderPaths(this);
     }
 }

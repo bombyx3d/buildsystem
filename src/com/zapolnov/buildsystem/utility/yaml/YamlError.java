@@ -21,7 +21,7 @@
  */
 package com.zapolnov.buildsystem.utility.yaml;
 
-import com.zapolnov.zbt.utility.Utility;
+import com.zapolnov.buildsystem.utility.StringUtils;
 
 /** An exception thrown for errors in YAML files. */
 public class YamlError extends RuntimeException
@@ -55,7 +55,7 @@ public class YamlError extends RuntimeException
     private static String makeMessage(YamlValue value, String message, Throwable exception)
     {
         if (message == null && exception != null)
-            message = Utility.getExceptionMessage(exception);
+            message = StringUtils.getShortExceptionMessage(exception);
 
         if (value == null) {
             if (exception instanceof RuntimeException)

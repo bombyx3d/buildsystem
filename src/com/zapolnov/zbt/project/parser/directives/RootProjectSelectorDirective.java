@@ -21,38 +21,28 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
+import com.zapolnov.buildsystem.project.ProjectScope;
 import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.ProjectDirective;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveList;
+import com.zapolnov.buildsystem.project.ProjectDirective;
 
 public final class RootProjectSelectorDirective extends ProjectDirective
 {
-    private final ProjectDirectiveList innerDirectives;
+    private final ProjectScope innerDirectives;
     public final boolean isTrue;
 
-    public RootProjectSelectorDirective(ProjectDirectiveList innerDirectives, boolean isTrue)
+    public RootProjectSelectorDirective(ProjectScope innerDirectives, boolean isTrue)
     {
         this.innerDirectives = innerDirectives;
         this.isTrue = isTrue;
     }
 
-    public ProjectDirectiveList innerDirectives()
+    public ProjectScope innerDirectives()
     {
         return innerDirectives;
     }
 
-    @Override public void clearCaches()
+    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
     {
-        innerDirectives.visitDirectives(new AbstractProjectDirectiveVisitor() {
-            @Override public void visitDirective(ProjectDirective directive) {
-                directive.clearCaches();
-            }
-        });
-    }
-
-    @Override public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitDirective(this);
         visitor.visitRootProjectSelector(this);
     }
 }

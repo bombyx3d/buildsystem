@@ -19,31 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.buildsystem.project.ProjectDirective;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public final class HeaderPathsDirective extends ProjectDirective
+/** Base class for directives in the project file. */
+public abstract class ProjectDirective
 {
-    private final List<File> headerPaths;
-
-    public HeaderPathsDirective(List<File> headerPaths)
-    {
-        this.headerPaths = new ArrayList<>(headerPaths);
-    }
-
-    public List<File> headerPaths()
-    {
-        return Collections.unmodifiableList(headerPaths);
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitHeaderPaths(this);
-    }
 }
