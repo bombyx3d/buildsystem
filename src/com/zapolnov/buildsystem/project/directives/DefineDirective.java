@@ -19,22 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/** A 'define' directive in the project file. */
 public final class DefineDirective extends ProjectDirective
 {
+    /** List of preprocessor definitions. */
     private final List<String> defines;
 
+    /**
+     * Constructor.
+     * @param defines List of preprocessor definitions.
+     */
     public DefineDirective(List<String> defines)
     {
         this.defines = new ArrayList<>(defines);
     }
 
+    /**
+     * Retrieves a list of preprocessor definitions.
+     * @return List of preprocessor definitions.
+     */
     public List<String> defines()
     {
         return Collections.unmodifiableList(defines);

@@ -246,29 +246,6 @@ public final class ProjectFileParser
         }
     }
 
-    private ProjectDirective processDefine(YamlValue valueOption)
-    {
-        List<YamlValue> defines;
-        if (valueOption.isSequence())
-            defines = valueOption.toSequence();
-        else {
-            if (valueOption.toString() == null)
-                throw new YamlError(valueOption, "Expected string or sequence of strings.");
-            defines = new ArrayList<>(1);
-            defines.add(valueOption);
-        }
-
-        List<String> defineList = new ArrayList<>();
-        for (YamlValue define : defines) {
-            String name = define.toString();
-            if (name == null)
-                throw new YamlError(define, "Expected string.");
-            defineList.add(name);
-        }
-
-        return new DefineDirective(defineList);
-    }
-
     private ProjectDirective processCMakeUseOpenGL(YamlValue valueOption)
     {
         String name = valueOption.toString();

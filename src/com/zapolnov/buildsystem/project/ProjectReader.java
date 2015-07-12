@@ -21,6 +21,7 @@
  */
 package com.zapolnov.buildsystem.project;
 
+import com.zapolnov.buildsystem.project.directives.DefineDirective;
 import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
 import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
@@ -251,6 +252,13 @@ public class ProjectReader
 
             d.put("source_directories", (r, k, v) -> parseSourceDirectories(r, k, v, false));
             d.put("3rdparty_source_directories", (r, k, v) -> parseSourceDirectories(r, k, v, true));
+
+            d.put("define", (r, k, v) -> {
+                List<String> defines = new ArrayList<>();
+                for (YamlValue define : v.toSequence())
+                    defines.add(define.toString());
+                r.currentScope().addDirective(new DefineDirective(defines));
+            });
 
             standardDirectives = d;
         }
