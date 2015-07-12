@@ -34,6 +34,7 @@ import java.util.Map;
 
 public class FileToCPlugin extends Plugin
 {
+    /*
     @Override public CustomDirective processDirective(Project project, File basePath, String key,
         YamlValue keyOption, YamlValue valueOption)
     {
@@ -135,4 +136,5 @@ public class FileToCPlugin extends Plugin
 
         return null;
     }
+    */
 }

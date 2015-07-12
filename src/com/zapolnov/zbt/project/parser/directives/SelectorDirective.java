@@ -21,11 +21,10 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
-import com.zapolnov.buildsystem.project.ProjectDirective;
 import com.zapolnov.buildsystem.project.ProjectScope;
 import java.util.Set;
 
-public final class SelectorDirective extends ProjectDirective
+public final class SelectorDirective// extends ProjectDirective
 {
     private final String enumerationID;
     private final Set<String> matchingValues;

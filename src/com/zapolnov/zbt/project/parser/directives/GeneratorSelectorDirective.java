@@ -22,12 +22,11 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.buildsystem.project.ProjectScope;
-import com.zapolnov.buildsystem.project.ProjectDirective;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class GeneratorSelectorDirective extends ProjectDirective
+public final class GeneratorSelectorDirective// extends ProjectDirective
 {
     public static final String DEFAULT = "";
 

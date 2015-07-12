@@ -51,7 +51,7 @@ public class FileToCDirective extends CustomDirective
         File sourceFile = new File(outputDirectory, String.format("file2c/%s.cpp", output));
 
         byte[] optionsHash = Utility.makeOptionsHash(input, output, identifier, namespace, compressionMethod.name);
-        if (!headerFile.exists() || !sourceFile.exists() || project.database().didInputFileChange(input, optionsHash)) {
+        if (!headerFile.exists() || !sourceFile.exists() /*|| project.database().didInputFileChange(input, optionsHash)*/) {
             byte[] data = Utility.byteArrayFromFile(input);
 
             switch (compressionMethod)
@@ -95,8 +95,10 @@ public class FileToCDirective extends CustomDirective
             writeNamespaceEnd(headerBuilder);
             writeNamespaceEnd(sourceBuilder);
 
+            /*
             headerBuilder.commit(project.database());
             sourceBuilder.commit(project.database());
+            */
         }
     }
 

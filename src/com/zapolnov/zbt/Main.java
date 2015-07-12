@@ -113,6 +113,7 @@ public class Main
                         throw new RuntimeException(String.format("\"%s\" is not a directory.", projectPath));
                 } else if ("--build".equals(args[i])) {
                     build = true;
+                /*
                 } else if ("--cmake-build-tool".equals(args[i])) {
                     if (i == args.length - 1)
                         throw new RuntimeException(String.format("Missing value after the \"%s\" option.", args[i]));
@@ -134,6 +135,7 @@ public class Main
                     if (!CMakeGenerator.isValidQt5Directory(qt5Path))
                         throw new RuntimeException(String.format("Invalid Qt5 directory \"%s\".", qt5Path));
                     cmakeQt5Path = qt5Path;
+                */
                 } else if ("--help".equals(args[i]) || "-h".equals(args[i])) {
                     showUsage();
                     System.exit(1);
@@ -153,6 +155,7 @@ public class Main
 
             // Build the project
 
+            /*
             final Project project = new Project(projectPath);
 
             // Invoke the builder
@@ -194,6 +197,7 @@ public class Main
                 project.closeDatabase();
                 throw t;
             }
+            */
         } catch (Throwable t) {
             handleFatalException(t);
         }

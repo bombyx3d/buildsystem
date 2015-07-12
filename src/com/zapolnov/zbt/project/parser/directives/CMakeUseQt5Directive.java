@@ -21,9 +21,7 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
-import com.zapolnov.buildsystem.project.ProjectDirective;
-
-public final class CMakeUseQt5Directive extends ProjectDirective
+public final class CMakeUseQt5Directive// extends ProjectDirective
 {
     private final boolean value;
 

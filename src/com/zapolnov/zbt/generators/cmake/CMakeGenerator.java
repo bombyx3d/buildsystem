@@ -21,36 +21,9 @@
  */
 package com.zapolnov.zbt.generators.cmake;
 
-import com.zapolnov.buildsystem.utility.FileUtils;
-import com.zapolnov.zbt.Main;
-import com.zapolnov.zbt.generators.Generator;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.project.parser.ProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.ProjectFileParser;
-import com.zapolnov.zbt.project.parser.directives.CMakeUseOpenGLDirective;
-import com.zapolnov.zbt.project.parser.directives.CMakeUseQt5Directive;
-import com.zapolnov.zbt.project.parser.directives.TargetNameDirective;
-import com.zapolnov.zbt.utility.CommandInvoker;
-import com.zapolnov.buildsystem.utility.Database;
-import com.zapolnov.buildsystem.utility.FileBuilder;
-import com.zapolnov.zbt.utility.GuiUtility;
-import com.zapolnov.buildsystem.utility.Template;
-import com.zapolnov.zbt.utility.Utility;
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-
-public class CMakeGenerator extends Generator
+public class CMakeGenerator //extends Generator
 {
+    /*
     private enum BuildTool
     {
         UNIX_MAKEFILES("Unix Makefiles", "makefiles", "Unix Makefiles", true),
@@ -750,4 +723,5 @@ public class CMakeGenerator extends Generator
         }
         return buildTools;
     }
+    */
 }

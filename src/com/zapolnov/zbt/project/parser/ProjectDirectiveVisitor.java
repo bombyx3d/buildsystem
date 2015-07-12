@@ -21,26 +21,9 @@
  */
 package com.zapolnov.zbt.project.parser;
 
-import com.zapolnov.buildsystem.project.ProjectScope;
-import com.zapolnov.buildsystem.utility.FileUtils;
-import com.zapolnov.zbt.generators.Generator;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.project.parser.directives.CustomDirectiveWrapper;
-import com.zapolnov.zbt.project.parser.directives.DefineDirective;
-import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.HeaderPathsDirective;
-import com.zapolnov.buildsystem.project.directives.ImportDirective;
-import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.SourceDirectoriesDirective;
-import com.zapolnov.zbt.project.parser.directives.ThirdPartyHeaderPathsDirective;
-import com.zapolnov.zbt.project.parser.directives.ThirdPartySourceDirectoriesDirective;
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-
-public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVisitor
+public abstract class ProjectDirectiveVisitor
 {
+    /*
     private final Project project;
     private final File outputDirectory;
     private final Generator generator;
@@ -157,4 +140,5 @@ public abstract class ProjectDirectiveVisitor extends AbstractProjectDirectiveVi
             throw new RuntimeException(t);
         }
     }
+    */
 }

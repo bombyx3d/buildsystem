@@ -23,6 +23,7 @@ package com.zapolnov.zbt.project;
 
 public class Project
 {
+    /*
     public interface BuildCompletionListener
     {
         void onBuildFinished(Throwable error);
@@ -30,17 +31,6 @@ public class Project
 
     private final Map<String, ImportDirective> importedModules = new HashMap<>();
     private final Map<String, Plugin> plugins = new HashMap<>();
-    private Map<String, String> options = new HashMap<>();
-
-    public String getConfigurationOption(String name)
-    {
-        return options.get(name);
-    }
-
-    public Map<String, String> configurationOptions()
-    {
-        return Collections.unmodifiableMap(options);
-    }
 
     public ImportDirective getImportedModule(String modulePath)
     {
@@ -122,4 +112,5 @@ public class Project
             throw t;
         }
     }
+    */
 }

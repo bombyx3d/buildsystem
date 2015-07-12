@@ -22,9 +22,8 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.buildsystem.project.ProjectScope;
-import com.zapolnov.buildsystem.project.ProjectDirective;
 
-public final class RootProjectSelectorDirective extends ProjectDirective
+public final class RootProjectSelectorDirective// extends ProjectDirective
 {
     private final ProjectScope innerDirectives;
     public final boolean isTrue;

@@ -23,6 +23,7 @@ package com.zapolnov.zbt.project.parser;
 
 public final class ProjectFileParser
 {
+    /*
     private static final Pattern ENUM_REG_EXP = Pattern.compile(String.format("^\\^(%s)\\((%s(,%s)*)\\)$",
         EnumerationDirective.NAME_PATTERN, EnumerationDirective.VALUE_PATTERN, EnumerationDirective.VALUE_PATTERN));
     private static final Pattern EXE_NAME_REG_EXP = Pattern.compile(String.format("^%s$",
@@ -194,4 +195,5 @@ public final class ProjectFileParser
             throw new YamlError(valueOption, e);
         }
     }
+    */
 }
