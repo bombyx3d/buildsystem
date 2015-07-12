@@ -19,45 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.generators;
+package com.zapolnov.buildsystem.build.generators;
 
-import com.zapolnov.zbt.generators.cmake.CMakeGenerator;
-import com.zapolnov.zbt.generators.dummy.DummyGenerator;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.utility.CommandInvoker;
+import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.utility.Database;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.JPanel;
 
+/** Base class for project file generators. */
 public abstract class Generator
 {
-    public interface CompletionHandler
+    /** Retrieves a name of this generator. */
+    public abstract String name();
+
+    /**
+     * Creates an UI panel with generator configuration options.
+     * @param database Database.
+     * @return UI panel with generator configuration options.
+     */
+    public JPanel createSettingsPanel(Database database)
     {
-        void onComplete(boolean success);
+        return null;
     }
 
-    public abstract String id();
-    public abstract String name();
-    public abstract void generate(Project project, CommandInvoker.Printer printer, boolean build) throws Throwable;
+    /**
+     * Generates the project.
+     * @param projectBuilder Project builder.
+     * @param build Set to `true` to also build the project after generating project files.
+     */
+    public abstract void generate(ProjectBuilder projectBuilder, boolean build) throws Throwable;
 
-    public JPanel createSettingsPanel(Database database) { return null; }
-    public void validateAndSaveSettings(Database database) { assert(createSettingsPanel(database) == null); }
 
-    private static Map<String, Generator> allGenerators;
+    /**
+     * Retrieves a map of all supported generators.
+     * @return Map of all generators.
+     */
     public static Map<String, Generator> allGenerators()
     {
-        try {
-            if (allGenerators == null) {
-                Map<String, Generator> g = new LinkedHashMap<>();
-                g.put(DummyGenerator.NAME, new DummyGenerator());
-                g.put(CMakeGenerator.NAME, new CMakeGenerator());
-                allGenerators = g;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (allGenerators == null) {
+            Map<String, Generator> g = new LinkedHashMap<>();
+            /*
+            g.put(DummyGenerator.NAME, new DummyGenerator());
+            g.put(CMakeGenerator.NAME, new CMakeGenerator());
+            */
+            allGenerators = g;
         }
         return allGenerators;
     }
+
+    /** A map of all supported generators. */
+    private static Map<String, Generator> allGenerators;
 }

@@ -19,24 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/** An 'enum' directive in the project file. */
 public final class EnumerationDirective extends ProjectDirective
 {
+    /** Regular expression for valid enumeration identifiers. */
     public static Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
+    /** Regular expression for valid enumeration values' identifiers. */
     public static Pattern VALUE_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
 
-    private final String id;
-    private final String title;
-    private final String defaultValue;
+    /** Unique identifier of the enumeration. */
+    public final String id;
+    /** Title of the enumeration. */
+    public final String title;
+    /** Default value of the enumeration (could be `null`). */
+    public final String defaultValue;
+    /** Map of enumeration values. */
     private final Map<String, String> values;
 
+    /**
+     * Constructor.
+     * @param id Unique identifier of the enumeration.
+     * @param title Title of the enumeration.
+     * @param defaultValue Default value of the enumeration.
+     * @param values Map of enumeration values.
+     */
     public EnumerationDirective(String id, String title, String defaultValue, Map<String, String> values)
     {
         this.id = id;
@@ -45,23 +60,17 @@ public final class EnumerationDirective extends ProjectDirective
         this.values = new LinkedHashMap<>(values);
     }
 
-    public String id()
-    {
-        return id;
-    }
-
-    public String title()
-    {
-        return title;
-    }
-
-    public String defaultValue()
-    {
-        return defaultValue;
-    }
-
+    /**
+     * Retrieves a map of enumeration values.
+     * @return A map of enumeration values.
+     */
     public Map<String, String> values()
     {
         return Collections.unmodifiableMap(values);
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        visitor.visitEnumeration(this);
     }
 }

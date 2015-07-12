@@ -19,24 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.gui;
+package com.zapolnov.buildsystem.gui.widgets;
 
+import com.zapolnov.buildsystem.build.ProjectBuilder;
+import com.zapolnov.buildsystem.build.generators.Generator;
+import com.zapolnov.buildsystem.gui.utililty.GuiUtility;
 import com.zapolnov.buildsystem.project.ProjectScope;
-import com.zapolnov.zbt.generators.Generator;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.zbt.project.parser.directives.EnumerationDirective;
-import com.zapolnov.zbt.project.parser.directives.GeneratorSelectorDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
+import com.zapolnov.buildsystem.project.directives.EnumerationDirective;
 import com.zapolnov.buildsystem.project.directives.ImportDirective;
-import com.zapolnov.zbt.project.parser.directives.RootProjectSelectorDirective;
-import com.zapolnov.zbt.project.parser.directives.SelectorDirective;
-import com.zapolnov.zbt.utility.GuiUtility;
+import com.zapolnov.buildsystem.utility.Database;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,40 +42,46 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
+/** An UI panel with project settings. */
 public final class ProjectConfigurationPanel extends JPanel
 {
     public static final String GENERATOR_LABEL = "Generator:";
 
+    /*
     public interface Listener
     {
         void onProjectConfigurationPanelChanged();
     }
+    */
 
-    private final Project project;
+    private final ProjectBuilder projectBuilder;
     private final JComboBox<String> generatorCombo;
     private final Map<Generator, JPanel> generatorSettingsPanels = new HashMap<>();
     private final Map<JComboBox<String>, EnumerationDirective> enumerationDirectives = new LinkedHashMap<>();
     private final Map<EnumerationDirective, JComboBox<String>> comboBoxes = new LinkedHashMap<>();
     private final Map<String, List<JComboBox<String>>> comboBoxesById = new LinkedHashMap<>();
     private final List<Container> widgetPanels = new ArrayList<>();
-    private final List<Listener> listeners = new ArrayList<>();
-    private final Map<String, String> defaultOptionValues;
+//    private final List<Listener> listeners = new ArrayList<>();
 
-    public ProjectConfigurationPanel(Project project, Generator defaultGenerator, Map<String, String> options)
+    /**
+     * Constructor.
+     * @param projectBuilder Project builder.
+     */
+    public ProjectConfigurationPanel(ProjectBuilder projectBuilder)
     {
-        this.project = project;
-        this.defaultOptionValues = new LinkedHashMap<>(options);
+        this.projectBuilder = projectBuilder;
 
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-        String defaultGeneratorName = (defaultGenerator != null ? defaultGenerator.name() : null);
-        if (defaultGeneratorName == null)
-            defaultGeneratorName = project.database().getOption(Database.OPTION_GENERATOR_NAME);
-        generatorCombo = GuiUtility.createComboBox(this, GENERATOR_LABEL, Generator.allGenerators().keySet(), defaultGeneratorName);
+        Map<String, Generator> allGenerators = Generator.allGenerators();
+        String selectedGeneratorName = (projectBuilder.generator() != null ? projectBuilder.generator().name() : null);
+        if (selectedGeneratorName == null)
+            selectedGeneratorName = projectBuilder.database.getOption(Database.OPTION_GENERATOR_NAME);
+        generatorCombo = GuiUtility.createComboBox(this, GENERATOR_LABEL, allGenerators.keySet(), selectedGeneratorName);
         generatorCombo.addItemListener(e -> updateWidgetsVisibility());
 
-        for (Generator generator : Generator.allGenerators().values()) {
-            JPanel panel = generator.createSettingsPanel(project.database());
+        for (Generator generator : allGenerators.values()) {
+            JPanel panel = generator.createSettingsPanel(projectBuilder.database);
             if (panel != null) {
                 add(panel);
                 generatorSettingsPanels.put(generator, panel);
@@ -89,28 +92,31 @@ public final class ProjectConfigurationPanel extends JPanel
         updateWidgetsVisibility();
     }
 
+    /*
     public void addChangeListener(Listener listener)
     {
         listeners.add(listener);
     }
+    */
 
     private void createWidgets()
     {
-        createWidgets(project.directives());
+        createWidgets(projectBuilder.project.scope);
     }
 
-    private void createWidgets(ProjectScope directives)
+    private void createWidgets(ProjectScope scope)
     {
-        directives.visitDirectives(new AbstractProjectDirectiveVisitor() {
+        scope.visit(new ProjectVisitor() {
             @Override public void visitEnumeration(EnumerationDirective directive) {
                 createEnumerationWidget(directive);
             }
         });
 
-        directives.visitDirectives(new AbstractProjectDirectiveVisitor() {
+        scope.visit(new ProjectVisitor() {
             @Override public void visitImport(ImportDirective directive) {
-                createWidgets(directive.innerDirectives());
+                createWidgets(directive.scope);
             }
+            /* FIXME
             @Override public void visitSelector(SelectorDirective directive) {
                 createWidgets(directive.innerDirectives());
             }
@@ -120,6 +126,7 @@ public final class ProjectConfigurationPanel extends JPanel
             @Override public void visitRootProjectSelector(RootProjectSelectorDirective directive) {
                 createWidgets(directive.innerDirectives());
             }
+            */
         });
     }
 
@@ -132,27 +139,27 @@ public final class ProjectConfigurationPanel extends JPanel
         Collection<String> values = directive.values().values();
 
         int selectedIndex = -1;
-        String defaultValue = defaultOptionValues.get(directive.id());
+        String defaultValue = projectBuilder.optionValues().get(directive.id);
         if (defaultValue == null)
-            defaultValue = project.database().getOption(String.format(Database.PROJECT_OPTION_FORMAT, directive.id()));
+            defaultValue = projectBuilder.database.getOption(String.format(Database.PROJECT_OPTION_FORMAT, directive.id));
         if (defaultValue == null)
-            defaultValue = directive.defaultValue();
+            defaultValue = directive.defaultValue;
         if (defaultValue != null) {
             selectedIndex = getEnumerationSelectedIndex(directive, defaultValue);
-            if (selectedIndex < 0 && !defaultValue.equals(directive.defaultValue())) {
-                defaultValue = directive.defaultValue();
+            if (selectedIndex < 0 && !defaultValue.equals(directive.defaultValue)) {
+                defaultValue = directive.defaultValue;
                 if (defaultValue != null)
                     selectedIndex = getEnumerationSelectedIndex(directive, defaultValue);
             }
         }
 
-        comboBox = GuiUtility.createComboBox(this, directive.title() + ':', values, selectedIndex);
+        comboBox = GuiUtility.createComboBox(this, directive.title + ':', values, selectedIndex);
         comboBox.addItemListener(e -> updateWidgetsVisibility());
 
-        List<JComboBox<String>> list = comboBoxesById.get(directive.id());
+        List<JComboBox<String>> list = comboBoxesById.get(directive.id);
         if (list == null) {
             list = new ArrayList<>();
-            comboBoxesById.put(directive.id(), list);
+            comboBoxesById.put(directive.id, list);
         }
         list.add(comboBox);
 
@@ -175,7 +182,7 @@ public final class ProjectConfigurationPanel extends JPanel
     private void updateWidgetsVisibility()
     {
         Set<Container> visible = new HashSet<>();
-        updateWidgetsVisibility(visible, project.directives());
+        updateWidgetsVisibility(visible, projectBuilder.project.scope);
 
         for (Container panel : widgetPanels)
             panel.setVisible(visible.contains(panel));
@@ -184,19 +191,22 @@ public final class ProjectConfigurationPanel extends JPanel
         for (Map.Entry<Generator, JPanel> it : generatorSettingsPanels.entrySet())
             it.getValue().setVisible(it.getKey() == selectedGenerator);
 
+        /* FIXME
         List<Listener> listenerList = new ArrayList<>(listeners);
         listenerList.forEach(ProjectConfigurationPanel.Listener::onProjectConfigurationPanelChanged);
+        */
     }
 
-    private void updateWidgetsVisibility(final Set<Container> visible, ProjectScope directives)
+    private void updateWidgetsVisibility(final Set<Container> visible, ProjectScope scope)
     {
-        directives.visitDirectives(new AbstractProjectDirectiveVisitor() {
+        scope.visit(new ProjectVisitor() {
             @Override public void visitEnumeration(EnumerationDirective directive) {
                 visible.add(comboBoxes.get(directive).getParent());
             }
             @Override public void visitImport(ImportDirective directive) {
-                updateWidgetsVisibility(visible, directive.innerDirectives());
+                updateWidgetsVisibility(visible, directive.scope);
             }
+            /* FIXME
             @Override public void visitSelector(SelectorDirective directive) {
                 List<JComboBox<String>> list = comboBoxesById.get(directive.enumerationID());
                 for (JComboBox<String> comboBox : list) {
@@ -221,9 +231,11 @@ public final class ProjectConfigurationPanel extends JPanel
                 if (directive.isTrue)
                     updateWidgetsVisibility(visible, directive.innerDirectives());
             }
+            */
         });
     }
 
+    /*
     private String getComboBoxSelectedEnumeration(JComboBox<String> comboBox)
     {
         if (comboBox == null)
@@ -246,6 +258,7 @@ public final class ProjectConfigurationPanel extends JPanel
 
         return null;
     }
+    */
 
     public Generator selectedGenerator()
     {
@@ -253,6 +266,7 @@ public final class ProjectConfigurationPanel extends JPanel
         return Generator.allGenerators().get(generatorName);
     }
 
+    /*
     public Map<String, String> selectedOptions()
     {
         Map<String, String> options = new LinkedHashMap<>(defaultOptionValues);
@@ -298,4 +312,5 @@ public final class ProjectConfigurationPanel extends JPanel
 
         selectedGenerator.validateAndSaveSettings(project.database());
     }
+    */
 }

@@ -22,6 +22,7 @@
 package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,5 +54,10 @@ public final class HeaderPathsDirective extends ProjectDirective
     public List<File> headerPaths()
     {
         return Collections.unmodifiableList(headerPaths);
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        visitor.visitHeaderPaths(this);
     }
 }

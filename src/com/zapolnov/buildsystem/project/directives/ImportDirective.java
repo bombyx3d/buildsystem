@@ -23,6 +23,7 @@ package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
 import com.zapolnov.buildsystem.project.ProjectScope;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 
 /** An 'import' directive in the project file. */
 public final class ImportDirective extends ProjectDirective
@@ -37,5 +38,10 @@ public final class ImportDirective extends ProjectDirective
     public ImportDirective(ProjectScope scope)
     {
         this.scope = scope;
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        visitor.visitImport(this);
     }
 }

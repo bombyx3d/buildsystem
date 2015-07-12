@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.utility;
+package com.zapolnov.buildsystem.gui.utililty;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -32,19 +32,29 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/** Utility functions for GUI. */
 public final class GuiUtility
 {
-    public static final int LABEL_PREFERRED_WIDTH = 200;
-    public static final int COMBOBOX_PREFERRED_WIDTH = 200;
-
-    private GuiUtility() {}
-
+    /**
+     * Creates a combo box with label.
+     * @param container Container to add combo box to.
+     * @param labelText Text of the label.
+     * @param items List of items.
+     * @param selectedItem Selected item.
+     */
     public static JComboBox<String> createComboBox(Container container,
         String labelText, String[] items, String selectedItem)
     {
         return createComboBox(container, labelText, Arrays.asList(items), selectedItem);
     }
 
+    /**
+     * Creates a combo box with label.
+     * @param container Container to add combo box to.
+     * @param labelText Text of the label.
+     * @param items List of items.
+     * @param selectedItem Selected item.
+     */
     public static JComboBox<String> createComboBox(Container container,
         String labelText, Collection<String> items, String selectedItem)
     {
@@ -62,6 +72,13 @@ public final class GuiUtility
         return createComboBox(container, labelText, items, selectedIndex);
     }
 
+    /**
+     * Creates a combo box with label.
+     * @param container Container to add combo box to.
+     * @param labelText Text of the label.
+     * @param items List of items.
+     * @param selectedIndex Index of a selected item (use -1 for none).
+     */
     public static JComboBox<String> createComboBox(Container container,
         String labelText, Collection<String> items, int selectedIndex)
     {
@@ -70,11 +87,9 @@ public final class GuiUtility
         container.add(panel);
 
         JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(LABEL_PREFERRED_WIDTH, label.getPreferredSize().height));
         panel.add(label, BorderLayout.WEST);
 
         JComboBox<String> comboBox = new JComboBox<>(items.toArray(new String[items.size()]));
-        comboBox.setPreferredSize(new Dimension(COMBOBOX_PREFERRED_WIDTH, comboBox.getPreferredSize().height));
         comboBox.setEditable(false);
         panel.add(comboBox, BorderLayout.EAST);
 
@@ -82,4 +97,7 @@ public final class GuiUtility
 
         return comboBox;
     }
+
+    private GuiUtility() {}
+    static { new GuiUtility(); }
 }

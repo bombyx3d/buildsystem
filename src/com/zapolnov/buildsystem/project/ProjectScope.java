@@ -83,4 +83,14 @@ public class ProjectScope
     {
         directives.add(directive);
     }
+
+    /**
+     * Visits this scope with the specified visitor.
+     * @param visitor Visitor.
+     */
+    public void visit(ProjectVisitor visitor)
+    {
+        for (ProjectDirective directive : directives)
+            directive.visit(visitor);
+    }
 }

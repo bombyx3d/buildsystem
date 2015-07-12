@@ -22,6 +22,7 @@
 package com.zapolnov.buildsystem.project;
 
 import com.zapolnov.buildsystem.project.directives.DefineDirective;
+import com.zapolnov.buildsystem.project.directives.EnumerationDirective;
 import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
 import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
@@ -34,11 +35,11 @@ import com.zapolnov.buildsystem.utility.yaml.YamlValue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** Project file reader. */
@@ -220,6 +221,26 @@ public class ProjectReader
         if (standardDirectives == null) {
             Map<String, DirectiveParser> d = new HashMap<>();
 
+            d.put("target-name", (r, k, v) -> {
+                String name = v.toString();
+                if (!RE_TARGET_NAME.matcher(name).matches())
+                    throw new YamlError(v, "Invalid target name.");
+                r.currentScope().addDirective(new TargetNameDirective(name));
+            });
+
+            d.put("header_search_paths", (r, k, v) -> parseHeaderSearchPaths(r, k, v, false));
+            d.put("3rdparty_header_search_paths", (r, k, v) -> parseHeaderSearchPaths(r, k, v, true));
+
+            d.put("source_directories", (r, k, v) -> parseSourceDirectories(r, k, v, false));
+            d.put("3rdparty_source_directories", (r, k, v) -> parseSourceDirectories(r, k, v, true));
+
+            d.put("define", (r, k, v) -> {
+                List<String> defines = new ArrayList<>();
+                for (YamlValue define : v.toSequence())
+                    defines.add(define.toString());
+                r.currentScope().addDirective(new DefineDirective(defines));
+            });
+
             d.put("import", (r, k, v) -> {
                 for (YamlValue module : v.toSequence()) {
                     String moduleName = module.toString();
@@ -240,24 +261,64 @@ public class ProjectReader
                 }
             });
 
-            d.put("target-name", (r, k, v) -> {
-                String name = v.toString();
-                if (!RE_TARGET_NAME.matcher(name).matches())
-                    throw new YamlError(v, "Invalid target name.");
-                r.currentScope().addDirective(new TargetNameDirective(name));
-            });
+            d.put("enum", (r, k, v) -> {
+                String defaultValue = null;
+                String id = null;
+                String title = null;
+                Map<String, String> values = new LinkedHashMap<>();
+                YamlValue defaultValueOption = null;
 
-            d.put("header_search_paths", (r, k, v) -> parseHeaderSearchPaths(r, k, v, false));
-            d.put("3rdparty_header_search_paths", (r, k, v) -> parseHeaderSearchPaths(r, k, v, true));
+                for (Map.Entry<YamlValue, YamlValue> item : v.toMapping().entrySet()) {
+                    String subKey = item.getKey().toString();
+                    switch (subKey)
+                    {
+                    case "id":
+                        id = item.getValue().toString();
+                        if (!EnumerationDirective.NAME_PATTERN.matcher(id).matches())
+                            throw new YamlError(item.getValue(), String.format("Invalid enumeration id \"%s\".", id));
+                        if (!r.currentScope().reserveEnumerationID(id))
+                            throw new YamlError(item.getValue(), String.format("Duplicate enumeration id \"%s\".", id));
+                        break;
 
-            d.put("source_directories", (r, k, v) -> parseSourceDirectories(r, k, v, false));
-            d.put("3rdparty_source_directories", (r, k, v) -> parseSourceDirectories(r, k, v, true));
+                    case "title":
+                        title = item.getValue().toString();
+                        if (title.length() == 0)
+                            throw new YamlError(item.getValue(), "Title should not be empty.");
+                        break;
 
-            d.put("define", (r, k, v) -> {
-                List<String> defines = new ArrayList<>();
-                for (YamlValue define : v.toSequence())
-                    defines.add(define.toString());
-                r.currentScope().addDirective(new DefineDirective(defines));
+                    case "default":
+                        defaultValueOption = item.getValue();
+                        defaultValue = defaultValueOption.toString();
+                        break;
+
+                    case "values":
+                        for (Map.Entry<YamlValue, YamlValue> value : item.getValue().toMapping().entrySet()) {
+                            String name = value.getKey().toString();
+                            String description = value.getValue().toString();
+                            if (!EnumerationDirective.VALUE_PATTERN.matcher(name).matches())
+                                throw new YamlError(value.getKey(), String.format("Invalid value id \"%s\".", name));
+                            if (values.get(name) != null)
+                                throw new YamlError(value.getKey(), String.format("Duplicate value id \"%s\".", name));
+                            values.put(name, description);
+                        }
+                        break;
+
+                    default:
+                        throw new YamlError(item.getKey(), String.format("Unknown option \"%s\".", subKey));
+                    }
+                }
+
+                if (id == null)
+                    throw new YamlError(k, "Missing enumeration id.");
+                if (title == null)
+                    throw new YamlError(k, "Missing enumeration title.");
+                if (values.isEmpty())
+                    throw new YamlError(k, "Missing enumeration values.");
+
+                if (defaultValue != null && !values.containsKey(defaultValue))
+                    throw new YamlError(defaultValueOption, String.format("Invalid value id \"%s\".", defaultValue));
+
+                r.currentScope().addDirective(new EnumerationDirective(id, title, defaultValue, values));
             });
 
             standardDirectives = d;

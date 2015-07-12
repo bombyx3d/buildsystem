@@ -21,10 +21,14 @@
  */
 package com.zapolnov.buildsystem.build;
 
+import com.zapolnov.buildsystem.build.generators.Generator;
 import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Project builder. */
 public class ProjectBuilder
@@ -37,6 +41,10 @@ public class ProjectBuilder
     public final File outputDirectory;
     /** Build database. */
     public final Database database;
+    /** Project generator. */
+    private Generator generator;
+    /** User-defined options. */
+    private Map<String, String> optionValues = new HashMap<>();
 
     /**
      * Constructor.
@@ -50,5 +58,32 @@ public class ProjectBuilder
 
         FileUtils.ensureDirectoryExists(outputDirectory);
         FileUtils.makeDirectoryHidden(outputDirectory);
+    }
+
+    /**
+     * Retrieves a generator used to build the project.
+     * @return Generator.
+     */
+    public Generator generator()
+    {
+        return generator;
+    }
+
+    /**
+     * Retrives a map of options and their values.
+     * @return A map of options and their values.
+     */
+    public Map<String, String> optionValues()
+    {
+        return Collections.unmodifiableMap(optionValues);
+    }
+
+    /**
+     * Sets generator to use to build the project.
+     * @param generator Generator.
+     */
+    public void setGenerator(Generator generator)
+    {
+        this.generator = generator;
     }
 }

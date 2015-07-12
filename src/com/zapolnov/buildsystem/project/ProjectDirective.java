@@ -24,4 +24,9 @@ package com.zapolnov.buildsystem.project;
 /** Base class for directives in the project file. */
 public abstract class ProjectDirective
 {
+    /**
+     * Visits this directive with the specified visitor.
+     * @param visitor Visitor.
+     */
+    public abstract void visit(ProjectVisitor visitor);
 }

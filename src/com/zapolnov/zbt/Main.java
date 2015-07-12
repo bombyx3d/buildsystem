@@ -23,8 +23,7 @@ package com.zapolnov.zbt;
 
 import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.StringUtils;
-import com.zapolnov.zbt.generators.Generator;
-import com.zapolnov.zbt.generators.cmake.CMakeGenerator;
+import com.zapolnov.buildsystem.build.generators.Generator;
 import com.zapolnov.buildsystem.gui.FatalErrorDialog;
 import java.io.File;
 import java.util.LinkedHashMap;

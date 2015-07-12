@@ -22,6 +22,7 @@
 package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 import java.util.regex.Pattern;
 
 /** A 'target-name' directive in the project file. */
@@ -40,5 +41,10 @@ public final class TargetNameDirective extends ProjectDirective
     public TargetNameDirective(String name)
     {
         this.name = name;
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        visitor.visitTargetName(this);
     }
 }

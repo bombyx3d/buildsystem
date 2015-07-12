@@ -21,16 +21,17 @@
  */
 package com.zapolnov.buildsystem.gui;
 
+import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.gui.widgets.ButtonPanel;
 import com.zapolnov.buildsystem.gui.widgets.FileDialog;
 import com.zapolnov.buildsystem.gui.widgets.InvisibleFrame;
+import com.zapolnov.buildsystem.gui.widgets.ProjectConfigurationPanel;
 import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.project.ProjectReader;
 import com.zapolnov.buildsystem.utility.Colors;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.StringUtils;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -72,6 +73,8 @@ public class MainDialog extends JDialog
     public static final String BUILD_BUTTON_TITLE = "Build";
     public static final String CLOSE_BUTTON_TITLE = "Exit";
     public static final String REBUILD_CHECKBOX_TITLE = "Perform a full (non-incremental) run";
+    public static final String OPEN_PROJECT_CHECKBOX_TITLE = "Open project after successful completion";
+    public static final String EXIT_ON_SUCCESS_CHECKBOX_TITLE = "Exit after successful completion";
     public static final String DIRECTORY_DOES_NOT_EXIST_MESSAGE = "Entered path does not exist.";
     public static final String NOT_A_DIRECTORY_MESSAGE = "Entered path does not represent a directory.";
     public static final String PROJECT_NOT_FOUND_MESSAGE = "Entered directory does not contain a project file.";
@@ -87,10 +90,14 @@ public class MainDialog extends JDialog
     private final JTextField projectPathEdit;
     private final JPanel projectSettingsPanel;
     private final JCheckBox rebuildCheckBox;
+    private final JCheckBox openProjectCheckBox;
+    private final JCheckBox exitOnSuccessCheckBox;
     private final JButton generateButton;
     private final JButton buildButton;
     private File projectDirectory;
     private Project project;
+    private ProjectBuilder projectBuilder;
+    private ProjectConfigurationPanel projectConfigurationPanel;
 
     /**
      * Constructor.
@@ -161,15 +168,21 @@ public class MainDialog extends JDialog
         projectSettingsPanel = new JPanel();
         projectSettingsPanel.setLayout(new BorderLayout());
 
-        rebuildCheckBox = new JCheckBox(REBUILD_CHECKBOX_TITLE);
-        contentBox.add(rebuildCheckBox);
-
         JScrollPane scrollArea = new JScrollPane(projectSettingsPanel);
         scrollArea.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         scrollArea.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollArea.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollArea.setAlignmentX(Container.LEFT_ALIGNMENT);
         contentBox.add(scrollArea);
+
+        rebuildCheckBox = new JCheckBox(REBUILD_CHECKBOX_TITLE);
+        contentBox.add(rebuildCheckBox);
+
+        openProjectCheckBox = new JCheckBox(OPEN_PROJECT_CHECKBOX_TITLE);
+        contentBox.add(openProjectCheckBox);
+
+        exitOnSuccessCheckBox = new JCheckBox(EXIT_ON_SUCCESS_CHECKBOX_TITLE);
+        contentBox.add(exitOnSuccessCheckBox);
 
         ButtonPanel buttonPanel = new ButtonPanel(3);
         generateButton = buttonPanel.addButton(GENERATE_BUTTON_TITLE, () -> generate(false));
@@ -207,10 +220,7 @@ public class MainDialog extends JDialog
     /** Loads project file from disk and re-initializes the GUI. */
     private void reloadProject()
     {
-        project = null;
-        projectSettingsPanel.removeAll();
-        generateButton.setEnabled(false);
-        buildButton.setEnabled(false);
+        unloadProject();
 
         if (!projectDirectory.exists()) {
             displayError(DIRECTORY_DOES_NOT_EXIST_MESSAGE, null);
@@ -229,6 +239,13 @@ public class MainDialog extends JDialog
 
         try {
             project = ProjectReader.read(projectDirectory);
+            projectBuilder = new ProjectBuilder(project);
+            projectConfigurationPanel = new ProjectConfigurationPanel(projectBuilder);
+            Box projectConfigurationContainer = Box.createVerticalBox();
+            projectConfigurationContainer.add(projectConfigurationPanel);
+            projectConfigurationContainer.add(Box.createVerticalGlue());
+            projectSettingsPanel.add(projectConfigurationContainer, BorderLayout.PAGE_START);
+            projectSettingsPanel.add(new JPanel(), BorderLayout.CENTER);
         } catch (Throwable t) {
             displayError(UNABLE_TO_LOAD_PROJECT_MESSAGE, t);
             return;
@@ -237,8 +254,32 @@ public class MainDialog extends JDialog
         preferences.put(PREF_PROJECT_DIRECTORY, projectDirectory.toString());
         try { preferences.sync(); } catch (BackingStoreException e) { e.printStackTrace(); }
 
-        generateButton.setEnabled(true);
         buildButton.setEnabled(true);
+        generateButton.setEnabled(true);
+
+        pack();
+    }
+
+    /** Unloads the currently loaded project. */
+    private void unloadProject()
+    {
+        if (projectBuilder != null) {
+            projectBuilder.database.close();
+            projectBuilder = null;
+        }
+
+        if (projectConfigurationPanel != null) {
+            Container container = projectConfigurationPanel.getParent();
+            if (container != null)
+                container.remove(projectConfigurationPanel);
+            projectConfigurationPanel = null;
+        }
+
+        projectSettingsPanel.removeAll();
+        buildButton.setEnabled(false);
+        generateButton.setEnabled(false);
+
+        project = null;
     }
 
     /**
@@ -248,9 +289,7 @@ public class MainDialog extends JDialog
      */
     private void displayError(String message, final Throwable exception)
     {
-        projectSettingsPanel.removeAll();
-        generateButton.setEnabled(false);
-        buildButton.setEnabled(false);
+        unloadProject();
 
         JLabel errorLabel = new JLabel(message);
         errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -298,7 +337,7 @@ public class MainDialog extends JDialog
             projectSettingsPanel.add(errorContainer, BorderLayout.CENTER);
         }
 
-        validate();
+        pack();
     }
 
     /** Displays the main dialog. */

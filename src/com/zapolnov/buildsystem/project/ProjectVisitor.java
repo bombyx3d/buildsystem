@@ -19,32 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.generators.dummy;
+package com.zapolnov.buildsystem.project;
 
-import com.zapolnov.zbt.generators.Generator;
-import com.zapolnov.zbt.project.Project;
-import com.zapolnov.zbt.utility.CommandInvoker;
+import com.zapolnov.buildsystem.project.directives.DefineDirective;
+import com.zapolnov.buildsystem.project.directives.EnumerationDirective;
+import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
+import com.zapolnov.buildsystem.project.directives.ImportDirective;
+import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
+import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
 
-public class DummyGenerator extends Generator
+/** Base class for project scope directive enumerations. */
+public abstract class ProjectVisitor
 {
-    public static final String ID = "dummy";
-    public static final String NAME = "Dummy";
-
-    public DummyGenerator()
-    {
-    }
-
-    @Override public String id()
-    {
-        return ID;
-    }
-
-    @Override public String name()
-    {
-        return NAME;
-    }
-
-    @Override public void generate(final Project project, CommandInvoker.Printer printer, boolean build)
-    {
-    }
+    public void visitImport(ImportDirective directive) {}
+    public void visitTargetName(TargetNameDirective directive) {}
+    public void visitDefine(DefineDirective directive) {}
+    public void visitEnumeration(EnumerationDirective directive) {}
+    public void visitHeaderPaths(HeaderPathsDirective directive) {}
+    public void visitSourceDirectories(SourceDirectoriesDirective directive) {}
 }

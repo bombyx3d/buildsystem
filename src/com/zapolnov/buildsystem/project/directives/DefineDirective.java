@@ -22,6 +22,7 @@
 package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,5 +49,10 @@ public final class DefineDirective extends ProjectDirective
     public List<String> defines()
     {
         return Collections.unmodifiableList(defines);
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        visitor.visitDefine(this);
     }
 }

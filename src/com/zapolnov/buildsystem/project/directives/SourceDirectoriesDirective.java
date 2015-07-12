@@ -22,6 +22,7 @@
 package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
@@ -66,5 +67,10 @@ public final class SourceDirectoriesDirective extends ProjectDirective
         for (File directory : sourceDirectories)
             sourceFiles.addAll(FileUtils.recursivelyEnumerateFilesInDirectory(directory));
         return sourceFiles;
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        visitor.visitSourceDirectories(this);
     }
 }
