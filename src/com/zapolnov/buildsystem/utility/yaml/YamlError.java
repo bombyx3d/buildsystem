@@ -43,7 +43,18 @@ public class YamlError extends RuntimeException
      */
     public YamlError(YamlValue value, Throwable exception)
     {
-        super(makeMessage(value, null, exception));
+        super(makeMessage(value, null, exception), exception);
+    }
+
+    /**
+     * Constructor.
+     * @param value Value that caused the error.
+     * @param message Error message.
+     * @param exception Exception that caused the error.
+     */
+    public YamlError(YamlValue value, String message, Throwable exception)
+    {
+        super(makeMessage(value, message, exception), exception);
     }
 
     /**
@@ -58,6 +69,8 @@ public class YamlError extends RuntimeException
             message = StringUtils.getShortExceptionMessage(exception);
 
         if (value == null) {
+            if (exception instanceof Error)
+                throw (Error)exception;
             if (exception instanceof RuntimeException)
                 throw (RuntimeException)exception;
             throw new RuntimeException(message, exception);

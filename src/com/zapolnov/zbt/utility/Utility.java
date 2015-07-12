@@ -176,28 +176,6 @@ public final class Utility
         }
     }
 
-    public static List<File> recursivelyEnumerateFilesInDirectory(File directory)
-    {
-        final List<File> files = new ArrayList<>();
-        System.out.println(String.format("Enumerating files in source directory \"%s\".", directory));
-
-        try {
-            final Path path = Paths.get(directory.getAbsolutePath());
-
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-                @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    files.add(file.toFile().getCanonicalFile());
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            String message = String.format("Unable to enumerate files in directory \"%s\".", directory.getAbsolutePath());
-            throw new RuntimeException(message, e);
-        }
-
-        return files;
-    }
-
     public static String getJavaExecutable()
     {
         String javaHome = System.getProperty("java.home");

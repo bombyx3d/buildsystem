@@ -21,7 +21,6 @@
  */
 package com.zapolnov.zbt.project.parser.directives;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.buildsystem.project.ProjectDirective;
 
 public final class CMakeUseOpenGLDirective extends ProjectDirective
@@ -36,10 +35,5 @@ public final class CMakeUseOpenGLDirective extends ProjectDirective
     public final boolean value()
     {
         return value;
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitCMakeUseOpenGLDirective(this);
     }
 }

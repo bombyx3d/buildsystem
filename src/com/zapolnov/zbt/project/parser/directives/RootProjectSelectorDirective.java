@@ -22,7 +22,6 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.buildsystem.project.ProjectScope;
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.buildsystem.project.ProjectDirective;
 
 public final class RootProjectSelectorDirective extends ProjectDirective
@@ -39,11 +38,6 @@ public final class RootProjectSelectorDirective extends ProjectDirective
     public ProjectScope innerDirectives()
     {
         return innerDirectives;
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitRootProjectSelector(this);
     }
 }
 

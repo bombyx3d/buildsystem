@@ -26,9 +26,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,6 +119,34 @@ public class FileUtils
                 stringBuilder.append(buffer, 0, length);
         }
         return stringBuilder.toString();
+    }
+
+
+    /**
+     * Recursively enumerates all files in the specified directory and it's subdirectories.
+     * @param directory Path to the directory.
+     * @return List of files.
+     */
+    public static List<File> recursivelyEnumerateFilesInDirectory(File directory)
+    {
+        final List<File> files = new ArrayList<>();
+        Log.debug(String.format("Enumerating files in source directory \"%s\".", directory));
+
+        try {
+            final Path path = Paths.get(directory.getAbsolutePath());
+
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    files.add(file.toFile().getCanonicalFile());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            String msg = String.format("Unable to enumerate files in directory \"%s\".", directory.getAbsolutePath());
+            throw new RuntimeException(msg, e);
+        }
+
+        return files;
     }
 
     /**

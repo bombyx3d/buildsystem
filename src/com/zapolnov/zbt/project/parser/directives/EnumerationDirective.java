@@ -22,7 +22,6 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,10 +63,5 @@ public final class EnumerationDirective extends ProjectDirective
     public Map<String, String> values()
     {
         return Collections.unmodifiableMap(values);
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitEnumeration(this);
     }
 }

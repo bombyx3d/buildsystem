@@ -19,42 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project.directives;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.buildsystem.project.ProjectDirective;
-import com.zapolnov.zbt.utility.Utility;
+import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ThirdPartySourceDirectoriesDirective extends ProjectDirective
+/** A 'source_directories' or '3rdparty_source_directories' directive in the project file. */
+public final class SourceDirectoriesDirective extends ProjectDirective
 {
+    /** List of directories with source files. */
     private final List<File> sourceDirectories;
+    /** Set to `true` if this directive is a '3rdparty_source_directories' directive. */
+    public final boolean thirdparty;
 
-    public ThirdPartySourceDirectoriesDirective(List<File> sourceDirectories)
+    /**
+     * Constructor.
+     * @param sourceDirectories List of directories with source files.
+     * @param thirdparty Set to `true` if this directive is a '3rdparty_source_directories' directive.
+     */
+    public SourceDirectoriesDirective(List<File> sourceDirectories, boolean thirdparty)
     {
         this.sourceDirectories = new ArrayList<>(sourceDirectories);
+        this.thirdparty = thirdparty;
     }
 
+    /**
+     * Retrieves a list of directories with source files.
+     * @return List of directories with source files.
+     */
     public List<File> sourceDirectories()
     {
         return Collections.unmodifiableList(sourceDirectories);
     }
 
+    /**
+     * Enumerates all source files in all directories provided in this directive.
+     * @return List of source files.
+     */
     public List<File> sourceFiles()
     {
         List<File> sourceFiles = new ArrayList<>();
-        for (File directory : sourceDirectories) {
-            List<File> directoryFiles = Utility.recursivelyEnumerateFilesInDirectory(directory);
-            sourceFiles.addAll(directoryFiles);
-        }
+        for (File directory : sourceDirectories)
+            sourceFiles.addAll(FileUtils.recursivelyEnumerateFilesInDirectory(directory));
         return sourceFiles;
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitThirdPartySourceDirectories(this);
     }
 }

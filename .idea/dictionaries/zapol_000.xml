@@ -17,6 +17,7 @@
       <w>pathext</w>
       <w>rdparty</w>
       <w>stacktraces</w>
+      <w>thirdparty</w>
       <w>unistd</w>
       <w>wconversion</w>
       <w>wextra</w>

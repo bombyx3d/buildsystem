@@ -19,30 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.plugins;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
-import com.zapolnov.buildsystem.project.ProjectDirective;
-import java.util.regex.Pattern;
+import com.zapolnov.buildsystem.project.ProjectReader;
+import java.util.HashMap;
+import java.util.Map;
 
-public final class TargetNameDirective extends ProjectDirective
+/** Base class for plugins. */
+public abstract class Plugin
 {
-    public static Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
-
-    private final String name;
-
-    public TargetNameDirective(String name)
+    /**
+     * Retrieves a map of custom directives supported by this plugin.
+     * @return Map of directives.
+     */
+    public Map<String, ProjectReader.DirectiveParser> customDirectives()
     {
-        this.name = name;
-    }
-
-    public String name()
-    {
-        return name;
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitTargetName(this);
+        return new HashMap<>();
     }
 }

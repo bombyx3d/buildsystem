@@ -19,31 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.zbt.project.parser.directives;
+package com.zapolnov.buildsystem.project.directives;
 
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.buildsystem.project.ProjectDirective;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.regex.Pattern;
 
-public final class HeaderPathsDirective extends ProjectDirective
+/** A 'target-name' directive in the project file. */
+public final class TargetNameDirective extends ProjectDirective
 {
-    private final List<File> headerPaths;
+    /** Pattern for valid target names. */
+    public static Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
 
-    public HeaderPathsDirective(List<File> headerPaths)
-    {
-        this.headerPaths = new ArrayList<>(headerPaths);
-    }
+    /** Target name. */
+    public final String name;
 
-    public List<File> headerPaths()
+    /**
+     * Constructor.
+     * @param name Target name.
+     */
+    public TargetNameDirective(String name)
     {
-        return Collections.unmodifiableList(headerPaths);
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitHeaderPaths(this);
+        this.name = name;
     }
 }

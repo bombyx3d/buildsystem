@@ -21,6 +21,7 @@
  */
 package com.zapolnov.buildsystem.project;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,8 @@ public class ProjectScope
 {
     /** Parent scope or `null`. */
     public final ProjectScope parent;
+    /** Base directory of this scope. */
+    public final File directory;
 
     /** Set to `true` if this scope should share symbols with a parent scope. */
     private final boolean transparent;
@@ -41,11 +44,13 @@ public class ProjectScope
 
     /**
      * Constructor.
+     * @param directory Base directory of this scope.
      * @param parent Parent scope.
      * @param transparent Set to `true` if this scope should share symbols with a parent scope.
      */
-    public ProjectScope(ProjectScope parent, boolean transparent)
+    public ProjectScope(File directory, ProjectScope parent, boolean transparent)
     {
+        this.directory = directory;
         this.parent = parent;
         this.transparent = transparent;
     }

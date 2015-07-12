@@ -22,7 +22,6 @@
 package com.zapolnov.zbt.project.parser.directives;
 
 import com.zapolnov.buildsystem.project.ProjectScope;
-import com.zapolnov.zbt.project.parser.AbstractProjectDirectiveVisitor;
 import com.zapolnov.buildsystem.project.ProjectDirective;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,11 +41,6 @@ public final class GeneratorSelectorDirective extends ProjectDirective
     public Map<String, ProjectScope> mapping()
     {
         return Collections.unmodifiableMap(mapping);
-    }
-
-    /*@Override*/ public void visit(AbstractProjectDirectiveVisitor visitor)
-    {
-        visitor.visitGeneratorSelector(this);
     }
 }
 

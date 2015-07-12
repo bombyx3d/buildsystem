@@ -30,8 +30,6 @@ public class Project
     /** Name of a project file. */
     public static final String PROJECT_FILE_NAME = "project.yml";
 
-    /** Project file. */
-    public final File file;
     /** Project directory. */
     public final File directory;
     /** Root scope of the project. */
@@ -39,12 +37,11 @@ public class Project
 
     /**
      * Constructor.
-     * @param file Project file.
+     * @param directory Project directory.
      */
-    public Project(File file)
+    public Project(File directory)
     {
-        this.file = FileUtils.getCanonicalFile(file);
-        this.directory = this.file.getParentFile();
-        this.scope = new ProjectScope(null, false);
+        this.directory = FileUtils.getCanonicalFile(directory);
+        this.scope = new ProjectScope(this.directory, null, false);
     }
 }

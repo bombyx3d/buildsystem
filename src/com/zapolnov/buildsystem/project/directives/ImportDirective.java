@@ -23,24 +23,19 @@ package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.project.ProjectDirective;
 import com.zapolnov.buildsystem.project.ProjectScope;
-import java.io.File;
 
 /** An 'import' directive in the project file. */
 public final class ImportDirective extends ProjectDirective
 {
-    /** Path to the imported module. */
-    public final File path;
     /** Scope of the imported project. */
     public final ProjectScope scope;
 
     /**
      * Constructor.
-     * @param path Path to the imported module.
      * @param scope Scope of the module.
      */
-    public ImportDirective(File path, ProjectScope scope)
+    public ImportDirective(ProjectScope scope)
     {
-        this.path = path;
         this.scope = scope;
     }
 }
