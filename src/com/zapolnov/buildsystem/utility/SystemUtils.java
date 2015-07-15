@@ -19,24 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.project;
+package com.zapolnov.buildsystem.utility;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
-
-/** Base class for directives in the project file. */
-public abstract class ProjectDirective
+/** Operating system utilities. */
+public final class SystemUtils
 {
-    /**
-     * Performs build actions implemented by the directive.
-     * @param projectBuilder Project builder.
-     */
-    @SuppressWarnings("unused") public void build(ProjectBuilder projectBuilder) throws Throwable
-    {
-    }
+    /** A name of the operating system with are running under. */
+    public static final String OS_NAME = System.getProperty("os.name");
+    /** Set to `true` if we are running under Linux-based operating system. */
+    public static final boolean IS_LINUX =
+        StringUtils.startsWith(OS_NAME, "Linux") || StringUtils.startsWith(OS_NAME, "LINUX");
+    /** Set to `true` if we are running under Apple OS X. */
+    public static final boolean IS_OSX = StringUtils.startsWith(OS_NAME, "Mac OS");
+    /** Set to `true` if we are running under Microsoft Windows. */
+    public static final boolean IS_WINDOWS = StringUtils.startsWith(OS_NAME, "Windows");
 
-    /**
-     * Visits this directive with the specified visitor.
-     * @param visitor Visitor.
-     */
-    public abstract void visit(ProjectVisitor visitor);
+    private SystemUtils() {}
+    static { new SystemUtils(); }
 }

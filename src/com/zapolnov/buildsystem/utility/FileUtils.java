@@ -21,8 +21,8 @@
  */
 package com.zapolnov.buildsystem.utility;
 
-import com.zapolnov.zbt.utility.Utility;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,7 +93,7 @@ public class FileUtils
      */
     public static void makeDirectoryHidden(File directory)
     {
-        if (Utility.IS_WINDOWS) {
+        if (SystemUtils.IS_WINDOWS) {
             String path = FileUtils.getCanonicalPath(directory);
             try {
                 Files.setAttribute(Paths.get(path), "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
@@ -101,6 +101,25 @@ public class FileUtils
                 throw new RuntimeException(
                     String.format("Unable to apply 'hidden' attribute to directory \"%s\".", path), e);
             }
+        }
+    }
+
+    /**
+     * Loads the specified file into a byte array.
+     * @param file File to load.
+     * @return Byte array with file data.
+     */
+    public static byte[] byteArrayFromFile(File file) throws IOException
+    {
+        try (FileInputStream stream = new FileInputStream(file)) {
+            int fileLength = (int)file.length();
+            byte[] buffer = new byte[fileLength];
+            int bytesRead = stream.read(buffer, 0, fileLength);
+            if (bytesRead != fileLength) {
+                throw new RuntimeException(String.format("Incomplete read in file \"%s\".",
+                    FileUtils.getCanonicalPath(file)));
+            }
+            return buffer;
         }
     }
 

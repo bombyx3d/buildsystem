@@ -33,11 +33,6 @@ public class Database
     /** File name for the database. */
     public final static String FILE_NAME = "database";
 
-    public static final String OPTION_GENERATOR_NAME = "Generator";
-    public static final String OPTION_CMAKE_BUILD_TYPE = "CMakeBuildType";
-    public static final String OPTION_CMAKE_BUILD_TOOL = "CMakeBuildTool";
-    public static final String PROJECT_OPTION_FORMAT = "ProjectOption:%s";
-
     private final static String INPUT_FILES_TABLE = "InputFiles";
     private final static String INPUT_FILES_OPTIONS_HASHES_TABLE = "InputFilesOptionsHashes";
     private final static String OUTPUT_FILES_TABLE = "OutputFiles";

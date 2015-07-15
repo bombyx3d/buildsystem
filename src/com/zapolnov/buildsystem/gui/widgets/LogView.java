@@ -60,31 +60,31 @@ public class LogView extends JScrollPane implements Log.Printer
         setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         textPane = (JTextPane)getViewport().getView();
-        textPane.setBackground(Colors.TERMINAL_BLACK);
+        textPane.setBackground(Colors.BLACK);
         textPane.setEditable(false);
 
         DefaultCaret caret = (DefaultCaret)textPane.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
         errorStyle = textPane.addStyle("Error", null);
-        StyleConstants.setBackground(errorStyle, Colors.TERMINAL_BLACK);
-        StyleConstants.setForeground(errorStyle, Colors.TERMINAL_RED);
+        StyleConstants.setBackground(errorStyle, Colors.BLACK);
+        StyleConstants.setForeground(errorStyle, Colors.RED);
 
         warningStyle = textPane.addStyle("Warning", null);
-        StyleConstants.setBackground(warningStyle, Colors.TERMINAL_BLACK);
-        StyleConstants.setForeground(warningStyle, Colors.TERMINAL_YELLOW);
+        StyleConstants.setBackground(warningStyle, Colors.BLACK);
+        StyleConstants.setForeground(warningStyle, Colors.YELLOW);
 
         infoStyle = textPane.addStyle("Information", null);
-        StyleConstants.setBackground(infoStyle, Colors.TERMINAL_BLACK);
-        StyleConstants.setForeground(infoStyle, Colors.TERMINAL_WHITE);
+        StyleConstants.setBackground(infoStyle, Colors.BLACK);
+        StyleConstants.setForeground(infoStyle, Colors.WHITE);
 
         debugStyle = textPane.addStyle("Debug", null);
-        StyleConstants.setBackground(debugStyle, Colors.TERMINAL_BLACK);
-        StyleConstants.setForeground(debugStyle, Colors.TERMINAL_GRAY);
+        StyleConstants.setBackground(debugStyle, Colors.BLACK);
+        StyleConstants.setForeground(debugStyle, Colors.GRAY);
 
         traceStyle = textPane.addStyle("Trace", null);
-        StyleConstants.setBackground(traceStyle, Colors.TERMINAL_BLACK);
-        StyleConstants.setForeground(traceStyle, Colors.TERMINAL_DARK_GRAY);
+        StyleConstants.setBackground(traceStyle, Colors.BLACK);
+        StyleConstants.setForeground(traceStyle, Colors.DARK_GRAY);
     }
 
     @Override public void printLogMessage(LogLevel level, String message)

@@ -19,24 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.project;
+package com.zapolnov.buildsystem.gui.widgets;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
+import javax.swing.JPanel;
 
-/** Base class for directives in the project file. */
-public abstract class ProjectDirective
+/** An UI panel with project settings. */
+public final class ProjectSettingsPanel extends JPanel
 {
+    /** Project builder. */
+    private final ProjectBuilder projectBuilder;
+
     /**
-     * Performs build actions implemented by the directive.
+     * Constructor.
      * @param projectBuilder Project builder.
      */
-    @SuppressWarnings("unused") public void build(ProjectBuilder projectBuilder) throws Throwable
+    public ProjectSettingsPanel(ProjectBuilder projectBuilder)
     {
+        this.projectBuilder = projectBuilder;
     }
-
-    /**
-     * Visits this directive with the specified visitor.
-     * @param visitor Visitor.
-     */
-    public abstract void visit(ProjectVisitor visitor);
 }

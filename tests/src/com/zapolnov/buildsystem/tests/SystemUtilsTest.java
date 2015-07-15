@@ -19,24 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.project;
+package com.zapolnov.buildsystem.tests;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
+import com.zapolnov.buildsystem.utility.SystemUtils;
+import org.junit.Assert;
+import org.junit.Test;
 
-/** Base class for directives in the project file. */
-public abstract class ProjectDirective
+public class SystemUtilsTest extends Assert
 {
-    /**
-     * Performs build actions implemented by the directive.
-     * @param projectBuilder Project builder.
-     */
-    @SuppressWarnings("unused") public void build(ProjectBuilder projectBuilder) throws Throwable
+    @Test public void test()
     {
+        assertNotNull(SystemUtils.OS_NAME);
+        assertTrue(
+            (!SystemUtils.IS_WINDOWS && !SystemUtils.IS_LINUX && !SystemUtils.IS_OSX) ||
+            ( SystemUtils.IS_WINDOWS && !SystemUtils.IS_LINUX && !SystemUtils.IS_OSX) ||
+            (!SystemUtils.IS_WINDOWS &&  SystemUtils.IS_LINUX && !SystemUtils.IS_OSX) ||
+            (!SystemUtils.IS_WINDOWS && !SystemUtils.IS_LINUX &&  SystemUtils.IS_OSX)
+        );
     }
-
-    /**
-     * Visits this directive with the specified visitor.
-     * @param visitor Visitor.
-     */
-    public abstract void visit(ProjectVisitor visitor);
 }

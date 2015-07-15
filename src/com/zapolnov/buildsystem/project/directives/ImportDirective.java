@@ -21,6 +21,7 @@
  */
 package com.zapolnov.buildsystem.project.directives;
 
+import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.project.ProjectDirective;
 import com.zapolnov.buildsystem.project.ProjectScope;
 import com.zapolnov.buildsystem.project.ProjectVisitor;
@@ -38,6 +39,11 @@ public final class ImportDirective extends ProjectDirective
     public ImportDirective(ProjectScope scope)
     {
         this.scope = scope;
+    }
+
+    @Override public void build(ProjectBuilder projectBuilder) throws Throwable
+    {
+        scope.build(projectBuilder);
     }
 
     @Override public void visit(ProjectVisitor visitor)

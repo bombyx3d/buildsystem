@@ -21,11 +21,10 @@
  */
 package com.zapolnov.buildsystem.project;
 
+import com.zapolnov.buildsystem.build.ProjectBuilder;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /** An individual namespace of a project. */
 public class ProjectScope
@@ -34,13 +33,11 @@ public class ProjectScope
     public final ProjectScope parent;
     /** Base directory of this scope. */
     public final File directory;
-
     /** Set to `true` if this scope should share symbols with a parent scope. */
-    private final boolean transparent;
+    public final boolean transparent;
+
     /** List of directives in this scope. */
     private final List<ProjectDirective> directives = new ArrayList<>();
-    /** Set of enumeration identifiers used by directives in this scope. */
-    private final Set<String> enumerationIDs = new HashSet<>();
 
     /**
      * Constructor.
@@ -56,32 +53,22 @@ public class ProjectScope
     }
 
     /**
-     * Checks whether the specified enumeration identifier is unused and reserves it if it does.
-     * @return `true` if identifier has been successfully reserved or `false` if it has already been reserved.
-     */
-    public boolean reserveEnumerationID(String id)
-    {
-        for (ProjectScope scope = this; scope != null; scope = scope.parent) {
-            if (scope.enumerationIDs.contains(id))
-                return false;
-        }
-
-        for (ProjectScope scope = this; scope != null; scope = scope.parent) {
-            scope.enumerationIDs.add(id);
-            if (!scope.transparent)
-                break;
-        }
-
-        return true;
-    }
-
-    /**
      * Adds directive to this scope.
      * @param directive Directive to add.
      */
     public void addDirective(ProjectDirective directive)
     {
         directives.add(directive);
+    }
+
+    /**
+     * Performs build actions implemented by directives in this scope.
+     * @param projectBuilder Project builder.
+     */
+    public void build(ProjectBuilder projectBuilder) throws Throwable
+    {
+        for (ProjectDirective directive : directives)
+            directive.build(projectBuilder);
     }
 
     /**

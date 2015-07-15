@@ -25,11 +25,12 @@ import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.gui.widgets.ButtonPanel;
 import com.zapolnov.buildsystem.gui.widgets.FileDialog;
 import com.zapolnov.buildsystem.gui.widgets.InvisibleFrame;
-import com.zapolnov.buildsystem.gui.widgets.ProjectConfigurationPanel;
+import com.zapolnov.buildsystem.gui.widgets.ProjectSettingsPanel;
 import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.project.ProjectReader;
 import com.zapolnov.buildsystem.utility.Colors;
 import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.utility.Log;
 import com.zapolnov.buildsystem.utility.StringUtils;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -41,6 +42,8 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
@@ -57,9 +60,12 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /** Main dialog of the GUI application. */
 public class MainDialog extends JDialog
@@ -70,7 +76,6 @@ public class MainDialog extends JDialog
     public static final String PROJECT_PATH_LABEL = "Project path:";
     public static final String BROWSE_BUTTON_TITLE = "...";
     public static final String GENERATE_BUTTON_TITLE = "Generate";
-    public static final String BUILD_BUTTON_TITLE = "Build";
     public static final String CLOSE_BUTTON_TITLE = "Exit";
     public static final String REBUILD_CHECKBOX_TITLE = "Perform a full (non-incremental) run";
     public static final String OPEN_PROJECT_CHECKBOX_TITLE = "Open project after successful completion";
@@ -88,16 +93,15 @@ public class MainDialog extends JDialog
 
     private final Preferences preferences;
     private final JTextField projectPathEdit;
-    private final JPanel projectSettingsPanel;
+    private final JPanel projectSettingsContainer;
     private final JCheckBox rebuildCheckBox;
     private final JCheckBox openProjectCheckBox;
     private final JCheckBox exitOnSuccessCheckBox;
     private final JButton generateButton;
-    private final JButton buildButton;
     private File projectDirectory;
     private Project project;
     private ProjectBuilder projectBuilder;
-    private ProjectConfigurationPanel projectConfigurationPanel;
+    private ProjectSettingsPanel projectSettingsPanel;
 
     /**
      * Constructor.
@@ -165,10 +169,10 @@ public class MainDialog extends JDialog
         projectBrowseButton.addActionListener(e -> browseProject());
         projectPathPanel.add(projectBrowseButton);
 
-        projectSettingsPanel = new JPanel();
-        projectSettingsPanel.setLayout(new BorderLayout());
+        projectSettingsContainer = new JPanel();
+        projectSettingsContainer.setLayout(new BorderLayout());
 
-        JScrollPane scrollArea = new JScrollPane(projectSettingsPanel);
+        JScrollPane scrollArea = new JScrollPane(projectSettingsContainer);
         scrollArea.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         scrollArea.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollArea.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -185,8 +189,7 @@ public class MainDialog extends JDialog
         contentBox.add(exitOnSuccessCheckBox);
 
         ButtonPanel buttonPanel = new ButtonPanel(3);
-        generateButton = buttonPanel.addButton(GENERATE_BUTTON_TITLE, () -> generate(false));
-        buildButton = buttonPanel.addButton(BUILD_BUTTON_TITLE, () -> generate(true));
+        generateButton = buttonPanel.addButton(GENERATE_BUTTON_TITLE, () -> generate());
         buttonPanel.addButton(CLOSE_BUTTON_TITLE, this::dispose);
         add(buttonPanel, BorderLayout.PAGE_END);
 
@@ -199,21 +202,40 @@ public class MainDialog extends JDialog
     /** Displays the "Browse project" dialog. */
     private void browseProject()
     {
-        File directory = FileDialog.chooseDirectory(BROWSE_DIALOG_TITLE, new File(projectPathEdit.getText()));
-        if (directory != null) {
-            projectDirectory = directory;
+        List<FileFilter> filters = new ArrayList<>();
+        filters.add(new FileNameExtensionFilter("Bombyx3D project file", "yml"));
+
+        File directory = new File(projectPathEdit.getText());
+        File selectedFile = FileDialog.chooseOpenFile(this, BROWSE_DIALOG_TITLE, directory, filters);
+        if (selectedFile != null) {
+            projectDirectory = selectedFile.getParentFile();
             projectPathEdit.setText(projectDirectory.getPath());
             projectPathEdit.selectAll();
         }
     }
 
-    /**
-     * Generates the project.
-     * @param build Set to `true` to also build the project.
-     */
-    private void generate(boolean build)
+    /** Generates the project. */
+    private void generate()
     {
         BuildDialog buildDialog = new BuildDialog(this);
+
+        new Thread(() -> {
+            try {
+                projectBuilder.run();
+
+                Log.info("**** SUCCESSFUL COMPLETION ***");
+                SwingUtilities.invokeAndWait(() -> buildDialog.setCloseButtonEnabled(true));
+            } catch (Throwable t) {
+                Log.error(StringUtils.getDetailedExceptionMessage(t));
+                SwingUtilities.invokeLater(() -> {
+                    buildDialog.setCloseButtonEnabled(true);
+                    FatalErrorDialog errorDialog = new FatalErrorDialog(buildDialog, t);
+                    errorDialog.setVisible(true);
+                    buildDialog.setVisible(false);
+                });
+            }
+        }).start();
+
         buildDialog.setVisible(true);
     }
 
@@ -240,12 +262,12 @@ public class MainDialog extends JDialog
         try {
             project = ProjectReader.read(projectDirectory);
             projectBuilder = new ProjectBuilder(project);
-            projectConfigurationPanel = new ProjectConfigurationPanel(projectBuilder);
+            projectSettingsPanel = new ProjectSettingsPanel(projectBuilder);
             Box projectConfigurationContainer = Box.createVerticalBox();
-            projectConfigurationContainer.add(projectConfigurationPanel);
+            projectConfigurationContainer.add(projectSettingsPanel);
             projectConfigurationContainer.add(Box.createVerticalGlue());
-            projectSettingsPanel.add(projectConfigurationContainer, BorderLayout.PAGE_START);
-            projectSettingsPanel.add(new JPanel(), BorderLayout.CENTER);
+            projectSettingsContainer.add(projectConfigurationContainer, BorderLayout.PAGE_START);
+            projectSettingsContainer.add(new JPanel(), BorderLayout.CENTER);
         } catch (Throwable t) {
             displayError(UNABLE_TO_LOAD_PROJECT_MESSAGE, t);
             return;
@@ -254,7 +276,6 @@ public class MainDialog extends JDialog
         preferences.put(PREF_PROJECT_DIRECTORY, projectDirectory.toString());
         try { preferences.sync(); } catch (BackingStoreException e) { e.printStackTrace(); }
 
-        buildButton.setEnabled(true);
         generateButton.setEnabled(true);
 
         pack();
@@ -268,15 +289,14 @@ public class MainDialog extends JDialog
             projectBuilder = null;
         }
 
-        if (projectConfigurationPanel != null) {
-            Container container = projectConfigurationPanel.getParent();
+        if (projectSettingsPanel != null) {
+            Container container = projectSettingsPanel.getParent();
             if (container != null)
-                container.remove(projectConfigurationPanel);
-            projectConfigurationPanel = null;
+                container.remove(projectSettingsPanel);
+            projectSettingsPanel = null;
         }
 
-        projectSettingsPanel.removeAll();
-        buildButton.setEnabled(false);
+        projectSettingsContainer.removeAll();
         generateButton.setEnabled(false);
 
         project = null;
@@ -293,10 +313,10 @@ public class MainDialog extends JDialog
 
         JLabel errorLabel = new JLabel(message);
         errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        errorLabel.setForeground(Colors.TERMINAL_RED);
+        errorLabel.setForeground(Colors.RED);
 
         if (exception == null)
-            projectSettingsPanel.add(errorLabel, BorderLayout.CENTER);
+            projectSettingsContainer.add(errorLabel, BorderLayout.CENTER);
         else {
             System.err.println(StringUtils.getDetailedExceptionMessage(exception));
 
@@ -312,7 +332,7 @@ public class MainDialog extends JDialog
             messageText.setEditable(false);
             messageText.setAlignmentX(Container.CENTER_ALIGNMENT);
             messageText.setBackground(UIManager.getColor("Label.background"));
-            messageText.setForeground(Colors.TERMINAL_RED);
+            messageText.setForeground(Colors.RED);
 
             JPanel messageTextPanel = new JPanel();
             messageTextPanel.add(messageText);
@@ -334,7 +354,7 @@ public class MainDialog extends JDialog
             JPanel errorContainer = new JPanel(new GridBagLayout());
             errorContainer.add(errorPanel);
 
-            projectSettingsPanel.add(errorContainer, BorderLayout.CENTER);
+            projectSettingsContainer.add(errorContainer, BorderLayout.CENTER);
         }
 
         pack();

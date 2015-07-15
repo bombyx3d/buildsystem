@@ -19,24 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.project;
+package com.zapolnov.buildsystem.tests;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
+import com.zapolnov.buildsystem.utility.Colors;
+import org.junit.Assert;
+import org.junit.Test;
 
-/** Base class for directives in the project file. */
-public abstract class ProjectDirective
+public class ColorsTest extends Assert
 {
-    /**
-     * Performs build actions implemented by the directive.
-     * @param projectBuilder Project builder.
-     */
-    @SuppressWarnings("unused") public void build(ProjectBuilder projectBuilder) throws Throwable
+    @Test public void test()
     {
+        assertNotNull(Colors.BLACK);
+        assertNotNull(Colors.BLUE);
+        assertNotNull(Colors.RED);
+        assertNotNull(Colors.YELLOW);
+        assertNotNull(Colors.GREEN);
+        assertNotNull(Colors.CYAN);
+        assertNotNull(Colors.MAGENTA);
+        assertNotNull(Colors.GRAY);
+        assertNotNull(Colors.DARK_GRAY);
+        assertNotNull(Colors.WHITE);
     }
-
-    /**
-     * Visits this directive with the specified visitor.
-     * @param visitor Visitor.
-     */
-    public abstract void visit(ProjectVisitor visitor);
 }

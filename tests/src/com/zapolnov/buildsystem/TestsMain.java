@@ -21,10 +21,14 @@
  */
 package com.zapolnov.buildsystem;
 
+import com.zapolnov.buildsystem.tests.ColorsTest;
 import com.zapolnov.buildsystem.tests.DatabaseTests;
 import com.zapolnov.buildsystem.tests.FileBuilderTests;
+import com.zapolnov.buildsystem.tests.GeneratorTest;
 import com.zapolnov.buildsystem.tests.LogTests;
+import com.zapolnov.buildsystem.tests.PluginTest;
 import com.zapolnov.buildsystem.tests.StringUtilsTest;
+import com.zapolnov.buildsystem.tests.SystemUtilsTest;
 import com.zapolnov.buildsystem.tests.TemplateTests;
 import com.zapolnov.buildsystem.tests.YamlParserTests;
 import org.junit.internal.TextListener;
@@ -49,7 +53,11 @@ public final class TestsMain
             DatabaseTests.class,
             FileBuilderTests.class,
             TemplateTests.class,
-            StringUtilsTest.class
+            StringUtilsTest.class,
+            PluginTest.class,
+            ColorsTest.class,
+            SystemUtilsTest.class,
+            GeneratorTest.class
         );
 
         System.exit(!result.wasSuccessful() ? 1 : 0);

@@ -47,12 +47,9 @@ public class FatalErrorDialog extends JDialog
     public static final String DETAILS_BUTTON_TITLE_1 = "Show Details >>";
     public static final String DETAILS_BUTTON_TITLE_2 = "<< Hide Details";
 
-    public static final int TEXT_AREA_MAXIMUM_HEIGHT = 500;
-
     private JPanel contentPanel;
     private JPanel buttonPanel;
     private JPanel buttonContainer;
-    private JTextPane messageText;
     private JPanel messagePanel;
     private JScrollPane scrollArea;
     private JButton closeButton;
@@ -98,7 +95,7 @@ public class FatalErrorDialog extends JDialog
         messagePanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
         contentPanel.add(messagePanel, BorderLayout.CENTER);
 
-        messageText = new JTextPane();
+        JTextPane messageText = new JTextPane();
         messageText.setText(shortMessage);
         messageText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         messageText.setEditable(false);

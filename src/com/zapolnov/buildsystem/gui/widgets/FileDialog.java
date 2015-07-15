@@ -21,29 +21,67 @@
  */
 package com.zapolnov.buildsystem.gui.widgets;
 
+import java.awt.Component;
 import java.io.File;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileFilter;
 
 /** A wrapper over the JFileChooser dialog. */
 public class FileDialog extends JFileChooser
 {
     /**
-     * Displays the directory selection dialog.
+     * Displays the file selection dialog.
+     * @param parent Parent.
      * @param title Dialog title.
-     * @param initialDirectory Directory to be selected in the dialog immediately after it will be shown.
+     * @param initialDirectory Initial directory.
+     * @param filters List of file filters.
+     * @return Selected file or `null` if dialog has been cancelled.
      */
-    public static File chooseDirectory(String title, File initialDirectory)
+    public static File chooseOpenFile(Component parent, String title,
+        File initialDirectory, List<FileFilter> filters)
     {
         FileDialog chooser = new FileDialog();
-        chooser.setCurrentDirectory(initialDirectory);
+        chooser.setDialogTitle(title);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        if (filters == null)
+            chooser.setAcceptAllFileFilterUsed(true);
+        else {
+            filters.forEach(chooser::addChoosableFileFilter);
+            chooser.setAcceptAllFileFilterUsed(false);
+        }
+
+        if (initialDirectory != null)
+            chooser.setCurrentDirectory(initialDirectory);
+
+        if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
+            return chooser.getSelectedFile();
+
+        return null;
+    }
+
+    /**
+     * Displays the directory selection dialog.
+     * @param parent Parent.
+     * @param title Dialog title.
+     * @param initialDirectory Directory to be selected in the dialog immediately after it will be shown.
+     * @return Selected directory or `null` if dialog has been cancelled.
+     */
+    public static File chooseDirectory(Component parent, String title, File initialDirectory)
+    {
+        FileDialog chooser = new FileDialog();
         chooser.setDialogTitle(title);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
 
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+        if (initialDirectory != null)
+            chooser.setCurrentDirectory(initialDirectory);
+
+        if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
             return chooser.getSelectedFile();
 
         return null;

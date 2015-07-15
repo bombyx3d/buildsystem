@@ -26,16 +26,16 @@ import java.awt.Color;
 /** A set of useful colors. */
 public final class Colors
 {
-    public static final Color TERMINAL_BLACK = Color.decode("#1d1f21");
-    public static final Color TERMINAL_BLUE = Color.decode("#81a2be");
-    public static final Color TERMINAL_GREEN = Color.decode("#b5bd68");
-    public static final Color TERMINAL_CYAN = Color.decode("#8abeb7");
-    public static final Color TERMINAL_RED = Color.decode("#ee6666");
-    public static final Color TERMINAL_YELLOW = Color.decode("#eec35f");
-    public static final Color TERMINAL_MAGENTA = Color.decode("#b294bb");
-    public static final Color TERMINAL_GRAY = Color.decode("#c5c8c6");
-    public static final Color TERMINAL_DARK_GRAY = Color.decode("#969896");
-    public static final Color TERMINAL_WHITE = Color.decode("#ffffff");
+    public static final Color BLACK = Color.decode("#1d1f21");
+    public static final Color BLUE = Color.decode("#81a2be");
+    public static final Color GREEN = Color.decode("#b5bd68");
+    public static final Color CYAN = Color.decode("#8abeb7");
+    public static final Color RED = Color.decode("#ee6666");
+    public static final Color YELLOW = Color.decode("#eec35f");
+    public static final Color MAGENTA = Color.decode("#b294bb");
+    public static final Color GRAY = Color.decode("#c5c8c6");
+    public static final Color DARK_GRAY = Color.decode("#969896");
+    public static final Color WHITE = Color.decode("#ffffff");
 
     private Colors() {}
     static { new Colors(); }

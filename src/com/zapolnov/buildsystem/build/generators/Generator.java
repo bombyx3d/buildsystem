@@ -22,10 +22,6 @@
 package com.zapolnov.buildsystem.build.generators;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
-import com.zapolnov.buildsystem.utility.Database;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.swing.JPanel;
 
 /** Base class for project file generators. */
 public abstract class Generator
@@ -34,40 +30,8 @@ public abstract class Generator
     public abstract String name();
 
     /**
-     * Creates an UI panel with generator configuration options.
-     * @param database Database.
-     * @return UI panel with generator configuration options.
-     */
-    public JPanel createSettingsPanel(Database database)
-    {
-        return null;
-    }
-
-    /**
      * Generates the project.
      * @param projectBuilder Project builder.
-     * @param build Set to `true` to also build the project after generating project files.
      */
-    public abstract void generate(ProjectBuilder projectBuilder, boolean build) throws Throwable;
-
-
-    /**
-     * Retrieves a map of all supported generators.
-     * @return Map of all generators.
-     */
-    public static Map<String, Generator> allGenerators()
-    {
-        if (allGenerators == null) {
-            Map<String, Generator> g = new LinkedHashMap<>();
-            /*
-            g.put(DummyGenerator.NAME, new DummyGenerator());
-            g.put(CMakeGenerator.NAME, new CMakeGenerator());
-            */
-            allGenerators = g;
-        }
-        return allGenerators;
-    }
-
-    /** A map of all supported generators. */
-    private static Map<String, Generator> allGenerators;
+    public abstract void generate(ProjectBuilder projectBuilder) throws Throwable;
 }

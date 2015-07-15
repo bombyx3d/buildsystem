@@ -29,7 +29,65 @@ import org.junit.Test;
 
 public class StringUtilsTest extends Assert
 {
-    @Test public void testExceptionMessage() throws IOException
+    @Test public void testStartsWith() throws IOException
+    {
+        assertTrue(StringUtils.startsWith("Q", "Q"));
+        assertTrue(StringUtils.startsWith("QS", "Q"));
+        assertTrue(StringUtils.startsWith("QS", ""));
+        assertFalse(StringUtils.startsWith("QS", "S"));
+        assertFalse(StringUtils.startsWith("S", "Q"));
+    }
+
+    private static int unhex(char c)
+    {
+        if (c >= '0' && c <= '9')
+            return c - '0';
+        if (c >= 'a' && c <= 'f')
+            return c - 'a' + 10;
+        if (c >= 'A' && c <= 'F')
+            return c - 'A' + 10;
+        throw new RuntimeException(String.format("Invalid hexadecimal digit '%c'.", c));
+    }
+
+    private static byte[] toByteArray(String string)
+    {
+        int count = string.length() / 2;
+        byte[] result = new byte[count];
+        for (int i = 0; i < count; i++) {
+            char c1 = string.charAt(i * 2);
+            char c2 = string.charAt(i * 2 + 1);
+            result[i] = (byte)((unhex(c1) << 4) | unhex(c2));
+        }
+        return result;
+    }
+
+    @Test public void testMd5ForString() throws IOException
+    {
+        byte[] expected = toByteArray("6cd3556deb0da54bca060b4c39479839");
+        byte[] actual = StringUtils.md5ForString("Hello, world!");
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test public void testMd5ForObjects() throws IOException
+    {
+        byte[] expected = toByteArray("d41d8cd98f00b204e9800998ecf8427e");
+        byte[] actual = StringUtils.md5ForObjects();
+        assertArrayEquals(expected, actual);
+
+        expected = toByteArray("52c93399b0e0828f85654938bc699221");
+        actual = StringUtils.md5ForObjects("Hello, world!");
+        assertArrayEquals(expected, actual);
+
+        expected = toByteArray("050d144172d916d0846f839e0412e929");
+        actual = StringUtils.md5ForObjects(new Object[]{null});
+        assertArrayEquals(expected, actual);
+
+        expected = toByteArray("47bf4f5cf379cc3543c41db0951ec419");
+        actual = StringUtils.md5ForObjects("Hello", "world!");
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test public void testShortExceptionMessage() throws IOException
     {
         String message = StringUtils.getShortExceptionMessage(new NullPointerException());
         assertEquals(message, "java.lang.NullPointerException");
@@ -42,5 +100,12 @@ public class StringUtilsTest extends Assert
 
         message = StringUtils.getShortExceptionMessage(new RuntimeException("Test message"));
         assertEquals(message, "Test message");
+    }
+
+    @Test public void testDetailedExceptionMessage() throws IOException
+    {
+        String message = StringUtils.getDetailedExceptionMessage(new NullPointerException());
+        assertNotNull(message);
+        assertTrue(message.length() > 0);
     }
 }

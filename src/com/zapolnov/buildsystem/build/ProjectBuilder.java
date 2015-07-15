@@ -22,13 +22,12 @@
 package com.zapolnov.buildsystem.build;
 
 import com.zapolnov.buildsystem.build.generators.Generator;
+import com.zapolnov.buildsystem.plugins.Plugin;
 import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.utility.Log;
 import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Project builder. */
 public class ProjectBuilder
@@ -43,8 +42,6 @@ public class ProjectBuilder
     public final Database database;
     /** Project generator. */
     private Generator generator;
-    /** User-defined options. */
-    private Map<String, String> optionValues = new HashMap<>();
 
     /**
      * Constructor.
@@ -52,12 +49,12 @@ public class ProjectBuilder
      */
     public ProjectBuilder(Project project)
     {
-        this.project = project;
         this.outputDirectory = new File(project.directory, BUILD_DIRECTORY_NAME);
-        this.database = new Database(outputDirectory);
-
         FileUtils.ensureDirectoryExists(outputDirectory);
         FileUtils.makeDirectoryHidden(outputDirectory);
+
+        this.project = project;
+        this.database = new Database(outputDirectory);
     }
 
     /**
@@ -70,20 +67,43 @@ public class ProjectBuilder
     }
 
     /**
-     * Retrives a map of options and their values.
-     * @return A map of options and their values.
-     */
-    public Map<String, String> optionValues()
-    {
-        return Collections.unmodifiableMap(optionValues);
-    }
-
-    /**
      * Sets generator to use to build the project.
      * @param generator Generator.
      */
     public void setGenerator(Generator generator)
     {
         this.generator = generator;
+    }
+
+    /** Runs the project builder. */
+    public void run() throws Throwable
+    {
+        try {
+            if (generator == null)
+                throw new RuntimeException("No generator has been set.");
+
+            Log.debug("=== Pre-build phase");
+            for (Plugin plugin : project.plugins())
+                plugin.preBuild(this);
+
+            Log.debug("=== Building the project");
+            project.scope.build(this);
+
+            Log.debug("=== Pre-generate phase");
+            for (Plugin plugin : project.plugins())
+                plugin.preGenerate(this);
+
+            Log.debug("=== Generating IDE files");
+            generator.generate(this);
+
+            Log.debug("=== Post-generate phase");
+            for (Plugin plugin : project.plugins())
+                plugin.postGenerate(this);
+
+            database.commit();
+        } catch (Throwable t) {
+            database.rollbackSafe();
+            throw t;
+        }
     }
 }

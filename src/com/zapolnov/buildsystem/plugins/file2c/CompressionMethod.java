@@ -19,24 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.project;
+package com.zapolnov.buildsystem.plugins.file2c;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
-
-/** Base class for directives in the project file. */
-public abstract class ProjectDirective
+/** Compression method used by the File2C utility. */
+public enum CompressionMethod
 {
-    /**
-     * Performs build actions implemented by the directive.
-     * @param projectBuilder Project builder.
-     */
-    @SuppressWarnings("unused") public void build(ProjectBuilder projectBuilder) throws Throwable
-    {
-    }
+    /** No compression. */
+    NONE("none");
+
+    /** Name of the compression method. */
+    public final String name;
 
     /**
-     * Visits this directive with the specified visitor.
-     * @param visitor Visitor.
+     * Constructor.
+     * @param name Name of the compression method.
      */
-    public abstract void visit(ProjectVisitor visitor);
+    CompressionMethod(String name)
+    {
+        this.name = name;
+    }
 }

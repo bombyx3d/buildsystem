@@ -59,6 +59,7 @@ public class BuildDialog extends JDialog
 
         ButtonPanel buttonPanel = new ButtonPanel(3);
         closeButton = buttonPanel.addButton(CLOSE_BUTTON_TITLE, this::tryDispose);
+        closeButton.setEnabled(false);
         add(buttonPanel, BorderLayout.PAGE_END);
 
         setPreferredSize(new Dimension(PREFERRED_WIDTH, PREFERRED_HEIGHT));
@@ -68,9 +69,6 @@ public class BuildDialog extends JDialog
             }
         });
         addComponentListener(new ComponentAdapter() {
-            @Override public void componentShown(ComponentEvent e) {
-                Log.setPrinter(logView);
-            }
             @Override public void componentHidden(ComponentEvent e) {
                 Log.setPrinter(new Log.ConsolePrinter());
             }
@@ -80,8 +78,19 @@ public class BuildDialog extends JDialog
             }
         });
 
+        Log.setPrinter(logView);
+
         pack();
         setLocationRelativeTo(parent);
+    }
+
+    /**
+     * Enables or disables the "Close" button in the dialog.
+     * @param enabled Set to `true` to enable the "Close" button.
+     */
+    public void setCloseButtonEnabled(boolean enabled)
+    {
+        closeButton.setEnabled(enabled);
     }
 
     /** Disposes the dialog if there is no operation in progress. */

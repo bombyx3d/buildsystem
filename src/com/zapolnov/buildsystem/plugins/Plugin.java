@@ -21,6 +21,7 @@
  */
 package com.zapolnov.buildsystem.plugins;
 
+import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.project.ProjectReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,30 @@ import java.util.Map;
 /** Base class for plugins. */
 public abstract class Plugin
 {
+    /**
+     * Invoked before project build.
+     * @param projectBuilder Project builder.
+     */
+    @SuppressWarnings("unused") public void preBuild(ProjectBuilder projectBuilder) throws Throwable
+    {
+    }
+
+    /**
+     * Invoked after project has been built but before IDE files has been generated.
+     * @param projectBuilder Project builder.
+     */
+    @SuppressWarnings("unused") public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
+    {
+    }
+
+    /**
+     * Invoked after IDE files has been generated.
+     * @param projectBuilder Project builder.
+     */
+    @SuppressWarnings("unused") public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
+    {
+    }
+
     /**
      * Retrieves a map of custom directives supported by this plugin.
      * @return Map of directives.
