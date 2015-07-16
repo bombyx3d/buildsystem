@@ -33,6 +33,8 @@ public class Database
     /** File name for the database. */
     public final static String FILE_NAME = "database";
 
+    public final static String OPTION_TARGET_PLATFORM = "";
+
     private final static String INPUT_FILES_TABLE = "InputFiles";
     private final static String INPUT_FILES_OPTIONS_HASHES_TABLE = "InputFilesOptionsHashes";
     private final static String OUTPUT_FILES_TABLE = "OutputFiles";
@@ -50,15 +52,29 @@ public class Database
     public Database(File directory)
     {
         this.directory = directory;
-        db = DBMaker.newFileDB(new File(directory, FILE_NAME))
-            .closeOnJvmShutdown()
-            .make();
+    }
+
+    /** Opens the database if it has not been opened yet. */
+    public void open()
+    {
+        if (db == null) {
+            db = DBMaker.newFileDB(new File(directory, FILE_NAME))
+                .closeOnJvmShutdown()
+                .make();
+        }
     }
 
     /** Saves all uncommitted changes to the file. */
     public void commit()
     {
-        db.commit();
+        if (db != null) {
+            db.commit();
+            try {
+                db.close();
+            } finally {
+                db = null;
+            }
+        }
     }
 
     /**
@@ -67,7 +83,14 @@ public class Database
      */
     public void rollback()
     {
-        db.rollback();
+        if (db != null) {
+            db.rollback();
+            try {
+                db.close();
+            } finally {
+                db = null;
+            }
+        }
     }
 
     /**
@@ -90,8 +113,11 @@ public class Database
     public void close()
     {
         if (db != null) {
-            db.close();
-            db = null;
+            try {
+                db.close();
+            } finally {
+                db = null;
+            }
         }
     }
 
@@ -102,6 +128,7 @@ public class Database
     public String getOption(String key)
     {
         try {
+            open();
             ConcurrentNavigableMap<String, String> table = db.getTreeMap(OPTIONS_TABLE);
             return table.get(key);
         } catch (Throwable t) {
@@ -117,6 +144,7 @@ public class Database
      */
     public void setOption(String key, String value)
     {
+        open();
         ConcurrentNavigableMap<String, String> table = db.getTreeMap(OPTIONS_TABLE);
         table.put(key, value);
     }
@@ -136,6 +164,7 @@ public class Database
             return true;
 
         try {
+            open();
             String path = FileUtils.getCanonicalPath(file);
 
             ConcurrentNavigableMap<String, byte[]> hashesTable = db.getTreeMap(INPUT_FILES_OPTIONS_HASHES_TABLE);
@@ -170,6 +199,7 @@ public class Database
     public boolean didOutputFileChange(File file, byte[] md5)
     {
         try {
+            open();
             ConcurrentNavigableMap<String, byte[]> table = db.getTreeMap(OUTPUT_FILES_TABLE);
 
             String path = FileUtils.getCanonicalPath(file);
