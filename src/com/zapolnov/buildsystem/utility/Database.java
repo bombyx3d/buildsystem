@@ -33,7 +33,8 @@ public class Database
     /** File name for the database. */
     public final static String FILE_NAME = "database";
 
-    public final static String OPTION_TARGET_PLATFORM = "";
+    public final static String OPTION_TARGET_PLATFORM = "TargetPlatform";
+    public final static String OPTION_GENERATOR_NAME = "GeneratorName";
 
     private final static String INPUT_FILES_TABLE = "InputFiles";
     private final static String INPUT_FILES_OPTIONS_HASHES_TABLE = "InputFilesOptionsHashes";

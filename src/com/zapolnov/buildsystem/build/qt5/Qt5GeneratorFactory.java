@@ -19,23 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.tests;
+package com.zapolnov.buildsystem.build.qt5;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
-import com.zapolnov.buildsystem.build.Generator;
-import org.junit.Assert;
-import org.junit.Test;
+import com.zapolnov.buildsystem.build.GeneratorFactory;
 
-public class GeneratorTest extends Assert
+/** Qt5 generator factory. */
+public class Qt5GeneratorFactory extends GeneratorFactory
 {
-    private final static class TestGenerator extends Generator
+    /** Constructor. */
+    public Qt5GeneratorFactory()
     {
-        @Override public void generate(ProjectBuilder projectBuilder) {}
-    };
-
-    @Test public void test() throws Throwable
-    {
-        Generator generator = new TestGenerator();
-        generator.generate(null);
+        generators.put("CMake", new Qt5CMakeGenerator());
     }
 }

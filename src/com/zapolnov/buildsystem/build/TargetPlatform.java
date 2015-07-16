@@ -19,19 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.build.generators;
+package com.zapolnov.buildsystem.build;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
+import com.zapolnov.buildsystem.build.qt5.Qt5GeneratorFactory;
 
-/** Base class for project file generators. */
-public abstract class Generator
+/** Target platform. */
+public enum TargetPlatform
 {
-    /** Retrieves a name of this generator. */
-    public abstract String name();
+    QT5("Qt 5", new Qt5GeneratorFactory());
+
+    /** Name of the platform. */
+    public final String name;
+    /** Generator factory for the platform. */
+    public final GeneratorFactory generatorFactory;
 
     /**
-     * Generates the project.
-     * @param projectBuilder Project builder.
+     * Constructor.
+     * @param name Name of the platform.
+     * @param generatorFactory Project generator for the platform.
      */
-    public abstract void generate(ProjectBuilder projectBuilder) throws Throwable;
+    TargetPlatform(String name, GeneratorFactory generatorFactory)
+    {
+        this.name = name;
+        this.generatorFactory = generatorFactory;
+    }
 }

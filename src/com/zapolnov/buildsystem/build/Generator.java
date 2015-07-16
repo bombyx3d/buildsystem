@@ -19,23 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.tests;
+package com.zapolnov.buildsystem.build;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
-import com.zapolnov.buildsystem.build.Generator;
-import org.junit.Assert;
-import org.junit.Test;
-
-public class GeneratorTest extends Assert
+/** Base class for project file generators. */
+public abstract class Generator
 {
-    private final static class TestGenerator extends Generator
-    {
-        @Override public void generate(ProjectBuilder projectBuilder) {}
-    };
-
-    @Test public void test() throws Throwable
-    {
-        Generator generator = new TestGenerator();
-        generator.generate(null);
-    }
+    /**
+     * Generates the project.
+     * @param projectBuilder Project builder.
+     */
+    public abstract void generate(ProjectBuilder projectBuilder) throws Throwable;
 }

@@ -19,23 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.tests;
+package com.zapolnov.buildsystem.build;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
-import com.zapolnov.buildsystem.build.Generator;
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class GeneratorTest extends Assert
+/** Base class for generator factories. */
+public abstract class GeneratorFactory
 {
-    private final static class TestGenerator extends Generator
-    {
-        @Override public void generate(ProjectBuilder projectBuilder) {}
-    };
+    /** Map of available generators. */
+    protected final Map<String, Generator> generators = new LinkedHashMap<>();
 
-    @Test public void test() throws Throwable
+    /** Factory of generators. */
+    public GeneratorFactory()
     {
-        Generator generator = new TestGenerator();
-        generator.generate(null);
+    }
+
+    /**
+     * Retrieves a map of available generators.
+     * @return Map of available generators.
+     */
+    public Map<String, Generator> generators()
+    {
+        return Collections.unmodifiableMap(generators);
     }
 }

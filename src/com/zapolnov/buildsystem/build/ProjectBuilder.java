@@ -21,7 +21,6 @@
  */
 package com.zapolnov.buildsystem.build;
 
-import com.zapolnov.buildsystem.build.generators.Generator;
 import com.zapolnov.buildsystem.plugins.Plugin;
 import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.utility.Database;
@@ -93,7 +92,7 @@ public class ProjectBuilder
             for (Plugin plugin : project.plugins())
                 plugin.preGenerate(this);
 
-            Log.debug("=== Generating IDE files");
+            Log.debug("=== Generating project files");
             generator.generate(this);
 
             Log.debug("=== Post-generate phase");

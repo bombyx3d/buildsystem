@@ -219,24 +219,34 @@ public class MainDialog extends JDialog
     {
         BuildDialog buildDialog = new BuildDialog(this);
 
-        new Thread(() -> {
-            try {
-                projectBuilder.run();
+        try {
+            projectSettingsPanel.validateAndSaveSettings();
 
-                Log.info("**** SUCCESSFUL COMPLETION ***");
-                SwingUtilities.invokeAndWait(() -> buildDialog.setCloseButtonEnabled(true));
-            } catch (Throwable t) {
-                Log.error(StringUtils.getDetailedExceptionMessage(t));
-                SwingUtilities.invokeLater(() -> {
-                    buildDialog.setCloseButtonEnabled(true);
-                    FatalErrorDialog errorDialog = new FatalErrorDialog(buildDialog, t);
-                    errorDialog.setVisible(true);
-                    buildDialog.setVisible(false);
-                });
-            }
-        }).start();
+            new Thread(() -> {
+                try {
+                    projectBuilder.run();
 
-        buildDialog.setVisible(true);
+                    Log.info("**** SUCCESSFUL COMPLETION ***");
+                    SwingUtilities.invokeAndWait(() -> buildDialog.setCloseButtonEnabled(true));
+                } catch (Throwable t) {
+                    Log.error(StringUtils.getDetailedExceptionMessage(t));
+                    SwingUtilities.invokeLater(() -> {
+                        buildDialog.setCloseButtonEnabled(true);
+                        FatalErrorDialog errorDialog = new FatalErrorDialog(buildDialog, t);
+                        errorDialog.setVisible(true);
+                        buildDialog.setVisible(false);
+                    });
+                }
+            }).start();
+
+            buildDialog.setVisible(true);
+        } catch (Throwable t) {
+            Log.error(StringUtils.getDetailedExceptionMessage(t));
+            buildDialog.setCloseButtonEnabled(true);
+            FatalErrorDialog errorDialog = new FatalErrorDialog(buildDialog, t);
+            errorDialog.setVisible(true);
+            buildDialog.setVisible(false);
+        }
     }
 
     /** Loads project file from disk and re-initializes the GUI. */
@@ -263,10 +273,7 @@ public class MainDialog extends JDialog
             project = ProjectReader.read(projectDirectory);
             projectBuilder = new ProjectBuilder(project);
             projectSettingsPanel = new ProjectSettingsPanel(projectBuilder);
-            Box projectConfigurationContainer = Box.createVerticalBox();
-            projectConfigurationContainer.add(projectSettingsPanel);
-            projectConfigurationContainer.add(Box.createVerticalGlue());
-            projectSettingsContainer.add(projectConfigurationContainer, BorderLayout.PAGE_START);
+            projectSettingsContainer.add(projectSettingsPanel, BorderLayout.PAGE_START);
             projectSettingsContainer.add(new JPanel(), BorderLayout.CENTER);
         } catch (Throwable t) {
             displayError(UNABLE_TO_LOAD_PROJECT_MESSAGE, t);
