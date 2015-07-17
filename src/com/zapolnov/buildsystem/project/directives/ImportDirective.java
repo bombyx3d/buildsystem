@@ -54,5 +54,6 @@ public final class ImportDirective extends ProjectDirective
     @Override public void visit(ProjectVisitor visitor)
     {
         visitor.visitImport(this);
+        scope.visit(visitor);
     }
 }

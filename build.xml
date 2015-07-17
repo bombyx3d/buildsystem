@@ -44,8 +44,14 @@ THE SOFTWARE.
         <jar destfile="bin/buildsystem.jar" basedir="bin/out/production/buildsystem">
             <manifest><attribute name="Main-Class" value="com.zapolnov.buildsystem.Main" /></manifest>
             <fileset dir="src">
-                <include name="com/zapolnov/zbt/generators/cmake/root-CMakeLists.template" />
-                <include name="com/zapolnov/zbt/generators/cmake/src-CMakeLists.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/idea/encodings.xml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/idea/misc.xml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/idea/modules.xml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/idea/project.iml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/idea/runConfiguration.xml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/idea/workspace.xml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/root-CMakeLists.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/src-CMakeLists.template" />
             </fileset>
             <zipgroupfileset dir="lib" includes="**/*.jar" />
         </jar>

@@ -204,9 +204,11 @@ public class Database
             ConcurrentNavigableMap<String, byte[]> table = db.getTreeMap(OUTPUT_FILES_TABLE);
 
             String path = FileUtils.getCanonicalPath(file);
-            byte[] previousMd5 = table.get(path);
-            if (previousMd5 != null && Arrays.equals(md5, previousMd5))
-                return false;
+            if (file.exists()) {
+                byte[] previousMd5 = table.get(path);
+                if (previousMd5 != null && Arrays.equals(md5, previousMd5))
+                    return false;
+            }
 
             table.put(path, md5);
         } catch (Throwable t) {

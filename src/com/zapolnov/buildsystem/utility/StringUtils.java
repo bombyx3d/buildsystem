@@ -104,6 +104,27 @@ public class StringUtils
     }
 
     /**
+     * Escapes given string for use in XML.
+     * @param input Input string.
+     * @return Escaped string.
+     */
+    public static String escapeForXml(String input)
+    {
+        StringBuilder builder = new StringBuilder();
+        for (char ch : input.toCharArray()) {
+            switch (ch) {
+            case '<': builder.append("&lt;"); break;
+            case '>': builder.append("&gt;"); break;
+            case '&': builder.append("&amp;"); break;
+            case '"': builder.append("&quot;"); break;
+            case '\'': builder.append("&apos;"); break;
+            default: builder.append(ch); break;
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
      * Retrieves short description of a problem that caused the exception.
      * @param throwable Instance of the exception.
      * @return Short description of a problem.

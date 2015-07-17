@@ -31,5 +31,6 @@ public class Qt5CMakeGenerator extends Generator
     @Override public void generate(ProjectBuilder projectBuilder) throws Throwable
     {
         CMakeGeneratorUtilities.writeCMakeLists(projectBuilder);
+        CMakeGeneratorUtilities.generateCLionProject(projectBuilder);
     }
 }

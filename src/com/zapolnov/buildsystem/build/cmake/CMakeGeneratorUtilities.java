@@ -32,6 +32,7 @@ import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
 import com.zapolnov.buildsystem.utility.FileBuilder;
 import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.utility.StringUtils;
 import com.zapolnov.buildsystem.utility.SystemUtils;
 import com.zapolnov.buildsystem.utility.Template;
 import java.io.File;
@@ -50,6 +51,18 @@ public class CMakeGeneratorUtilities
     private static final Template rootTemplate;
     /** Template for CMakeLists.txt in subdirectory 'src'. */
     private static final Template srcTemplate;
+    /** Template for CLion project file. */
+    private static final Template clionProjectTemplate;
+    /** Template for '.idea/encodings.xml'. */
+    private static final Template clionEncodingsTemplate;
+    /** Template for '.idea/misc.xml'. */
+    private static final Template clionMiscTemplate;
+    /** Template for '.idea/modules.xml'. */
+    private static final Template clionModulesTemplate;
+    /** Template for '.idea/workspace.xml'. */
+    private static final Template clionWorkspaceTemplate;
+    /** Template for CLion run configurations. */
+    private static final Template clionRunConfigurationTemplate;
 
     /**
      * Generates the CMakeLists.txt files.
@@ -71,7 +84,6 @@ public class CMakeGeneratorUtilities
         projectBuilder.project.scope.visit(new ProjectVisitor() {
             @Override public void visitImport(ImportDirective directive) {
                 projectDirectories.add(directive.scope.directory);
-                directive.scope.visit(this);
             }
             @Override public void visitTargetName(TargetNameDirective directive) {
                 targetName[0] = directive.name;
@@ -234,6 +246,82 @@ public class CMakeGeneratorUtilities
     }
 
     /**
+     * Generates CLion project files.
+     * @param projectBuilder Project builder.
+     */
+    public static void generateCLionProject(ProjectBuilder projectBuilder) throws NoSuchAlgorithmException, IOException
+    {
+        Map<String, String> options;
+        FileBuilder builder;
+
+        final String[] targetName = new String[]{ "Project" };
+        projectBuilder.project.scope.visit(new ProjectVisitor() {
+            @Override public void visitTargetName(TargetNameDirective directive) {
+                targetName[0] = directive.name;
+            }
+        });
+
+        // Write .idea/.name
+
+        builder = new FileBuilder(projectBuilder.outputDirectory, ".idea/.name");
+        builder.append(targetName[0]);
+        builder.commit(projectBuilder.database);
+
+        // Write .idea/encodings.xml
+
+        builder = new FileBuilder(projectBuilder.outputDirectory, ".idea/encodings.xml");
+        options = new HashMap<>();
+        clionEncodingsTemplate.emit(builder, options);
+        builder.commit(projectBuilder.database);
+
+        // Write .idea/misc.xml
+
+        builder = new FileBuilder(projectBuilder.outputDirectory, ".idea/misc.xml");
+        options = new HashMap<>();
+        options.put("build_directory",
+            StringUtils.escapeForXml(FileUtils.getCanonicalPath(projectBuilder.outputDirectory)));
+        options.put("project_directory",
+            StringUtils.escapeForXml(FileUtils.getCanonicalPath(projectBuilder.project.directory)));
+        clionMiscTemplate.emit(builder, options);
+        builder.commit(projectBuilder.database);
+
+        // Write .idea/modules.xml
+
+        builder = new FileBuilder(projectBuilder.outputDirectory, ".idea/modules.xml");
+        options = new HashMap<>();
+        options.put("target_name", StringUtils.escapeForXml(targetName[0]));
+        clionModulesTemplate.emit(builder, options);
+        builder.commit(projectBuilder.database);
+
+        // Write .idea/workspace.xml
+
+        builder = new FileBuilder(projectBuilder.outputDirectory, ".idea/workspace.xml");
+        options = new HashMap<>();
+        options.put("target_name", StringUtils.escapeForXml(targetName[0]));
+        clionWorkspaceTemplate.emit(builder, options);
+        builder.commit(projectBuilder.database);
+
+        // Write .idea/runConfigurations/@{target_name}__@{build_type}_.xml
+
+        for (String buildType : new String[]{ "Debug", "Release" }) {
+            builder = new FileBuilder(projectBuilder.outputDirectory,
+                String.format(".idea/runConfigurations/%s__%s_.xml", targetName[0], buildType));
+            options = new HashMap<>();
+            options.put("target_name", StringUtils.escapeForXml(targetName[0]));
+            options.put("build_type", StringUtils.escapeForXml(buildType));
+            clionRunConfigurationTemplate.emit(builder, options);
+            builder.commit(projectBuilder.database);
+        }
+
+        // Write .idea/@{target_name}.iml
+
+        builder = new FileBuilder(projectBuilder.outputDirectory, String.format(".idea/%s.iml", targetName[0]));
+        options = new HashMap<>();
+        clionProjectTemplate.emit(builder, options);
+        builder.commit(projectBuilder.database);
+    }
+
+    /**
      * Writes a header notifying that file has been automatically generated.
      * @param builder File builder.
      */
@@ -349,8 +437,15 @@ public class CMakeGeneratorUtilities
 
     static {
         try {
-            rootTemplate = new Template(CMakeGeneratorUtilities.class.getResourceAsStream("root-CMakeLists.template"));
-            srcTemplate = new Template(CMakeGeneratorUtilities.class.getResourceAsStream("src-CMakeLists.template"));
+            Class<?> thisClass = CMakeGeneratorUtilities.class;
+            rootTemplate = new Template(thisClass.getResourceAsStream("root-CMakeLists.template"));
+            srcTemplate = new Template(thisClass.getResourceAsStream("src-CMakeLists.template"));
+            clionProjectTemplate = new Template(thisClass.getResourceAsStream("idea/project.iml.template"));
+            clionEncodingsTemplate = new Template(thisClass.getResourceAsStream("idea/encodings.xml.template"));
+            clionMiscTemplate = new Template(thisClass.getResourceAsStream("idea/misc.xml.template"));
+            clionModulesTemplate = new Template(thisClass.getResourceAsStream("idea/modules.xml.template"));
+            clionWorkspaceTemplate = new Template(thisClass.getResourceAsStream("idea/workspace.xml.template"));
+            clionRunConfigurationTemplate = new Template(thisClass.getResourceAsStream("idea/runConfiguration.xml.template"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
