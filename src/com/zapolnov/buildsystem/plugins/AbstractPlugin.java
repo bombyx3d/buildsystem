@@ -19,32 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.project;
+package com.zapolnov.buildsystem.plugins;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
+import com.zapolnov.buildsystem.project.ProjectReader;
+import java.util.HashMap;
+import java.util.Map;
 
-/** Base class for directives in the project file. */
-public abstract class ProjectDirective
+/** Abstract base class for plugins. */
+public abstract class AbstractPlugin
 {
     /**
-     * Performs pre-build actions implemented by the directive.
+     * Invoked before project build.
      * @param projectBuilder Project builder.
      */
-    public void preBuild(ProjectBuilder projectBuilder) throws Throwable
+    @SuppressWarnings("unused") public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
     }
 
     /**
-     * Performs build actions implemented by the directive.
+     * Invoked after project has been built but before IDE files has been generated.
      * @param projectBuilder Project builder.
      */
-    public void build(ProjectBuilder projectBuilder) throws Throwable
+    @SuppressWarnings("unused") public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
     {
     }
 
     /**
-     * Visits this directive with the specified visitor.
-     * @param visitor Visitor.
+     * Invoked after IDE files has been generated.
+     * @param projectBuilder Project builder.
      */
-    public abstract void visit(ProjectVisitor visitor);
+    @SuppressWarnings("unused") public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
+    {
+    }
+
+    /**
+     * Retrieves a map of custom directives supported by this plugin.
+     * @return Map of directives.
+     */
+    public Map<String, ProjectReader.DirectiveParser> customDirectives()
+    {
+        return new HashMap<>();
+    }
 }

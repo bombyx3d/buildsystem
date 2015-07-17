@@ -73,4 +73,13 @@ public final class SourceDirectoriesDirective extends ProjectDirective
     {
         visitor.visitSourceDirectories(this);
     }
+
+    /**
+     * Visits this directive as a `SourceFilesDirective`.
+     * @param visitor Visitor.
+     */
+    public void visitFiles(ProjectVisitor visitor)
+    {
+        visitor.visitSourceFiles(new SourceFilesDirective(sourceFiles(), thirdparty));
+    }
 }

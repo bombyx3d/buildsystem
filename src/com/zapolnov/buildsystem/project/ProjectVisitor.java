@@ -25,6 +25,7 @@ import com.zapolnov.buildsystem.project.directives.DefineDirective;
 import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
 import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
+import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
 
 /** Base class for project scope directive enumerations. */
@@ -35,4 +36,5 @@ public abstract class ProjectVisitor
     @SuppressWarnings("unused") public void visitDefine(DefineDirective directive) {}
     @SuppressWarnings("unused") public void visitHeaderPaths(HeaderPathsDirective directive) {}
     @SuppressWarnings("unused") public void visitSourceDirectories(SourceDirectoriesDirective directive) {}
+    @SuppressWarnings("unused") public void visitSourceFiles(SourceFilesDirective directive) {}
 }

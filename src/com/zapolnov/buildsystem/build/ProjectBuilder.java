@@ -21,7 +21,7 @@
  */
 package com.zapolnov.buildsystem.build;
 
-import com.zapolnov.buildsystem.plugins.Plugin;
+import com.zapolnov.buildsystem.plugins.AbstractPlugin;
 import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.buildsystem.utility.FileUtils;
@@ -82,21 +82,22 @@ public class ProjectBuilder
                 throw new RuntimeException("No generator has been set.");
 
             Log.debug("=== Pre-build phase");
-            for (Plugin plugin : project.plugins())
+            project.scope.preBuild(this);
+            for (AbstractPlugin plugin : project.plugins())
                 plugin.preBuild(this);
 
             Log.debug("=== Building the project");
             project.scope.build(this);
 
             Log.debug("=== Pre-generate phase");
-            for (Plugin plugin : project.plugins())
+            for (AbstractPlugin plugin : project.plugins())
                 plugin.preGenerate(this);
 
             Log.debug("=== Generating project files");
             generator.generate(this);
 
             Log.debug("=== Post-generate phase");
-            for (Plugin plugin : project.plugins())
+            for (AbstractPlugin plugin : project.plugins())
                 plugin.postGenerate(this);
 
             database.commit();

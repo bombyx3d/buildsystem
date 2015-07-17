@@ -21,13 +21,13 @@
  */
 package com.zapolnov.buildsystem;
 
+import com.zapolnov.buildsystem.tests.AbstractPluginTest;
 import com.zapolnov.buildsystem.tests.ColorsTest;
 import com.zapolnov.buildsystem.tests.DatabaseTests;
 import com.zapolnov.buildsystem.tests.FileBuilderTests;
 import com.zapolnov.buildsystem.tests.FileUtilsTest;
 import com.zapolnov.buildsystem.tests.GeneratorTest;
 import com.zapolnov.buildsystem.tests.LogTests;
-import com.zapolnov.buildsystem.tests.PluginTest;
 import com.zapolnov.buildsystem.tests.StringUtilsTest;
 import com.zapolnov.buildsystem.tests.SystemUtilsTest;
 import com.zapolnov.buildsystem.tests.TemplateTests;
@@ -55,7 +55,7 @@ public final class TestsMain
             FileBuilderTests.class,
             TemplateTests.class,
             StringUtilsTest.class,
-            PluginTest.class,
+            AbstractPluginTest.class,
             ColorsTest.class,
             SystemUtilsTest.class,
             FileUtilsTest.class,

@@ -41,6 +41,11 @@ public final class ImportDirective extends ProjectDirective
         this.scope = scope;
     }
 
+    @Override public void preBuild(ProjectBuilder projectBuilder) throws Throwable
+    {
+        scope.preBuild(projectBuilder);
+    }
+
     @Override public void build(ProjectBuilder projectBuilder) throws Throwable
     {
         scope.build(projectBuilder);

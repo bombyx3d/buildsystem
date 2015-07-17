@@ -62,6 +62,16 @@ public class ProjectScope
     }
 
     /**
+     * Performs pre-build actions implemented by directives in this scope.
+     * @param projectBuilder Project builder.
+     */
+    public void preBuild(ProjectBuilder projectBuilder) throws Throwable
+    {
+        for (ProjectDirective directive : directives)
+            directive.preBuild(projectBuilder);
+    }
+
+    /**
      * Performs build actions implemented by directives in this scope.
      * @param projectBuilder Project builder.
      */

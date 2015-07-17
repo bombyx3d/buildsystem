@@ -19,46 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.plugins;
+package com.zapolnov.buildsystem.project.directives;
 
-import com.zapolnov.buildsystem.build.ProjectBuilder;
-import com.zapolnov.buildsystem.project.ProjectReader;
-import java.util.HashMap;
-import java.util.Map;
+import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-/** Base class for plugins. */
-public abstract class Plugin
+/** A 'source_files' or '3rdparty_source_files' directive in the project file. */
+public final class SourceFilesDirective extends ProjectDirective
 {
+    /** List of source files. */
+    private final List<File> sourceFiles;
+    /** Set to `true` if this directive is a '3rdparty_source_files' directive. */
+    public final boolean thirdparty;
+
     /**
-     * Invoked before project build.
-     * @param projectBuilder Project builder.
+     * Constructor.
+     * @param sourceFiles List of source files.
+     * @param thirdparty Set to `true` if this directive is a '3rdparty_source_files' directive.
      */
-    @SuppressWarnings("unused") public void preBuild(ProjectBuilder projectBuilder) throws Throwable
+    public SourceFilesDirective(List<File> sourceFiles, boolean thirdparty)
     {
+        this.sourceFiles = new ArrayList<>(sourceFiles);
+        this.thirdparty = thirdparty;
     }
 
     /**
-     * Invoked after project has been built but before IDE files has been generated.
-     * @param projectBuilder Project builder.
+     * Retrieves a list of source files.
+     * @return List of source files.
      */
-    @SuppressWarnings("unused") public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
+    public List<File> sourceFiles()
     {
+        return Collections.unmodifiableList(sourceFiles);
     }
 
-    /**
-     * Invoked after IDE files has been generated.
-     * @param projectBuilder Project builder.
-     */
-    @SuppressWarnings("unused") public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
+    @Override public void visit(ProjectVisitor visitor)
     {
-    }
-
-    /**
-     * Retrieves a map of custom directives supported by this plugin.
-     * @return Map of directives.
-     */
-    public Map<String, ProjectReader.DirectiveParser> customDirectives()
-    {
-        return new HashMap<>();
+        visitor.visitSourceFiles(this);
     }
 }

@@ -24,10 +24,14 @@ package com.zapolnov.buildsystem.plugins.file2c;
 import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.project.ProjectDirective;
 import com.zapolnov.buildsystem.project.ProjectVisitor;
-import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
+import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.utility.FileBuilder;
+import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.StringUtils;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /** A 'file2c' directive in the project file. */
 @SuppressWarnings("unused") public class FileToCDirective extends ProjectDirective
@@ -42,6 +46,14 @@ import java.io.File;
     public final String namespace;
     /** Compression method. */
     public final CompressionMethod compressionMethod;
+
+    /** Header search path. */
+    private File headerSearchPath;
+    /** Path to the generated header file. */
+    private File headerFile;
+    /** Path to the generated source file. */
+    private File sourceFile;
+
 
     /**
      * Constructor.
@@ -61,12 +73,16 @@ import java.io.File;
         this.compressionMethod = compressionMethod;
     }
 
-    @Override public void build(ProjectBuilder projectBuilder) throws Throwable
+    @Override public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
         File outputDirectory = projectBuilder.outputDirectory;
-        File headerFile = new File(outputDirectory, String.format("file2c/include/%s", output));
-        File sourceFile = new File(outputDirectory, String.format("file2c/%s.cpp", output));
+        headerSearchPath = FileUtils.getCanonicalFile(new File(outputDirectory, "file2c/include"));
+        headerFile = FileUtils.getCanonicalFile(new File(headerSearchPath, output));
+        sourceFile = FileUtils.getCanonicalFile(new File(outputDirectory, String.format("file2c/%s.cpp", output)));
+    }
 
+    @Override public void build(ProjectBuilder projectBuilder) throws Throwable
+    {
         byte[] hash = StringUtils.md5ForObjects(input, output, identifier, namespace, compressionMethod.name);
         if (!headerFile.exists() || !sourceFile.exists() || projectBuilder.database.didInputFileChange(input, hash)) {
             byte[] data = FileUtils.byteArrayFromFile(input);
@@ -143,5 +159,13 @@ import java.io.File;
 
     @Override public void visit(ProjectVisitor visitor)
     {
+        List<File> sourceFiles = new ArrayList<>();
+        sourceFiles.add(headerFile);
+        sourceFiles.add(sourceFile);
+        visitor.visitSourceFiles(new SourceFilesDirective(sourceFiles, false));
+
+        List<File> headerPaths = new ArrayList<>();
+        headerPaths.add(headerSearchPath);
+        visitor.visitHeaderPaths(new HeaderPathsDirective(headerPaths, false));
     }
 }

@@ -21,11 +21,12 @@
  */
 package com.zapolnov.buildsystem.project;
 
-import com.zapolnov.buildsystem.plugins.Plugin;
+import com.zapolnov.buildsystem.plugins.AbstractPlugin;
 import com.zapolnov.buildsystem.project.directives.DefineDirective;
 import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
 import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
+import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.StringUtils;
@@ -64,7 +65,7 @@ public class ProjectReader
     /** Current stack of module imports. */
     private final Set<String> moduleImportStack = new LinkedHashSet<>();
     /** List of plugin-specific directive parses. */
-    private final Map<Plugin, Map<String, DirectiveParser>> pluginDirectiveParsers = new HashMap<>();
+    private final Map<AbstractPlugin, Map<String, DirectiveParser>> pluginDirectiveParsers = new HashMap<>();
 
 
     /**
@@ -157,7 +158,7 @@ public class ProjectReader
     {
         Map<String, DirectiveParser> standardDirectives = standardDirectives();
 
-        for (Map.Entry<YamlValue, YamlValue> directive : directives.entrySet()) {
+        outer: for (Map.Entry<YamlValue, YamlValue> directive : directives.entrySet()) {
             String key = directive.getKey().toString();
 
             DirectiveParser parser = standardDirectives.get(key);
@@ -166,7 +167,7 @@ public class ProjectReader
                 continue;
             }
 
-            for (Plugin plugin : project.plugins()) {
+            for (AbstractPlugin plugin : project.plugins()) {
                 Map<String, DirectiveParser> pluginDirectives = pluginDirectiveParsers.get(plugin);
                 if (pluginDirectives == null) {
                     pluginDirectives = plugin.customDirectives();
@@ -178,7 +179,7 @@ public class ProjectReader
                 parser = pluginDirectives.get(key);
                 if (parser != null) {
                     parser.readDirective(this, directive.getKey(), directive.getValue());
-                    continue;
+                    continue outer;
                 }
             }
 
@@ -228,6 +229,30 @@ public class ProjectReader
     }
 
     /**
+     * Parses directives 'source_files' and '3rdparty_source_files".
+     * @param r Instance of the reader.
+     * @param v Value of the directive.
+     * @param thirdparty Set to `true` if directive is '3rdparty_source_directories'.
+     */
+    public static void parseSourceFiles(ProjectReader r, YamlValue v, boolean thirdparty)
+    {
+        List<File> files = new ArrayList<>();
+        for (YamlValue path : v.toSequence()) {
+            File file = new File(r.currentScope().directory, path.toString());
+            if (!file.exists()) {
+                String fileName = FileUtils.getCanonicalPath(file);
+                throw new YamlError(path, String.format("File \"%s\" does not exist.", fileName));
+            }
+            if (file.isDirectory()) {
+                String fileName = FileUtils.getCanonicalPath(file);
+                throw new YamlError(path, String.format("\"%s\" is a directory.", fileName));
+            }
+            files.add(FileUtils.getCanonicalFile(file));
+        }
+        r.currentScope().addDirective(new SourceFilesDirective(files, thirdparty));
+    }
+
+    /**
      * Retrieves a map of standard directives.
      * @return Map of standard directives.
      */
@@ -248,6 +273,9 @@ public class ProjectReader
 
             d.put("source_directories", (r, k, v) -> parseSourceDirectories(r, v, false));
             d.put("3rdparty_source_directories", (r, k, v) -> parseSourceDirectories(r, v, true));
+
+            d.put("source_files", (r, k, v) -> parseSourceFiles(r, v, false));
+            d.put("3rdparty_source_files", (r, k, v) -> parseSourceFiles(r, v, true));
 
             d.put("define", (r, k, v) -> {
                 List<String> defines = new ArrayList<>();
@@ -272,6 +300,36 @@ public class ProjectReader
                         r.currentScope().addDirective(new ImportDirective(scope));
                     } catch (Throwable t) {
                         throw new YamlError(module, String.format("Unable to import module \"%s\".", moduleName), t);
+                    }
+                }
+            });
+
+            d.put("plugin", (r, k, v) -> {
+                for (YamlValue plugin : v.toSequence()) {
+                    String name = plugin.toString();
+
+                    Class<?> pluginClass = null;
+                    try {
+                        pluginClass = Class.forName(name);
+                    } catch (ClassNotFoundException ignored) {
+                    }
+
+                    if (pluginClass == null) {
+                        try {
+                            String fullClassName = String.format("com.zapolnov.buildsystem.plugins.%s.Plugin", name);
+                            pluginClass = Class.forName(fullClassName);
+                        } catch (ClassNotFoundException ignored) {
+                        }
+                    }
+
+                    if (pluginClass == null)
+                        throw new YamlError(plugin, String.format("Unable to find plugin \"%s\".", name));
+
+                    try {
+                        @SuppressWarnings("unchecked") Class<AbstractPlugin> c = (Class<AbstractPlugin>)pluginClass;
+                        r.project.addPlugin(c);
+                    } catch (InstantiationException|IllegalAccessException e) {
+                        throw new YamlError(plugin, String.format("Unable to load plugin \"%s\".", name), e);
                     }
                 }
             });

@@ -28,6 +28,7 @@ import com.zapolnov.buildsystem.project.directives.DefineDirective;
 import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
 import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
+import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
 import com.zapolnov.buildsystem.utility.FileBuilder;
 import com.zapolnov.buildsystem.utility.FileUtils;
@@ -263,6 +264,9 @@ public class CMakeGeneratorUtilities
                     systemIncludeDirectories.addAll(directive.headerPaths());
             }
             @Override public void visitSourceDirectories(SourceDirectoriesDirective directive) {
+                directive.visitFiles(this);
+            }
+            @Override public void visitSourceFiles(SourceFilesDirective directive) {
                 for (File file : directive.sourceFiles()) {
                     if (FileUtils.isCSourceFile(file) || FileUtils.isCxxSourceFile(file))
                         (directive.thirdparty ? thirdPartySourceFiles : sourceFiles).add(file);

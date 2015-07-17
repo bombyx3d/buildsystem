@@ -21,7 +21,7 @@
  */
 package com.zapolnov.buildsystem.project;
 
-import com.zapolnov.buildsystem.plugins.Plugin;
+import com.zapolnov.buildsystem.plugins.AbstractPlugin;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
 import java.util.Collection;
@@ -40,7 +40,7 @@ public class Project
     public final ProjectScope scope;
 
     /** List of plugins loaded by the project. */
-    private final Map<Class<Plugin>, Plugin> plugins = new HashMap<>();
+    private final Map<Class<AbstractPlugin>, AbstractPlugin> plugins = new HashMap<>();
 
     /**
      * Constructor.
@@ -56,7 +56,7 @@ public class Project
      * Retrieves a collection of plugins loaded by the project.
      * @return A collection of plugins.
      */
-    public Collection<Plugin> plugins()
+    public Collection<AbstractPlugin> plugins()
     {
         return plugins.values();
     }
@@ -65,7 +65,7 @@ public class Project
      * Adds the specified plugin to the project.
      * @param pluginClass Plugin to add.
      */
-    public void addPlugin(Class<Plugin> pluginClass) throws InstantiationException, IllegalAccessException
+    public void addPlugin(Class<AbstractPlugin> pluginClass) throws InstantiationException, IllegalAccessException
     {
         if (plugins.get(pluginClass) == null)
             plugins.put(pluginClass, pluginClass.newInstance());

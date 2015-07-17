@@ -21,21 +21,21 @@
  */
 package com.zapolnov.buildsystem.tests;
 
-import com.zapolnov.buildsystem.plugins.Plugin;
+import com.zapolnov.buildsystem.plugins.AbstractPlugin;
 import com.zapolnov.buildsystem.project.ProjectReader;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class PluginTest extends Assert
+public class AbstractPluginTest extends Assert
 {
-    private final static class TestPlugin extends Plugin
+    private final static class TestPlugin extends AbstractPlugin
     {
     };
 
     @Test public void test() throws Throwable
     {
-        Plugin plugin = new TestPlugin();
+        AbstractPlugin plugin = new TestPlugin();
 
         Map<String, ProjectReader.DirectiveParser> directives = plugin.customDirectives();
         assertNotNull(directives);
