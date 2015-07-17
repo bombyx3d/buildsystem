@@ -21,6 +21,9 @@
  */
 package com.zapolnov.buildsystem.utility;
 
+import java.io.File;
+import java.net.URISyntaxException;
+
 /** Operating system utilities. */
 public final class SystemUtils
 {
@@ -33,6 +36,40 @@ public final class SystemUtils
     public static final boolean IS_OSX = StringUtils.startsWith(OS_NAME, "Mac OS");
     /** Set to `true` if we are running under Microsoft Windows. */
     public static final boolean IS_WINDOWS = StringUtils.startsWith(OS_NAME, "Windows");
+
+    /**
+     * Determines path to the `java` executable.
+     * @return Path to the `java` executable.
+     */
+    public static String getJavaExecutable()
+    {
+        String javaHome = System.getProperty("java.home");
+        if (javaHome != null) {
+            File executableFile;
+            if (!IS_WINDOWS)
+                executableFile = new File(new File(javaHome), "bin/java");
+            else
+                executableFile = new File(new File(javaHome), "bin/java.exe");
+
+            if (executableFile.exists())
+                return FileUtils.getCanonicalPath(executableFile);
+        }
+        return "java";
+    }
+
+    /**
+     * Determines path to the jar file of the running application.
+     * @return Path to the jar file.
+     */
+    public static File getApplicationJarFile()
+    {
+        try {
+            File jar = new File(SystemUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            return FileUtils.getCanonicalFile(jar);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Unable to determine path to the application JAR file.", e);
+        }
+    }
 
     private SystemUtils() {}
     static { new SystemUtils(); }

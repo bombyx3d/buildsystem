@@ -88,6 +88,22 @@ public class StringUtils
     }
 
     /**
+     * Checks whether given file has one of the provided extensions.
+     * @param file File.
+     * @param extensions Array of extensions.
+     * @return `true` if file has one of the provided extensions, otherwise returns `false`.
+     */
+    public static boolean fileHasExtension(File file, String[] extensions)
+    {
+        String fileName = file.getName();
+        for (String extension : extensions) {
+            if (fileName.endsWith(extension) && fileName.length() > extension.length())
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Retrieves short description of a problem that caused the exception.
      * @param throwable Instance of the exception.
      * @return Short description of a problem.

@@ -69,6 +69,39 @@ public class FileUtils
     }
 
     /**
+     * Checks whether given file is a C source file.
+     * @param file File to check.
+     * @return `true` if given file is a C source file.
+     */
+    public static boolean isCSourceFile(File file)
+    {
+        final String[] extensions = new String[]{ ".c" };
+        return StringUtils.fileHasExtension(file, extensions);
+    }
+
+    /**
+     * Checks whether given file is a C++ source file.
+     * @param file File to check.
+     * @return `true` if given file is a C++ source file.
+     */
+    public static boolean isCxxSourceFile(File file)
+    {
+        final String[] extensions = new String[]{ ".cc", ".cpp", ".cxx" };
+        return StringUtils.fileHasExtension(file, extensions);
+    }
+
+    /**
+     * Checks whether given file is a C or C++ header file.
+     * @param file File to check.
+     * @return `true` if given file is a C or C++ header file.
+     */
+    public static boolean isHeaderFile(File file)
+    {
+        final String[] extensions = new String[]{ ".h", ".hh", ".hpp", ".hxx", ".inl" };
+        return StringUtils.fileHasExtension(file, extensions);
+    }
+
+    /**
      * Creates the specified directory and all parent directories if they do not exist yet.
      * @param directory Path to the directory.
      */

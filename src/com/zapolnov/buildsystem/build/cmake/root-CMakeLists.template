@@ -1,0 +1,24 @@
+#
+# Template file is Copyright (c) 2015 Nikolay Zapolnov (zapolnov@gmail.com).
+# Licensed under the MIT license.
+#
+
+cmake_minimum_required(VERSION 3.2)
+project(@{target_name})
+
+add_custom_target(BuildSystemCheck ALL
+    "@{java_executable}" -jar "@{jar}"
+        -b
+        -g "@{generator}"
+        -p "@{project_directory}"
+    WORKING_DIRECTORY
+        "@{project_directory}"
+    COMMENT
+        "Validating build scripts"
+    SOURCES
+        @{project_files}
+)
+
+@{source_groups}
+
+add_subdirectory(src)

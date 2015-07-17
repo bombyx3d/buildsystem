@@ -24,6 +24,7 @@ package com.zapolnov.buildsystem;
 import com.zapolnov.buildsystem.tests.ColorsTest;
 import com.zapolnov.buildsystem.tests.DatabaseTests;
 import com.zapolnov.buildsystem.tests.FileBuilderTests;
+import com.zapolnov.buildsystem.tests.FileUtilsTest;
 import com.zapolnov.buildsystem.tests.GeneratorTest;
 import com.zapolnov.buildsystem.tests.LogTests;
 import com.zapolnov.buildsystem.tests.PluginTest;
@@ -57,6 +58,7 @@ public final class TestsMain
             PluginTest.class,
             ColorsTest.class,
             SystemUtilsTest.class,
+            FileUtilsTest.class,
             GeneratorTest.class
         );
 

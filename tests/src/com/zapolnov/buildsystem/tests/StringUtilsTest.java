@@ -22,6 +22,7 @@
 package com.zapolnov.buildsystem.tests;
 
 import com.zapolnov.buildsystem.utility.StringUtils;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.junit.Assert;
@@ -85,6 +86,33 @@ public class StringUtilsTest extends Assert
         expected = toByteArray("47bf4f5cf379cc3543c41db0951ec419");
         actual = StringUtils.md5ForObjects("Hello", "world!");
         assertArrayEquals(expected, actual);
+    }
+
+    @Test public void testFileHasExtension() throws IOException
+    {
+        boolean result = StringUtils.fileHasExtension(new File("Test"), new String[]{});
+        assertFalse(result);
+
+        result = StringUtils.fileHasExtension(new File("Test"), new String[]{ ".exe" });
+        assertFalse(result);
+
+        result = StringUtils.fileHasExtension(new File("Test.exe"), new String[]{ ".exe" });
+        assertTrue(result);
+
+        result = StringUtils.fileHasExtension(new File("Test.exe"), new String[]{ ".exe", ".com" });
+        assertTrue(result);
+
+        result = StringUtils.fileHasExtension(new File("Test.exe"), new String[]{ ".com", ".exe" });
+        assertTrue(result);
+
+        result = StringUtils.fileHasExtension(new File("Test.com"), new String[]{ ".exe", ".com", ".z" });
+        assertTrue(result);
+
+        result = StringUtils.fileHasExtension(new File("Test.tar.gz"), new String[]{ ".com", ".exe", ".gz" });
+        assertTrue(result);
+
+        result = StringUtils.fileHasExtension(new File("Test.tar.gz"), new String[]{ ".com", ".exe", ".tar.gz" });
+        assertTrue(result);
     }
 
     @Test public void testShortExceptionMessage() throws IOException

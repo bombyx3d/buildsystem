@@ -23,12 +23,13 @@ package com.zapolnov.buildsystem.build.qt5;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.build.Generator;
+import com.zapolnov.buildsystem.build.cmake.CMakeGeneratorUtilities;
 
 /** Qt5 project generator. */
 public class Qt5CMakeGenerator extends Generator
 {
     @Override public void generate(ProjectBuilder projectBuilder) throws Throwable
     {
-
+        CMakeGeneratorUtilities.writeCMakeLists(projectBuilder);
     }
 }
