@@ -156,7 +156,7 @@ public class CMakeGeneratorUtilities
             projectFileList.append(String.format("        \"%s\"\n", cmakeEscapePath(items.get(0))));
         }
 
-        // Build list of SOURCE_GROUP() commands for source files
+        // Build list of SOURCE_GROUP() commands for project files
 
         StringBuilder projectFileGroupsString = new StringBuilder();
         for (Map.Entry<String, List<String>> sourceGroup : projectFileGroups.entrySet()) {
@@ -164,7 +164,8 @@ public class CMakeGeneratorUtilities
                 String groupName = sourceGroup.getKey().replace("/", "\\");
                 while (groupName.startsWith("..\\"))
                     groupName = groupName.substring(3);
-                projectFileGroupsString.append(String.format("source_group(\"%s\" FILES\n", cmakeEscape(groupName)));
+                projectFileGroupsString.append(String.format(
+                    "source_group(\"Source Files\\\\%s\" FILES\n", cmakeEscape(groupName)));
                 for (String file : sourceGroup.getValue())
                     projectFileGroupsString.append(String.format("    \"%s\"\n", cmakeEscapePath(file)));
                 projectFileGroupsString.append(")\n\n");
@@ -192,8 +193,7 @@ public class CMakeGeneratorUtilities
         Map<String, String> options = new LinkedHashMap<>();
         options.put("target_name", cmakeEscape(targetName[0]));
         options.put("java_executable", cmakeEscapePath(SystemUtils.getJavaExecutable()));
-        options.put("jar", cmakeEscapePath(FileUtils.getRelativePath(projectBuilder.project.directory,
-            SystemUtils.getApplicationJarFile())));
+        options.put("jar", cmakeEscapePath(FileUtils.getCanonicalPath(SystemUtils.getApplicationJarFile())));
         options.put("generator", cmakeEscape(projectBuilder.generator().getClass().getName()));
         options.put("project_directory", cmakeEscapePath(FileUtils.getCanonicalPath(projectBuilder.project.directory)));
         options.put("project_files", projectFileList.toString());
@@ -235,7 +235,7 @@ public class CMakeGeneratorUtilities
                 String groupName = sourceGroup.getKey().replace("/", "\\");
                 while (groupName.startsWith("..\\"))
                     groupName = groupName.substring(3);
-                builder.append(String.format("source_group(\"%s\" FILES\n", cmakeEscape(groupName)));
+                builder.append(String.format("source_group(\"Source Files\\\\%s\" FILES\n", cmakeEscape(groupName)));
                 for (String file : sourceGroup.getValue())
                     builder.append(String.format("    \"%s\"\n", cmakeEscapePath(file)));
                 builder.append(")\n\n");
