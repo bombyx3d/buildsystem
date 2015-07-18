@@ -21,6 +21,7 @@
  */
 package com.zapolnov.buildsystem.project;
 
+import com.zapolnov.buildsystem.build.TargetPlatform;
 import com.zapolnov.buildsystem.plugins.AbstractPlugin;
 import com.zapolnov.buildsystem.project.directives.DefineDirective;
 import com.zapolnov.buildsystem.project.directives.HeaderPathsDirective;
@@ -28,6 +29,7 @@ import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
 import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
+import com.zapolnov.buildsystem.project.directives.TargetPlatformSelectorDirective;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.StringUtils;
 import com.zapolnov.buildsystem.utility.yaml.YamlError;
@@ -333,6 +335,20 @@ public class ProjectReader
                     }
                 }
             });
+
+            for (TargetPlatform platform : TargetPlatform.values()) {
+                d.put(platform.name, (r, k, v) -> {
+                    ProjectScope previousScope = r.scope;
+                    r.scope = new ProjectScope(r.currentScope().directory, r.currentScope(), false);
+
+                    try {
+                        r.readDirectives(v.toMapping());
+                        r.currentScope().addDirective(new TargetPlatformSelectorDirective(platform, r.scope));
+                    } finally {
+                        r.scope = previousScope;
+                    }
+                });
+            }
 
             standardDirectives = d;
         }

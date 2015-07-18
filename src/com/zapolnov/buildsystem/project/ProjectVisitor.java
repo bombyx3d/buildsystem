@@ -27,6 +27,7 @@ import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
 import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
+import com.zapolnov.buildsystem.project.directives.TargetPlatformSelectorDirective;
 
 /** Base class for project scope directive enumerations. */
 public abstract class ProjectVisitor
@@ -37,4 +38,11 @@ public abstract class ProjectVisitor
     @SuppressWarnings("unused") public void visitHeaderPaths(HeaderPathsDirective directive) {}
     @SuppressWarnings("unused") public void visitSourceDirectories(SourceDirectoriesDirective directive) {}
     @SuppressWarnings("unused") public void visitSourceFiles(SourceFilesDirective directive) {}
+
+    /**
+     * Called for each visited platform-specific section in the project file.
+     * @param d Directive.
+     * @return `true` if this section should be visited, otherwise `false`.
+     */
+    @SuppressWarnings("unused") public abstract boolean visitTargetPlatformSelector(TargetPlatformSelectorDirective d);
 }

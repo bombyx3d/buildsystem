@@ -25,6 +25,12 @@ package com.zapolnov.buildsystem.build;
 public abstract class Generator
 {
     /**
+     * Retrieves target platform of this generator.
+     * @return Target platform.
+     */
+    public abstract TargetPlatform targetPlatform();
+
+    /**
      * Generates the project.
      * @param projectBuilder Project builder.
      */

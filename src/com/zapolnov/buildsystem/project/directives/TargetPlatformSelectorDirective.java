@@ -19,24 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.build.qt5;
+package com.zapolnov.buildsystem.project.directives;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
-import com.zapolnov.buildsystem.build.Generator;
 import com.zapolnov.buildsystem.build.TargetPlatform;
-import com.zapolnov.buildsystem.build.cmake.CMakeGeneratorUtilities;
+import com.zapolnov.buildsystem.project.ProjectDirective;
+import com.zapolnov.buildsystem.project.ProjectScope;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
 
-/** Qt5 project generator. */
-public class Qt5CMakeGenerator extends Generator
+/** A platform-specific section in the project file. */
+public final class TargetPlatformSelectorDirective extends ProjectDirective
 {
-    @Override public TargetPlatform targetPlatform()
+    /** Target platform. */
+    public final TargetPlatform targetPlatform;
+    /** Scope. */
+    public final ProjectScope scope;
+
+    /**
+     * Constructor.
+     * @param targetPlatform Target platform.
+     * @param scope Scope.
+     */
+    public TargetPlatformSelectorDirective(TargetPlatform targetPlatform, ProjectScope scope)
     {
-        return TargetPlatform.QT5;
+        this.targetPlatform = targetPlatform;
+        this.scope = scope;
     }
 
-    @Override public void generate(ProjectBuilder projectBuilder) throws Throwable
+    @Override public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
-        CMakeGeneratorUtilities.writeCMakeLists(projectBuilder);
-        CMakeGeneratorUtilities.generateCLionProject(projectBuilder);
+        scope.preBuild(projectBuilder);
+    }
+
+    @Override public void build(ProjectBuilder projectBuilder) throws Throwable
+    {
+        scope.build(projectBuilder);
+    }
+
+    @Override public void visit(ProjectVisitor visitor)
+    {
+        if (visitor.visitTargetPlatformSelector(this))
+            scope.visit(visitor);
     }
 }

@@ -30,6 +30,7 @@ import com.zapolnov.buildsystem.project.directives.ImportDirective;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
 import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetNameDirective;
+import com.zapolnov.buildsystem.project.directives.TargetPlatformSelectorDirective;
 import com.zapolnov.buildsystem.utility.FileBuilder;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.StringUtils;
@@ -107,6 +108,9 @@ public class CMakeGeneratorUtilities
                     else if (FileUtils.isHeaderFile(file))
                         (directive.thirdparty ? thirdPartyHeaderFiles : headerFiles).add(file);
                 }
+            }
+            @Override public boolean visitTargetPlatformSelector(TargetPlatformSelectorDirective directive) {
+                return directive.targetPlatform == projectBuilder.generator().targetPlatform();
             }
         });
 
@@ -258,6 +262,9 @@ public class CMakeGeneratorUtilities
         projectBuilder.project.scope.visit(new ProjectVisitor() {
             @Override public void visitTargetName(TargetNameDirective directive) {
                 targetName[0] = directive.name;
+            }
+            @Override public boolean visitTargetPlatformSelector(TargetPlatformSelectorDirective directive) {
+                return directive.targetPlatform == projectBuilder.generator().targetPlatform();
             }
         });
 
