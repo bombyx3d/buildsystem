@@ -84,6 +84,7 @@ public class MainDialog extends JDialog
     public static final String NOT_A_DIRECTORY_MESSAGE = "Entered path does not represent a directory.";
     public static final String PROJECT_NOT_FOUND_MESSAGE = "Entered directory does not contain a project file.";
     public static final String UNABLE_TO_LOAD_PROJECT_MESSAGE = "Unable to load project file.";
+    public static final String RELOAD_BUTTON_TITLE = "Reload";
     public static final String DETAILS_BUTTON_TITLE = "Details...";
 
     private static final String PREF_PROJECT_DIRECTORY = "ProjectDirectory";
@@ -180,12 +181,15 @@ public class MainDialog extends JDialog
         contentBox.add(scrollArea);
 
         rebuildCheckBox = new JCheckBox(REBUILD_CHECKBOX_TITLE);
+        rebuildCheckBox.setEnabled(false);  // FIXME
         contentBox.add(rebuildCheckBox);
 
         openProjectCheckBox = new JCheckBox(OPEN_PROJECT_CHECKBOX_TITLE);
+        openProjectCheckBox.setEnabled(false);  // FIXME
         contentBox.add(openProjectCheckBox);
 
         exitOnSuccessCheckBox = new JCheckBox(EXIT_ON_SUCCESS_CHECKBOX_TITLE);
+        exitOnSuccessCheckBox.setEnabled(false);  // FIXME
         contentBox.add(exitOnSuccessCheckBox);
 
         ButtonPanel buttonPanel = new ButtonPanel(3);
@@ -347,8 +351,17 @@ public class MainDialog extends JDialog
 
             errorPanel.add(Box.createVerticalStrut(10));
 
+            JPanel buttonsPanel = new JPanel(new GridBagLayout());
+            buttonsPanel.setAlignmentX(Container.CENTER_ALIGNMENT);
+            errorPanel.add(buttonsPanel);
+
+            JButton reloadButton = new JButton(RELOAD_BUTTON_TITLE);
+            reloadButton.addActionListener(e -> {
+                reloadProject();
+            });
+            buttonsPanel.add(reloadButton);
+
             JButton detailsButton = new JButton(DETAILS_BUTTON_TITLE);
-            detailsButton.setAlignmentX(Container.CENTER_ALIGNMENT);
             detailsButton.addActionListener(e -> {
                 FatalErrorDialog dialog = new FatalErrorDialog(this, exception);
                 dialog.setTitle(ERROR_DETAILS_TITLE);
@@ -356,7 +369,7 @@ public class MainDialog extends JDialog
                 dialog.setDetailsButtonVisible(false);
                 dialog.setVisible(true);
             });
-            errorPanel.add(detailsButton);
+            buttonsPanel.add(detailsButton);
 
             JPanel errorContainer = new JPanel(new GridBagLayout());
             errorContainer.add(errorPanel);
