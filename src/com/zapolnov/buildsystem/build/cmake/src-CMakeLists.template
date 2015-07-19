@@ -69,6 +69,12 @@ else()
     set(CMAKE_REQUIRED_DEFINITIONS)
 endif()
 
+if(NOT CMAKE_PREFIX_PATH)
+    if(WIN32)
+        include(LocateQt5_Win32.cmake)
+    endif()
+endif()
+
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)

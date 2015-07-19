@@ -8,6 +8,9 @@
       <w>cstddef</w>
       <w>cstdint</w>
       <w>dcmake</w>
+      <w>elif</w>
+      <w>endforeach</w>
+      <w>endwhile</w>
       <w>extern</w>
       <w>grou</w>
       <w>largefile</w>
@@ -21,6 +24,7 @@
       <w>pathext</w>
       <w>rdparty</w>
       <w>stacktraces</w>
+      <w>subdirs</w>
       <w>thirdparty</w>
       <w>uint</w>
       <w>unhex</w>

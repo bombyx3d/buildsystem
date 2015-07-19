@@ -52,6 +52,8 @@ public class CMakeGeneratorUtilities
     private static final Template rootTemplate;
     /** Template for CMakeLists.txt in subdirectory 'src'. */
     private static final Template srcTemplate;
+    /** Template for LocateQt5_Win32.cmake. */
+    private static final Template locateQt5Win32Template;
     /** Template for CLion project file. */
     private static final Template clionProjectTemplate;
     /** Template for '.idea/encodings.xml'. */
@@ -217,6 +219,12 @@ public class CMakeGeneratorUtilities
         options.put("include_directories", includeDirectories.toString());
         srcTemplate.emit(builder, options);
 
+        builder.commit(projectBuilder.database);
+
+        // Write src/LocateQt5_Win32.cmake
+
+        builder = new FileBuilder(srcDir, "LocateQt5_Win32.cmake");
+        locateQt5Win32Template.emit(builder, new HashMap<>());
         builder.commit(projectBuilder.database);
 
         // Write SourceFiles.cmake
@@ -447,6 +455,7 @@ public class CMakeGeneratorUtilities
             Class<?> thisClass = CMakeGeneratorUtilities.class;
             rootTemplate = new Template(thisClass.getResourceAsStream("root-CMakeLists.template"));
             srcTemplate = new Template(thisClass.getResourceAsStream("src-CMakeLists.template"));
+            locateQt5Win32Template = new Template(thisClass.getResourceAsStream("LocateQt5_Win32.cmake"));
             clionProjectTemplate = new Template(thisClass.getResourceAsStream("idea/project.iml.template"));
             clionEncodingsTemplate = new Template(thisClass.getResourceAsStream("idea/encodings.xml.template"));
             clionMiscTemplate = new Template(thisClass.getResourceAsStream("idea/misc.xml.template"));
