@@ -105,7 +105,7 @@ public class TemplateTests extends Assert
         assertFalse(file.isDirectory());
 
         if (file.length() == 0) {
-            assertEquals(expectedContents, "");
+            assertEquals("", expectedContents);
             return;
         }
 

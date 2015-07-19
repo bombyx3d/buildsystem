@@ -39,7 +39,7 @@ public class AbstractPluginTest extends Assert
 
         Map<String, ProjectReader.DirectiveParser> directives = plugin.customDirectives();
         assertNotNull(directives);
-        assertEquals(directives.size(), 0);
+        assertTrue(directives.isEmpty());
 
         plugin.preBuild(null);
         plugin.preGenerate(null);

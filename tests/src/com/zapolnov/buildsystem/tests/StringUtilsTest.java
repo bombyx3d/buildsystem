@@ -118,16 +118,16 @@ public class StringUtilsTest extends Assert
     @Test public void testShortExceptionMessage() throws IOException
     {
         String message = StringUtils.getShortExceptionMessage(new NullPointerException());
-        assertEquals(message, "java.lang.NullPointerException");
+        assertEquals("java.lang.NullPointerException", message);
 
         message = StringUtils.getShortExceptionMessage(new FileNotFoundException("test.file"));
-        assertEquals(message, "File not found: test.file");
+        assertEquals("File not found: test.file", message);
 
         message = StringUtils.getShortExceptionMessage(new ClassNotFoundException("TestClass"));
-        assertEquals(message, "Class not found: TestClass");
+        assertEquals("Class not found: TestClass", message);
 
         message = StringUtils.getShortExceptionMessage(new RuntimeException("Test message"));
-        assertEquals(message, "Test message");
+        assertEquals("Test message", message);
     }
 
     @Test public void testDetailedExceptionMessage() throws IOException

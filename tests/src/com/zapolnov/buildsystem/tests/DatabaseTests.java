@@ -44,35 +44,35 @@ public class DatabaseTests extends Assert
 
             database.setOption("TEST_OPTION", "Hello, world!");
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world!");
+            assertEquals("Hello, world!", option);
 
             database.commit();
 
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world!");
+            assertEquals("Hello, world!", option);
 
             database.setOption("TEST_OPTION", "Hello, world 2!");
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world 2!");
+            assertEquals("Hello, world 2!", option);
 
             database.rollback();
 
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world!");
+            assertEquals("Hello, world!", option);
 
             database.setOption("TEST_OPTION", "Hello, world 2!");
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world 2!");
+            assertEquals("Hello, world 2!", option);
 
             database.commit();
 
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world 2!");
+            assertEquals("Hello, world 2!", option);
 
             database.rollbackSafe();
 
             option = database.getOption("TEST_OPTION");
-            assertEquals(option, "Hello, world 2!");
+            assertEquals("Hello, world 2!", option);
         } finally {
             database.close();
             new File(temporaryDirectory, Database.FILE_NAME).deleteOnExit();

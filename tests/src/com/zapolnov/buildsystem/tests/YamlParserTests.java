@@ -89,8 +89,8 @@ public class YamlParserTests extends Assert
         assertFalse(value.isSequence());
         assertTrue(value.isString());
 
-        assertEquals(value.toString(), "item1");
-        assertEquals(value.toSequence().get(0).toString(), "item1");
+        assertEquals("item1", value.toString());
+        assertEquals("item1", value.toSequence().get(0).toString());
 
         boolean thrown = false;
         try { value.toMapping(); } catch(YamlError e) { thrown = true; }
@@ -116,8 +116,8 @@ public class YamlParserTests extends Assert
         assertFalse(value.isString());
 
         assertEquals(value.toSequence().size(), 2);
-        assertEquals(value.toSequence().get(0).toString(), "item1");
-        assertEquals(value.toSequence().get(1).toString(), "item2");
+        assertEquals("item1", value.toSequence().get(0).toString());
+        assertEquals("item2", value.toSequence().get(1).toString());
 
         boolean thrown = false;
         try { value.toMapping(); } catch(YamlError e) { thrown = true; }
@@ -148,8 +148,8 @@ public class YamlParserTests extends Assert
 
         YamlValue values[] = value.toMapping().values().toArray(new YamlValue[2]);
         assertEquals(values.length, 2);
-        assertEquals(values[0].toString(), "value1");
-        assertEquals(values[1].toString(), "value2");
+        assertEquals("value1", values[0].toString());
+        assertEquals("value2", values[1].toString());
 
         boolean thrown = false;
         try { value.toSequence(); } catch(YamlError e) { thrown = true; }

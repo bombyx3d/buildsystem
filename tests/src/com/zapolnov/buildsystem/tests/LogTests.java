@@ -118,11 +118,11 @@ public class LogTests extends Assert
             Log.debug(TEST_DEBUG_MESSAGE);
             Log.trace(TEST_TRACE_MESSAGE);
 
-            assertEquals(printer.errorMessage, TEST_ERROR_MESSAGE);
-            assertEquals(printer.warningMessage, TEST_WARNING_MESSAGE);
-            assertEquals(printer.infoMessage, TEST_INFO_MESSAGE);
-            assertEquals(printer.debugMessage, TEST_DEBUG_MESSAGE);
-            assertEquals(printer.traceMessage, TEST_TRACE_MESSAGE);
+            assertEquals(TEST_ERROR_MESSAGE, printer.errorMessage);
+            assertEquals(TEST_WARNING_MESSAGE, printer.warningMessage);
+            assertEquals(TEST_INFO_MESSAGE, printer.infoMessage);
+            assertEquals(TEST_DEBUG_MESSAGE, printer.debugMessage);
+            assertEquals(TEST_TRACE_MESSAGE, printer.traceMessage);
         } finally {
             Log.setPrinter(null);
         }
