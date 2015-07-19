@@ -54,9 +54,11 @@ import java.util.List;
                 directive.visitFiles(this);
             }
             @Override public void visitSourceFiles(SourceFilesDirective directive) {
-                for (File file : directive.sourceFiles()) {
-                    if (FileUtils.isHeaderFile(file) || StringUtils.fileHasExtension(file, EXTENSIONS))
-                        headerFiles.add(file);
+                if (!directive.thirdparty) {
+                    for (File file : directive.sourceFiles()) {
+                        if (FileUtils.isHeaderFile(file) || StringUtils.fileHasExtension(file, EXTENSIONS))
+                            headerFiles.add(file);
+                    }
                 }
             }
             @Override public boolean visitTargetPlatformSelector(TargetPlatformSelectorDirective directive) {
