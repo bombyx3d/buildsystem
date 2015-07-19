@@ -23,6 +23,7 @@ package com.zapolnov.buildsystem.tests;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.build.Generator;
+import com.zapolnov.buildsystem.build.TargetPlatform;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,6 +31,7 @@ public class GeneratorTest extends Assert
 {
     private final static class TestGenerator extends Generator
     {
+        @Override public TargetPlatform targetPlatform() { return null; }
         @Override public void generate(ProjectBuilder projectBuilder) {}
     };
 
