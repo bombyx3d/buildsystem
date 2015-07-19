@@ -6,10 +6,16 @@ Bombyx3D Build System
  <img src="https://travis-ci.org/bombyx3d/buildsystem.svg?branch=master" alt="Build Status" />
 </a>
 
-Building
---------
+Stable releases
+---------------
 
-You will need the following software to build this tool:
+Latest stable binary of the build system is available on the
+[GitHub releases page](https://github.com/bombyx3d/buildsystem/releases).
+
+Building from sources
+---------------------
+
+If you want to build the latest version from sources, you will need to download and install the following software:
 
   * [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) (version 8 or later)
   * [Apache ANT](http://ant.apache.org/)
