@@ -53,6 +53,7 @@ THE SOFTWARE.
                 <include name="com/zapolnov/buildsystem/build/cmake/idea/project.iml.template" />
                 <include name="com/zapolnov/buildsystem/build/cmake/idea/runConfiguration.xml.template" />
                 <include name="com/zapolnov/buildsystem/build/cmake/idea/workspace.xml.template" />
+                <include name="com/zapolnov/buildsystem/build/cmake/CopyIfNotExists.cmake" />
                 <include name="com/zapolnov/buildsystem/build/cmake/LocateQt5_Win32.cmake" />
                 <include name="com/zapolnov/buildsystem/build/cmake/root-CMakeLists.template" />
                 <include name="com/zapolnov/buildsystem/build/cmake/src-CMakeLists.template" />

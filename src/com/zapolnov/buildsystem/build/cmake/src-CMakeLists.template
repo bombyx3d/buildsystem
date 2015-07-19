@@ -137,3 +137,39 @@ set_target_properties(@{target_name} PROPERTIES CXX_STANDARD 11)
 
 target_link_libraries(@{target_name} Qt5::OpenGL Qt5::Widgets Qt5::Gui Qt5::Core)
 target_link_libraries(@{target_name} ${OPENGL_LIBRARIES})
+
+if(WIN32)
+
+    set(qt "${_qt5Core_install_prefix}/bin")
+    file(TO_CMAKE_PATH "${qt}" qt)
+
+    file(GLOB icudt RELATIVE "${qt}" "${qt}/icudt*.dll")
+    file(GLOB icuin RELATIVE "${qt}" "${qt}/icuin*.dll")
+    file(GLOB icuuc RELATIVE "${qt}" "${qt}/icuuc*.dll")
+    set(files "${icudt}" "${icuin}" "${icuuc}")
+
+    set(suffix "$<$<CONFIG:Debug>:d>")
+    list(APPEND files "Qt5Core${suffix}.dll")
+    list(APPEND files "Qt5Gui${suffix}.dll")
+    list(APPEND files "Qt5Widgets${suffix}.dll")
+    list(APPEND files "Qt5OpenGL${suffix}.dll")
+
+    foreach(file ${files})
+
+        string(REPLACE "${suffix}" "" dll "${file}")
+
+        add_custom_command(TARGET
+            @{target_name}
+        POST_BUILD
+        COMMAND
+            "${CMAKE_COMMAND}"
+            -Dout="$<TARGET_FILE_DIR:@{target_name}>"
+            -Din="${qt}/${file}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/CopyIfNotExists.cmake"
+        COMMENT
+            "Validating ${dll}"
+        )
+
+    endforeach()
+
+endif()

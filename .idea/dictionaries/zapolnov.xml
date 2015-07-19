@@ -7,12 +7,14 @@
       <w>buildsystem</w>
       <w>cstddef</w>
       <w>cstdint</w>
-      <w>dcmake</w>
+      <w>dlls</w>
       <w>elif</w>
       <w>endforeach</w>
       <w>endwhile</w>
       <w>extern</w>
-      <w>grou</w>
+      <w>icudt</w>
+      <w>icuin</w>
+      <w>icuuc</w>
       <w>largefile</w>
       <w>libm</w>
       <w>makefiles</w>
