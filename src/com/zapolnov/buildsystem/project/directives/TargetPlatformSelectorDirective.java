@@ -46,6 +46,11 @@ public final class TargetPlatformSelectorDirective extends ProjectDirective
         this.scope = scope;
     }
 
+    @Override public void clearCaches() throws Throwable
+    {
+        scope.clearCaches();
+    }
+
     @Override public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
         scope.preBuild(projectBuilder);

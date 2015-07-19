@@ -8,6 +8,7 @@
       <w>cstddef</w>
       <w>cstdint</w>
       <w>dlls</w>
+      <w>doxyfile</w>
       <w>elif</w>
       <w>endforeach</w>
       <w>endwhile</w>

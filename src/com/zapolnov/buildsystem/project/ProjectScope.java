@@ -61,6 +61,13 @@ public class ProjectScope
         directives.add(directive);
     }
 
+    /** Clears cached values. */
+    public void clearCaches() throws Throwable
+    {
+        for (ProjectDirective directive : directives)
+            directive.clearCaches();
+    }
+
     /**
      * Performs pre-build actions implemented by directives in this scope.
      * @param projectBuilder Project builder.

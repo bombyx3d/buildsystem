@@ -306,7 +306,7 @@ public class ProjectReader
                 }
             });
 
-            d.put("plugin", (r, k, v) -> {
+            d.put("load-plugins", (r, k, v) -> {
                 for (YamlValue plugin : v.toSequence()) {
                     String name = plugin.toString();
 

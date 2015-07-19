@@ -34,6 +34,8 @@ public final class SourceDirectoriesDirective extends ProjectDirective
 {
     /** List of directories with source files. */
     private final List<File> sourceDirectories;
+    /** Cached list of source files. */
+    private List<File> sourceFiles;
     /** Set to `true` if this directive is a '3rdparty_source_directories' directive. */
     public final boolean thirdparty;
 
@@ -63,10 +65,17 @@ public final class SourceDirectoriesDirective extends ProjectDirective
      */
     public List<File> sourceFiles()
     {
-        List<File> sourceFiles = new ArrayList<>();
-        for (File directory : sourceDirectories)
-            sourceFiles.addAll(FileUtils.recursivelyEnumerateFilesInDirectory(directory));
+        if (sourceFiles == null) {
+            sourceFiles = new ArrayList<>();
+            for (File directory : sourceDirectories())
+                sourceFiles.addAll(FileUtils.recursivelyEnumerateFilesInDirectory(directory));
+        }
         return sourceFiles;
+    }
+
+    @Override public void clearCaches() throws Throwable
+    {
+        sourceFiles = null;
     }
 
     @Override public void visit(ProjectVisitor visitor)

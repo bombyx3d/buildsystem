@@ -114,6 +114,7 @@ public class ProjectBuilder
             FileUtils.ensureDirectoryExists(generatorOutputDirectory);
 
             Log.debug("=== Pre-build phase");
+            project.scope.clearCaches();
             project.scope.preBuild(this);
             for (AbstractPlugin plugin : project.plugins())
                 plugin.preBuild(this);

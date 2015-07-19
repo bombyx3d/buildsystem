@@ -26,6 +26,11 @@ import com.zapolnov.buildsystem.build.ProjectBuilder;
 /** Base class for directives in the project file. */
 public abstract class ProjectDirective
 {
+    /** Clears cached values. */
+    public void clearCaches() throws Throwable
+    {
+    }
+
     /**
      * Performs pre-build actions implemented by the directive.
      * @param projectBuilder Project builder.
