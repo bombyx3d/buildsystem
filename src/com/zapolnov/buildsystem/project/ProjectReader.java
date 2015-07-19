@@ -340,10 +340,9 @@ public class ProjectReader
                 d.put(platform.id, (r, k, v) -> {
                     ProjectScope previousScope = r.scope;
                     r.scope = new ProjectScope(r.currentScope().directory, r.currentScope(), false);
-
                     try {
                         r.readDirectives(v.toMapping());
-                        r.currentScope().addDirective(new TargetPlatformSelectorDirective(platform, r.scope));
+                        previousScope.addDirective(new TargetPlatformSelectorDirective(platform, r.scope));
                     } finally {
                         r.scope = previousScope;
                     }
