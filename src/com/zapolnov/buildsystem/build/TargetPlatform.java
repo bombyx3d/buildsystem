@@ -26,8 +26,10 @@ import com.zapolnov.buildsystem.build.qt5.Qt5GeneratorFactory;
 /** Target platform. */
 public enum TargetPlatform
 {
-    QT5("Qt 5", new Qt5GeneratorFactory());
+    QT5("qt5", "Qt 5", new Qt5GeneratorFactory());
 
+    /** Unique identifier of the platform. */
+    public final String id;
     /** Name of the platform. */
     public final String name;
     /** Generator factory for the platform. */
@@ -35,11 +37,13 @@ public enum TargetPlatform
 
     /**
      * Constructor.
+     * @param id Unique identifier of the platform.
      * @param name Name of the platform.
      * @param generatorFactory Project generator for the platform.
      */
-    TargetPlatform(String name, GeneratorFactory generatorFactory)
+    TargetPlatform(String id, String name, GeneratorFactory generatorFactory)
     {
+        this.id = id;
         this.name = name;
         this.generatorFactory = generatorFactory;
     }

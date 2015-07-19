@@ -337,7 +337,7 @@ public class ProjectReader
             });
 
             for (TargetPlatform platform : TargetPlatform.values()) {
-                d.put(platform.name, (r, k, v) -> {
+                d.put(platform.id, (r, k, v) -> {
                     ProjectScope previousScope = r.scope;
                     r.scope = new ProjectScope(r.currentScope().directory, r.currentScope(), false);
 
