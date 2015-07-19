@@ -1,0 +1,182 @@
+/*
+ * Copyright (c) 2015 Nikolay Zapolnov (zapolnov@gmail.com).
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClassBody;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxIdentifier;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxMemberProtection;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClassList;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClass;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
+import java_cup.runtime.ComplexSymbolFactory;
+
+parser code {:
+
+    public boolean printErrors = false;
+
+    public final static class ParseError extends RuntimeException
+    {
+        public ParseError(String message)
+        {
+            super(message);
+        }
+    }
+
+    public String makeErrorString(String message, Object info)
+    {
+        StringBuilder builder = new StringBuilder();
+
+        if (info instanceof ComplexSymbolFactory.ComplexSymbol) {
+            ComplexSymbolFactory.ComplexSymbol symbol = (ComplexSymbolFactory.ComplexSymbol)info;
+            if (symbol.xleft != null) {
+                if (symbol.xleft.getUnit() != null) {
+                    builder.append("\"");
+                    builder.append(symbol.xleft.getUnit());
+                    builder.append("\"\n");
+                }
+                if (symbol.xleft.getLine() >= 0) {
+                    builder.append("at line ");
+                    builder.append(symbol.xleft.getLine() + 1);
+                }
+                if (symbol.xleft.getColumn() >= 0) {
+                    builder.append(", column ");
+                    builder.append(symbol.xleft.getColumn() + 1);
+                }
+                builder.append(": ");
+            }
+        }
+
+        builder.append(message);
+        return builder.toString();
+    }
+
+    @Override public void report_error(String message, Object info)
+    {
+        if (printErrors)
+            System.out.println(makeErrorString(message, info));
+    }
+
+    @Override protected void report_expected_token_ids()
+    {
+    }
+
+    @Override public void report_fatal_error(String message, Object info)
+    {
+        String description = makeErrorString(message, info);
+        if (printErrors)
+            System.out.println(description);
+        throw new ParseError(description);
+    }
+:};
+
+terminal String IDENTIFIER;
+terminal COMMA;
+terminal COLON;
+terminal SEMICOLON;
+terminal LCURLY;
+terminal RCURLY;
+terminal CLASS;
+terminal STRUCT;
+terminal VIRTUAL;
+terminal PUBLIC;
+terminal PROTECTED;
+terminal PRIVATE;
+terminal UNKNOWN;
+
+non terminal CxxTranslationUnit translation_unit;
+non terminal CxxClass class_declaration;
+non terminal CxxParentClassList parent_class_list;
+non terminal CxxParentClass parent_class;
+non terminal CxxMemberProtection class_protection;
+non terminal CxxClassBody class_body;
+non terminal CxxClassBody class_member_list;
+non terminal CxxIdentifier identifier;
+
+start with translation_unit;
+
+translation_unit
+    ::= /* empty */
+        {: RESULT = new CxxTranslationUnit(); :}
+    | translation_unit:unit class_declaration:decl
+        {: RESULT = unit; unit.addClass(decl); :}
+    | translation_unit:unit UNKNOWN
+        {: RESULT = unit; :}
+    | translation_unit:unit error
+        {: RESULT = unit; :}
+    ;
+
+class_declaration
+    ::= CLASS identifier:name parent_class_list:parents class_body:body
+        {: RESULT = new CxxClass(false, name, parents, body); :}
+    | STRUCT identifier:name parent_class_list:parents class_body:body
+        {: RESULT = new CxxClass(true, name, parents, body); :}
+    ;
+
+parent_class_list
+    ::= /* empty */
+        {: RESULT = new CxxParentClassList(); :}
+    | COLON parent_class:parent
+        {: RESULT = new CxxParentClassList(parent); :}
+    | parent_class_list:list COMMA parent_class:parent
+        {: RESULT = list; list.add(parent); :}
+    ;
+
+parent_class
+    ::= identifier:name
+        {: RESULT = new CxxParentClass(name, null, false); :}
+    | VIRTUAL identifier:name
+        {: RESULT = new CxxParentClass(name, null, true); :}
+    | class_protection:protection identifier:name
+        {: RESULT = new CxxParentClass(name, protection, false); :}
+    | class_protection:protection VIRTUAL identifier:name
+        {: RESULT = new CxxParentClass(name, protection, true); :}
+    | VIRTUAL class_protection:protection identifier:name
+        {: RESULT = new CxxParentClass(name, protection, true); :}
+    ;
+
+class_protection
+    ::= PUBLIC
+        {: RESULT = CxxMemberProtection.PUBLIC; :}
+    | PROTECTED
+        {: RESULT = CxxMemberProtection.PROTECTED; :}
+    | PRIVATE
+        {: RESULT = CxxMemberProtection.PRIVATE; :}
+    ;
+
+class_body
+    ::= LCURLY class_member_list:body RCURLY SEMICOLON
+        {: RESULT = body; :}
+    ;
+
+class_member_list
+    ::= /* empty */
+        {: RESULT = new CxxClassBody(); :}
+    | class_member_list:list class_protection COLON
+        {: RESULT = list; :}
+    | class_member_list:list error
+        {: RESULT = list; :}
+    ;
+
+identifier
+    ::= IDENTIFIER:name
+        {: RESULT = new CxxIdentifier(name); :}
+    ;

@@ -23,9 +23,27 @@ THE SOFTWARE.
 -->
 <project default="build">
 
+    <taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="lib/jflex/jflex-1.6.1.jar" />
+    <taskdef name="cup" classname="java_cup.anttask.CUPTask" classpath="lib/cup/java-cup-11b.jar" />
+
     <target name="build">
         <!-- Create output directory -->
         <mkdir dir="bin/out/production/buildsystem" />
+        <!-- Generate code for lexers. -->
+        <jflex
+            file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxLexer.flex"
+            nobak="on"
+        />
+        <!-- Generate code for parsers -->
+        <cup
+            srcfile="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxParser.cup"
+            destdir="src/com/zapolnov/buildsystem/plugins/metacompiler/parser"
+            package="com.zapolnov.buildsystem.plugins.metacompiler.parser"
+            parser="CxxParser"
+            symbols="CxxToken"
+            interface="on"
+            nosummary="on"
+        />
         <!-- Compile source code -->
         <javac
             includeantruntime="false"
@@ -58,7 +76,11 @@ THE SOFTWARE.
                 <include name="com/zapolnov/buildsystem/build/cmake/root-CMakeLists.template" />
                 <include name="com/zapolnov/buildsystem/build/cmake/src-CMakeLists.template" />
             </fileset>
-            <zipgroupfileset dir="lib" includes="**/*.jar" />
+            <zipgroupfileset
+                dir="lib"
+                includes="**/*.jar"
+                excludes="jflex/jflex-1.6.1.jar,cup/java-cup-11b.jar"
+            />
         </jar>
     </target>
 
@@ -98,6 +120,9 @@ THE SOFTWARE.
 
     <target name="clean">
         <delete dir="bin" />
+        <delete file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxLexer.java" />
+        <delete file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxToken.java" />
+        <delete file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxParser.java" />
     </target>
 
 </project>

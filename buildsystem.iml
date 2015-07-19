@@ -13,5 +13,6 @@
     <orderEntry type="library" scope="TEST" name="junit-4.12" level="project" />
     <orderEntry type="library" name="darcula" level="project" />
     <orderEntry type="library" name="mapdb-1.0.8" level="project" />
+    <orderEntry type="library" name="java-cup-11b-runtime" level="project" />
   </component>
 </module>

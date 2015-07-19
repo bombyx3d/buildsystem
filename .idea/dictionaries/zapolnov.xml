@@ -16,6 +16,7 @@
       <w>icudt</w>
       <w>icuin</w>
       <w>icuuc</w>
+      <w>instanceof</w>
       <w>largefile</w>
       <w>libm</w>
       <w>makefiles</w>
@@ -25,7 +26,7 @@
       <w>nonstdc</w>
       <w>opengl</w>
       <w>pathext</w>
-      <w>rdparty</w>
+      <w>preprocesses</w>
       <w>stacktraces</w>
       <w>subdirs</w>
       <w>thirdparty</w>

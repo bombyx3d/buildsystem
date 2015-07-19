@@ -23,6 +23,7 @@ package com.zapolnov.buildsystem;
 
 import com.zapolnov.buildsystem.tests.AbstractPluginTest;
 import com.zapolnov.buildsystem.tests.ColorsTest;
+import com.zapolnov.buildsystem.tests.CxxParserTest;
 import com.zapolnov.buildsystem.tests.DatabaseTests;
 import com.zapolnov.buildsystem.tests.FileBuilderTests;
 import com.zapolnov.buildsystem.tests.FileUtilsTest;
@@ -59,7 +60,8 @@ public final class TestsMain
             ColorsTest.class,
             SystemUtilsTest.class,
             FileUtilsTest.class,
-            GeneratorTest.class
+            GeneratorTest.class,
+            CxxParserTest.class
         );
 
         System.exit(!result.wasSuccessful() ? 1 : 0);
