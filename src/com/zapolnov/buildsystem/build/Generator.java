@@ -31,6 +31,12 @@ public abstract class Generator
     public abstract TargetPlatform targetPlatform();
 
     /**
+     * Name of the output directory.
+     * @return Name of the output directory.
+     */
+    public abstract String outputDirectoryName();
+
+    /**
      * Generates the project.
      * @param projectBuilder Project builder.
      */

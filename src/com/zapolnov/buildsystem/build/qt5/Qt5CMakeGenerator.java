@@ -34,6 +34,11 @@ public class Qt5CMakeGenerator extends Generator
         return TargetPlatform.QT5;
     }
 
+    @Override public String outputDirectoryName()
+    {
+        return "qt5-cmake";
+    }
+
     @Override public void generate(ProjectBuilder projectBuilder) throws Throwable
     {
         CMakeGeneratorUtilities.writeCMakeLists(projectBuilder);

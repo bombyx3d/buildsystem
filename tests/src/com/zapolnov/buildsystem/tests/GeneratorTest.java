@@ -32,6 +32,7 @@ public class GeneratorTest extends Assert
     private final static class TestGenerator extends Generator
     {
         @Override public TargetPlatform targetPlatform() { return null; }
+        @Override public String outputDirectoryName() { return null; }
         @Override public void generate(ProjectBuilder projectBuilder) {}
     };
 

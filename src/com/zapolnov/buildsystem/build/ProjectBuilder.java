@@ -31,16 +31,22 @@ import java.io.File;
 /** Project builder. */
 public class ProjectBuilder
 {
-    public static final String BUILD_DIRECTORY_NAME = ".build";
+    public static final String BUILD_DIRECTORY_NAME = "build";
+    public static final String DATABASE_DIRECTORY_NAME = ".cache";
 
     /** A project being built. */
     public final Project project;
-    /** Path to the output directory for generated files. */
-    public final File outputDirectory;
     /** Build database. */
     public final Database database;
+
+    /** Path to the output directory for generated files. */
+    private File outputDirectory;
+    /** Path to the hidden directory with database files. */
+    private File databaseDirectory;
     /** Project generator. */
     private Generator generator;
+    /** Path to the output directory for generator-specific files. */
+    private File generatorOutputDirectory;
 
     /**
      * Constructor.
@@ -48,12 +54,33 @@ public class ProjectBuilder
      */
     public ProjectBuilder(Project project)
     {
-        this.outputDirectory = new File(project.directory, BUILD_DIRECTORY_NAME);
+        outputDirectory = new File(project.directory, BUILD_DIRECTORY_NAME);
         FileUtils.ensureDirectoryExists(outputDirectory);
-        FileUtils.makeDirectoryHidden(outputDirectory);
+
+        databaseDirectory = new File(outputDirectory, DATABASE_DIRECTORY_NAME);
+        FileUtils.ensureDirectoryExists(databaseDirectory);
+        FileUtils.makeDirectoryHidden(databaseDirectory);
 
         this.project = project;
-        this.database = new Database(outputDirectory);
+        this.database = new Database(databaseDirectory);
+    }
+
+    /**
+     * Retrieves path to the output directory for generated files.
+     * @return Path to the output directory.
+     */
+    public File outputDirectory()
+    {
+        return outputDirectory;
+    }
+
+    /**
+     * Retrieves path to the output directory for generator-specific files.
+     * @return Path to the output directory.
+     */
+    public File generatorOutputDirectory()
+    {
+        return generatorOutputDirectory;
     }
 
     /**
@@ -72,6 +99,10 @@ public class ProjectBuilder
     public void setGenerator(Generator generator)
     {
         this.generator = generator;
+        if (generator == null)
+            generatorOutputDirectory = null;
+        else
+            generatorOutputDirectory = new File(outputDirectory, generator.outputDirectoryName());
     }
 
     /** Runs the project builder. */
@@ -80,6 +111,7 @@ public class ProjectBuilder
         try {
             if (generator == null)
                 throw new RuntimeException("No generator has been set.");
+            FileUtils.ensureDirectoryExists(generatorOutputDirectory);
 
             Log.debug("=== Pre-build phase");
             project.scope.preBuild(this);

@@ -75,7 +75,7 @@ import java.util.List;
 
     @Override public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
-        File outputDirectory = projectBuilder.outputDirectory;
+        File outputDirectory = projectBuilder.outputDirectory();
         headerSearchPath = FileUtils.getCanonicalFile(new File(outputDirectory, "file2c/include"));
         headerFile = FileUtils.getCanonicalFile(new File(headerSearchPath, output));
         sourceFile = FileUtils.getCanonicalFile(new File(outputDirectory, String.format("file2c/%s.cpp", output)));
