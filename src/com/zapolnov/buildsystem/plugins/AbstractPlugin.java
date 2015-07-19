@@ -33,7 +33,7 @@ public abstract class AbstractPlugin
      * Invoked before project build.
      * @param projectBuilder Project builder.
      */
-    @SuppressWarnings("unused") public void preBuild(ProjectBuilder projectBuilder) throws Throwable
+    public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
     }
 
@@ -49,7 +49,7 @@ public abstract class AbstractPlugin
      * Invoked after IDE files has been generated.
      * @param projectBuilder Project builder.
      */
-    @SuppressWarnings("unused") public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
+    public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
     {
     }
 

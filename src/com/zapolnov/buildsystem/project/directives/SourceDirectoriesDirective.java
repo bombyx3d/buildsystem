@@ -70,7 +70,7 @@ public final class SourceDirectoriesDirective extends ProjectDirective
             for (File directory : sourceDirectories())
                 sourceFiles.addAll(FileUtils.recursivelyEnumerateFilesInDirectory(directory));
         }
-        return sourceFiles;
+        return Collections.unmodifiableList(sourceFiles);
     }
 
     @Override public void clearCaches() throws Throwable

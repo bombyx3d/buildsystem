@@ -41,11 +41,7 @@ import java.util.List;
     public static final String[] EXTENSIONS = new String[]{ ".dox" };
     public static final String DOXYFILE_INC = "Doxyfile.inc";
 
-    /**
-     * Invoked after project has been built but before IDE files has been generated.
-     * @param projectBuilder Project builder.
-     */
-    @SuppressWarnings("unused") public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
+    @Override public void postGenerate(ProjectBuilder projectBuilder) throws Throwable
     {
         List<File> headerFiles = new ArrayList<>();
 
