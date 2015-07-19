@@ -29,6 +29,6 @@ public class Qt5GeneratorFactory extends GeneratorFactory
     /** Constructor. */
     public Qt5GeneratorFactory()
     {
-        generators.put("CMake", new Qt5CMakeGenerator());
+        generators.put("CMake (Qt Creator, JetBrains CLion, etc.)", new Qt5CMakeGenerator());
     }
 }
