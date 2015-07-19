@@ -32,12 +32,13 @@ THE SOFTWARE.
         <!-- Generate code for lexers. -->
         <jflex
             file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxLexer.flex"
+            destdir="src_generated"
             nobak="on"
         />
         <!-- Generate code for parsers -->
         <cup
             srcfile="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxParser.cup"
-            destdir="src/com/zapolnov/buildsystem/plugins/metacompiler/parser"
+            destdir="src_generated/com/zapolnov/buildsystem/plugins/metacompiler/parser"
             package="com.zapolnov.buildsystem.plugins.metacompiler.parser"
             parser="CxxParser"
             symbols="CxxToken"
@@ -48,14 +49,16 @@ THE SOFTWARE.
         <javac
             includeantruntime="false"
             depend="off"
-            srcdir="src"
             destdir="bin/out/production/buildsystem"
             encoding="UTF-8"
             debug="on"
             optimize="on"
             debuglevel="lines,vars,source">
+            <src path="src" />
+            <src path="src_generated" />
             <classpath>
                 <fileset dir="lib"><include name="**/*.jar" /></fileset>
+                <pathelement path="src_generated" />
             </classpath>
         </javac>
         <!-- Create JAR file -->
@@ -63,6 +66,7 @@ THE SOFTWARE.
             <manifest><attribute name="Main-Class" value="com.zapolnov.buildsystem.Main" /></manifest>
             <fileset dir=".">
                 <include name="NOTICE" />
+                <include name="README.md" />
             </fileset>
             <fileset dir="src">
                 <include name="com/zapolnov/buildsystem/build/cmake/idea/encodings.xml.template" />
@@ -120,9 +124,7 @@ THE SOFTWARE.
 
     <target name="clean">
         <delete dir="bin" />
-        <delete file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxLexer.java" />
-        <delete file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxToken.java" />
-        <delete file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxParser.java" />
+        <delete dir="src_generated" />
     </target>
 
 </project>

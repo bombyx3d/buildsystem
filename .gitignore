@@ -1,5 +1,3 @@
 /bin
+/src_generated
 /.idea/workspace.xml
-/src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxLexer.java
-/src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxToken.java
-/src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxParser.java
