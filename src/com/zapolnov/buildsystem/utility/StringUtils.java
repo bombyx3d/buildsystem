@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -85,6 +86,32 @@ public class StringUtils
             builder.append('\1');
         }
         return md5ForString(builder.toString());
+    }
+
+    /**
+     * Converts byte array to its hexadecimal representation.
+     * @param array Byte array to convert.
+     * @return Hexadecimal representation of the array contents.
+     */
+    public static String toHex(byte[] array)
+    {
+        if (array == null || array.length == 0)
+            return "";
+
+        BigInteger bigInt = new BigInteger(1, array);
+        String result = bigInt.toString(16);
+
+        int expectedLength = array.length * 2;
+        int actualLength = result.length();
+        if (actualLength == expectedLength)
+            return result;
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < expectedLength - actualLength; i++)
+            builder.append('0');
+        builder.append(result);
+
+        return builder.toString();
     }
 
     /**

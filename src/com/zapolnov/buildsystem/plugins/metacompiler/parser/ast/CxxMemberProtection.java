@@ -21,8 +21,10 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import java.io.Serializable;
+
 /** Protection level of a C++ class or struct member. */
-public enum CxxMemberProtection
+public enum CxxMemberProtection implements Serializable
 {
     /** Member is private. */
     PRIVATE,

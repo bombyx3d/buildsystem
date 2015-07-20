@@ -21,8 +21,10 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import java.io.Serializable;
+
 /** Class declaration. */
-public class CxxClass
+public class CxxClass implements Serializable
 {
     /** Set to `true` if this class is actually a struct. */
     public final boolean struct;

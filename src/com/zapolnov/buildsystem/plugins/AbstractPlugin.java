@@ -41,7 +41,7 @@ public abstract class AbstractPlugin
      * Invoked after project has been built but before IDE files has been generated.
      * @param projectBuilder Project builder.
      */
-    @SuppressWarnings("unused") public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
+    public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
     {
     }
 

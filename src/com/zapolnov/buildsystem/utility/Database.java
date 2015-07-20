@@ -39,6 +39,7 @@ public class Database
     private final static String INPUT_FILES_TABLE = "InputFiles";
     private final static String INPUT_FILES_OPTIONS_HASHES_TABLE = "InputFilesOptionsHashes";
     private final static String OUTPUT_FILES_TABLE = "OutputFiles";
+    private final static String FILES_PARSE_RESULTS_TABLE = "FileParseResults";
     private final static String OPTIONS_TABLE = "Options";
 
     /** Directory containing the database file. */
@@ -216,5 +217,40 @@ public class Database
         }
 
         return true;
+    }
+
+    /**
+     * Retrieves parse results for the specified file.
+     * @param file Path to the file.
+     * @param parserClass Class that performed the parse.
+     * @return Parse results for the file or `null` if there are no parse results for the file.
+     */
+    public byte[] loadFileParseResults(File file, Class<?> parserClass)
+    {
+        try {
+            open();
+            ConcurrentNavigableMap<String, byte[]> table = db.getTreeMap(FILES_PARSE_RESULTS_TABLE);
+
+            String key = StringUtils.toHex(StringUtils.md5ForObjects(FileUtils.getCanonicalPath(file), parserClass.getName()));
+            return table.get(key);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Stores parse results for the specified file.
+     * @param file Path to the file.
+     * @param parserClass Class that performed the parse.
+     * @param data Parse results.
+     */
+    public void saveFileParseResults(File file, Class<?> parserClass, byte[] data)
+    {
+        open();
+        ConcurrentNavigableMap<String, byte[]> table = db.getTreeMap(FILES_PARSE_RESULTS_TABLE);
+
+        String key = StringUtils.toHex(StringUtils.md5ForObjects(FileUtils.getCanonicalPath(file), parserClass.getName()));
+        table.put(key, data);
     }
 }

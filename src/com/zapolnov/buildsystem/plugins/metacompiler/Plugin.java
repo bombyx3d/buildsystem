@@ -23,6 +23,17 @@ package com.zapolnov.buildsystem.plugins.metacompiler;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.plugins.AbstractPlugin;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
+import com.zapolnov.buildsystem.project.ProjectVisitor;
+import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
+import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
+import com.zapolnov.buildsystem.project.directives.TargetPlatformSelectorDirective;
+import com.zapolnov.buildsystem.utility.FileUtils;
+import com.zapolnov.buildsystem.utility.Log;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Plugin that preprocesses source files and automatically generates some code. */
 @SuppressWarnings("unused") public class Plugin extends AbstractPlugin
@@ -33,6 +44,41 @@ import com.zapolnov.buildsystem.plugins.AbstractPlugin;
     @Override public void preBuild(ProjectBuilder projectBuilder) throws Throwable
     {
         projectBuilder.project.scope.addDirective(directive);
+
+        final List<CxxTranslationUnit> scanResults = new ArrayList<>();
+        projectBuilder.project.scope.visit(new ProjectVisitor() {
+            @Override public void visitSourceDirectories(SourceDirectoriesDirective directive) {
+                directive.visitFiles(this);
+            }
+            @Override public void visitSourceFiles(SourceFilesDirective directive) {
+                if (directive.thirdparty)
+                    return;
+                for (File file : directive.sourceFiles()) {
+                    if (FileUtils.isHeaderFile(file) || FileUtils.isCSourceFile(file) || FileUtils.isCxxSourceFile(file)) {
+                        try {
+                            scanResults.add(projectBuilder.parseFile(file, new CxxAnalyzer()).syntaxTree());
+                        } catch (Throwable t) {
+                            throw new RuntimeException(String.format("Unable to parse file \"%s\".",
+                                FileUtils.getCanonicalPath(file)), t);
+                        }
+                    }
+                }
+            }
+            @Override public boolean visitTargetPlatformSelector(TargetPlatformSelectorDirective directive) {
+                return directive.targetPlatform == projectBuilder.generator().targetPlatform();
+            }
+        });
+
+        for (CxxTranslationUnit translationUnit : scanResults) {
+            for (CxxClass cxxClass : translationUnit.classes()) {
+                // FIXME
+                System.out.println(String.format("--- %s", cxxClass.name.text));
+            }
+        }
+    }
+
+    @Override public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
+    {
     }
 
     @Override public void postGenerate(ProjectBuilder projectBuilder) throws Throwable

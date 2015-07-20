@@ -21,12 +21,13 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /** A list of parent classes in a class declaration. */
-public class CxxParentClassList
+public class CxxParentClassList implements Serializable
 {
     /** List of parent classes. */
     private final List<CxxParentClass> parentClasses = new ArrayList<>();

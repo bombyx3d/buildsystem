@@ -21,55 +21,51 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler;
 
+import com.zapolnov.buildsystem.build.FileParser;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxLexer;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxParser;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /** An analyzer for C++ files. */
-public class CxxAnalyzer
+public class CxxAnalyzer implements FileParser
 {
-    /** Path to the file being analyzed. */
-    public final File file;
+    /** Abstract syntax tree for the analyzed file. */
+    private CxxTranslationUnit syntaxTree;
 
     /**
-     * Constructor.
-     * @param file File to analyze.
+     * Retrieves an abstract syntax tree for the analyzed file.
+     * @return Root of the AST.
      */
-    public CxxAnalyzer(File file)
+    public CxxTranslationUnit syntaxTree()
     {
-        this.file = file;
+        return syntaxTree;
     }
 
-    /**
-     * Parses the file.
-     * @return Translation unit.
-     */
-    public CxxTranslationUnit parse() throws Exception
+    @Override public void parse(File file) throws Exception
     {
+        syntaxTree = new CxxTranslationUnit();
         try {
             CxxLexer lexer = new CxxLexer(new FileReader(file), file.toString());
             CxxParser parser = new CxxParser(lexer, CxxLexer.SymbolFactory.instance);
-            return (CxxTranslationUnit)parser.parse().value;
+            syntaxTree = (CxxTranslationUnit)parser.parse().value;
         } catch (CxxParser.ParseError ignored) {
-            return new CxxTranslationUnit();
         }
     }
 
-    /** Analyzes the file. */
-    public void analyze() throws Exception
+    @Override public void save(ObjectOutputStream stream) throws IOException
     {
-        CxxTranslationUnit translationUnit = parse();
+        stream.writeObject(syntaxTree);
     }
 
-    /**
-     * Analyzes the specified file.
-     * @param file File to analyze.
-     */
-    public static void analyze(File file) throws Exception
+    @Override public void load(ObjectInputStream stream) throws IOException, ClassNotFoundException
     {
-        CxxAnalyzer analyzer = new CxxAnalyzer(file);
-        analyzer.analyze();
+        syntaxTree = (CxxTranslationUnit)stream.readObject();
+        if (syntaxTree == null)
+            syntaxTree = new CxxTranslationUnit();
     }
 }

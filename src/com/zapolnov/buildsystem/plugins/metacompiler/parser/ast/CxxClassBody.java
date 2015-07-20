@@ -21,8 +21,10 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import java.io.Serializable;
+
 /** Body of a class. */
-public class CxxClassBody
+public class CxxClassBody implements Serializable
 {
     /** Constructor. */
     public CxxClassBody()

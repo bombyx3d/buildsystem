@@ -26,7 +26,13 @@ import com.zapolnov.buildsystem.project.Project;
 import com.zapolnov.buildsystem.utility.Database;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import com.zapolnov.buildsystem.utility.Log;
+import com.zapolnov.buildsystem.utility.StringUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /** Project builder. */
 public class ProjectBuilder
@@ -103,6 +109,45 @@ public class ProjectBuilder
             generatorOutputDirectory = null;
         else
             generatorOutputDirectory = new File(outputDirectory, generator.outputDirectoryName());
+    }
+
+    /**
+     * Parses a source file.
+     * This method caches result of a parse and retrieves the cached results if file did not change.
+     * @param file Path to the file.
+     * @param parser Parser.
+     */
+    public <PARSER extends FileParser> PARSER parseFile(File file, PARSER parser) throws Throwable
+    {
+        byte[] fileData = database.loadFileParseResults(file, parser.getClass());
+        if (fileData != null) {
+            try {
+                ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(fileData));
+                long expectedLastModificationTime = stream.readLong();
+                long actualLastModificationTime = file.lastModified();
+                if (expectedLastModificationTime == actualLastModificationTime) {
+                    parser.load(stream);
+                    return parser;
+                }
+            } catch (Throwable t) {
+                Log.debug(String.format("Unable to deserialize data for file \"%s\".\n%s",
+                    file.toString(), StringUtils.getDetailedExceptionMessage(t)));
+            }
+        }
+
+        Log.trace(String.format("Scanning file \"%s\".", FileUtils.getCanonicalPath(file)));
+        parser.parse(file);
+
+        ByteArrayOutputStream fileDataStream = new ByteArrayOutputStream();
+        ObjectOutputStream stream = new ObjectOutputStream(fileDataStream);
+        stream.writeLong(file.lastModified());
+        parser.save(stream);
+        stream.close();
+
+        fileData = fileDataStream.toByteArray();
+        database.saveFileParseResults(file, parser.getClass(), fileData);
+
+        return parser;
     }
 
     /** Runs the project builder. */

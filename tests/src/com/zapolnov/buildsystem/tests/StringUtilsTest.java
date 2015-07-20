@@ -88,6 +88,20 @@ public class StringUtilsTest extends Assert
         assertArrayEquals(expected, actual);
     }
 
+    @Test public void testToHex()
+    {
+        assertEquals("", StringUtils.toHex(null));
+        assertEquals("", StringUtils.toHex(new byte[0]));
+        assertEquals("00", StringUtils.toHex(new byte[]{ 0x00 }));
+        assertEquals("0a", StringUtils.toHex(new byte[]{ 0x0a }));
+        assertEquals("2a", StringUtils.toHex(new byte[]{ 0x2a }));
+        assertEquals("032a", StringUtils.toHex(new byte[]{ 0x03, 0x2a }));
+        assertEquals("732a", StringUtils.toHex(new byte[]{ 0x73, 0x2a }));
+        assertEquals("d41d8cd98f00b204e9800998ecf8427e", StringUtils.toHex(toByteArray("d41d8cd98f00b204e9800998ecf8427e")));
+        assertEquals("52c93399b0e0828f85654938bc699221", StringUtils.toHex(toByteArray("52c93399b0e0828f85654938bc699221")));
+        assertEquals("050d144172d916d0846f839e0412e929", StringUtils.toHex(toByteArray("050d144172d916d0846f839e0412e929")));
+    }
+
     @Test public void testFileHasExtension() throws IOException
     {
         boolean result = StringUtils.fileHasExtension(new File("Test"), new String[]{});

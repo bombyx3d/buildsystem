@@ -21,8 +21,10 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import java.io.Serializable;
+
 /** An identifier. */
-public class CxxIdentifier
+public class CxxIdentifier implements Serializable
 {
     /** Name of the identifier. */
     public final String text;

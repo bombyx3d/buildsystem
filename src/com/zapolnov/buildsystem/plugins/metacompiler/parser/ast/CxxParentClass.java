@@ -21,8 +21,10 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import java.io.Serializable;
+
 /** Parent class in a class declaration. */
-public class CxxParentClass
+public class CxxParentClass implements Serializable
 {
     /** Name of the parent class. */
     public final CxxIdentifier name;

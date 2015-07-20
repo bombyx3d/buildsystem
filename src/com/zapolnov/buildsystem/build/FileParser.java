@@ -19,39 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
+package com.zapolnov.buildsystem.build;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-/** A translation unit. */
-public class CxxTranslationUnit implements Serializable
+/** An interface for source file parsers. */
+public interface FileParser
 {
-    /** List of classes in the translation unit. */
-    private final List<CxxClass> classes = new ArrayList<>();
-
-    /** Constructor. */
-    public CxxTranslationUnit()
-    {
-    }
+    /**
+     * Parses the specified file.
+     * @param file File to parse.
+     */
+    void parse(File file) throws Throwable;
 
     /**
-     * Adds a class to the translation unit.
-     * @param member Class to add.
+     * Stores parse results into the specified stream.
+     * @param stream Stream.
      */
-    public void addClass(CxxClass member)
-    {
-        classes.add(member);
-    }
+    void save(ObjectOutputStream stream) throws IOException;
 
     /**
-     * Retrieves a list of classes in the translation unit.
-     * @return List of classes in the translation unit.
+     * Retrieves previously stored parse results from the specified stream.
+     * @param stream Stream.
      */
-    public List<CxxClass> classes()
-    {
-        return Collections.unmodifiableList(classes);
-    }
+    void load(ObjectInputStream stream) throws IOException, ClassNotFoundException;
 }
