@@ -67,7 +67,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 %}
 
 LineTerminator          = \r|\n|\r\n
-ExceptLineTerminator    = [^\r\n]
+ExceptLineTerminator    = [^\r\n] | "\\\n"
 Whitespace              = [ \t\v\f] | {LineTerminator}
 
 Identifier              = [a-zA-Z$_] [a-zA-Z0-9$_]*
@@ -79,12 +79,15 @@ Identifier              = [a-zA-Z$_] [a-zA-Z0-9$_]*
     "/*" ~"*/"                                      {}
     "//" {ExceptLineTerminator}* {LineTerminator}?  {}
 
+    "#" {ExceptLineTerminator}* {LineTerminator}?   {}
+
     ","                                             { return symbol(COMMA); }
     ":"                                             { return symbol(COLON); }
     ";"                                             { return symbol(SEMICOLON); }
     "{"                                             { return symbol(LCURLY); }
     "}"                                             { return symbol(RCURLY); }
 
+    "namespace"                                     { return symbol(NAMESPACE); }
     "class"                                         { return symbol(CLASS); }
     "struct"                                        { return symbol(STRUCT); }
     "virtual"                                       { return symbol(VIRTUAL); }

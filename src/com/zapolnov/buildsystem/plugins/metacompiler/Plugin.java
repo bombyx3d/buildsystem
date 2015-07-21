@@ -23,7 +23,9 @@ package com.zapolnov.buildsystem.plugins.metacompiler;
 
 import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.plugins.AbstractPlugin;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
 import com.zapolnov.buildsystem.project.ProjectVisitor;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
@@ -34,6 +36,7 @@ import com.zapolnov.buildsystem.utility.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /** Plugin that preprocesses source files and automatically generates some code. */
 @SuppressWarnings("unused") public class Plugin extends AbstractPlugin
@@ -70,10 +73,34 @@ import java.util.List;
         });
 
         for (CxxTranslationUnit translationUnit : scanResults) {
-            for (CxxClass cxxClass : translationUnit.classes()) {
-                // FIXME
-                System.out.println(String.format("--- %s", cxxClass.name.text));
-            }
+            translationUnit.visit(new CxxAstVisitor() {
+                final Stack<String> scopeStack = new Stack<>();
+
+                {
+                    scopeStack.push("");
+                }
+
+                @Override public void enterNamespace(CxxNamespace namespace) {
+                    if (namespace.name == null)
+                        scopeStack.push(scopeStack.peek());
+                    else {
+                        // FIXME
+                        Log.trace(String.format("**************** namespace %s", scopeStack.peek() + namespace.name.text));
+                        scopeStack.push(scopeStack.peek() + namespace.name.text + "::");
+                    }
+                }
+                @Override public void leaveNamespace(CxxNamespace namespace) {
+                    scopeStack.pop();
+                }
+                @Override public void enterClass(CxxClass cxxClass) {
+                    // FIXME
+                    Log.trace(String.format("**************** class %s", scopeStack.peek() + cxxClass.name.text));
+                    scopeStack.push(scopeStack.peek() + cxxClass.name.text + "::");
+                }
+                @Override public void leaveClass(CxxClass cxxClass) {
+                    scopeStack.pop();
+                }
+            });
         }
     }
 

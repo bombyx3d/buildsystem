@@ -23,49 +23,33 @@ package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-/** Body of a class. */
-public class CxxClassBody implements Serializable
+/** Namespace declaration. */
+public class CxxNamespace implements Serializable
 {
-    /** List of inner classes. */
-    private final List<CxxClass> innerClasses = new ArrayList<>();
-
-    /** Constructor. */
-    public CxxClassBody()
-    {
-    }
+    /** Name of the namespace (`null` for anonymous namespaces). */
+    public final CxxIdentifier name;
+    /** Namespace body. */
+    public final CxxNamespaceBody body;
 
     /**
-     * Adds an inner class to this class.
-     * @param member Class to add.
+     * Constructor.
+     * @param name Name of the namespace (`null` for anonymous namespaces).
+     * @param body Namespace body.
      */
-    public void addInnerClass(CxxClass member)
+    public CxxNamespace(CxxIdentifier name, CxxNamespaceBody body)
     {
-        innerClasses.add(member);
+        this.name = name;
+        this.body = body;
     }
 
     /**
-     * Retrieves a list of inner classes in this class.
-     * @return List of inner classes in this class.
-     */
-    public List<CxxClass> innerClasses()
-    {
-        return Collections.unmodifiableList(innerClasses);
-    }
-
-    /**
-     * Visits this class body with the specified visitor.
+     * Visits this namespace with the specified visitor.
      * @param visitor Visitor.
      */
     public void visit(final CxxAstVisitor visitor)
     {
-        innerClasses.forEach(innerClass -> {
-            visitor.enterClass(innerClass);
-            innerClass.visit(visitor);
-            visitor.leaveClass(innerClass);
-        });
+        if (body != null)
+            body.visit(visitor);
     }
 }

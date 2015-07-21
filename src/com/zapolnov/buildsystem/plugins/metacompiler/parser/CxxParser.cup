@@ -24,6 +24,8 @@ import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClassBody;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxIdentifier;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxMemberProtection;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespaceBody;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClassList;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
@@ -94,6 +96,7 @@ terminal COLON;
 terminal SEMICOLON;
 terminal LCURLY;
 terminal RCURLY;
+terminal NAMESPACE;
 terminal CLASS;
 terminal STRUCT;
 terminal VIRTUAL;
@@ -103,6 +106,9 @@ terminal PRIVATE;
 terminal UNKNOWN;
 
 non terminal CxxTranslationUnit translation_unit;
+non terminal CxxNamespace namespace_declaration;
+non terminal CxxNamespaceBody namespace_body;
+non terminal CxxNamespaceBody namespace_member_list;
 non terminal CxxClass class_declaration;
 non terminal CxxParentClassList parent_class_list;
 non terminal CxxParentClass parent_class;
@@ -118,10 +124,35 @@ translation_unit
         {: RESULT = new CxxTranslationUnit(); :}
     | translation_unit:unit class_declaration:decl
         {: RESULT = unit; unit.addClass(decl); :}
+    | translation_unit:unit namespace_declaration:decl
+        {: RESULT = unit; unit.addNamespace(decl); :}
     | translation_unit:unit UNKNOWN
         {: RESULT = unit; :}
     | translation_unit:unit error
         {: RESULT = unit; :}
+    ;
+
+namespace_declaration
+    ::= NAMESPACE identifier:name namespace_body:body
+        {: RESULT = new CxxNamespace(name, body); :}
+    | NAMESPACE namespace_body:body
+        {: RESULT = new CxxNamespace(null, body); :}
+    ;
+
+namespace_body
+    ::= LCURLY namespace_member_list:body RCURLY
+        {: RESULT = body; :}
+    ;
+
+namespace_member_list
+    ::= /* empty */
+        {: RESULT = new CxxNamespaceBody(); :}
+    | namespace_member_list:list namespace_declaration:namespace
+        {: RESULT = list; list.addNamespace(namespace); :}
+    | namespace_member_list:list class_declaration:c
+        {: RESULT = list; list.addClass(c); :}
+    | namespace_member_list:list error
+        {: RESULT = list; :}
     ;
 
 class_declaration
@@ -172,6 +203,8 @@ class_member_list
         {: RESULT = new CxxClassBody(); :}
     | class_member_list:list class_protection COLON
         {: RESULT = list; :}
+    | class_member_list:list class_declaration:c
+        {: RESULT = list; list.addInnerClass(c); :}
     | class_member_list:list error
         {: RESULT = list; :}
     ;

@@ -21,6 +21,7 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
 import java.io.Serializable;
 
 /** Class declaration. */
@@ -48,5 +49,15 @@ public class CxxClass implements Serializable
         this.name = name;
         this.parentClassList = parentClassList;
         this.body = body;
+    }
+
+    /**
+     * Visits this class with the specified visitor.
+     * @param visitor Visitor.
+     */
+    public void visit(final CxxAstVisitor visitor)
+    {
+        if (body != null)
+            body.visit(visitor);
     }
 }

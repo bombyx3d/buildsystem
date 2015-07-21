@@ -27,45 +27,71 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Body of a class. */
-public class CxxClassBody implements Serializable
+/** Body of a namespace. */
+public class CxxNamespaceBody implements Serializable
 {
-    /** List of inner classes. */
-    private final List<CxxClass> innerClasses = new ArrayList<>();
+    /** List of inner namespaces. */
+    private final List<CxxNamespace> namespaces = new ArrayList<>();
+    /** List of classes. */
+    private final List<CxxClass> classes = new ArrayList<>();
 
     /** Constructor. */
-    public CxxClassBody()
+    public CxxNamespaceBody()
     {
     }
 
     /**
-     * Adds an inner class to this class.
+     * Adds an inner namespace to this namespace.
+     * @param member Namespace to add.
+     */
+    public void addNamespace(CxxNamespace member)
+    {
+        namespaces.add(member);
+    }
+
+    /**
+     * Adds a class to this namespace.
      * @param member Class to add.
      */
-    public void addInnerClass(CxxClass member)
+    public void addClass(CxxClass member)
     {
-        innerClasses.add(member);
+        classes.add(member);
     }
 
     /**
-     * Retrieves a list of inner classes in this class.
-     * @return List of inner classes in this class.
+     * Retrieves a list of inner namespaces in this namespace.
+     * @return List of inner namespaces in this namespace.
      */
-    public List<CxxClass> innerClasses()
+    public List<CxxNamespace> namespaces()
     {
-        return Collections.unmodifiableList(innerClasses);
+        return Collections.unmodifiableList(namespaces);
     }
 
     /**
-     * Visits this class body with the specified visitor.
+     * Retrieves a list of classes in this namespace.
+     * @return List of classes in this namespace.
+     */
+    public List<CxxClass> classes()
+    {
+        return Collections.unmodifiableList(classes);
+    }
+
+    /**
+     * Visits this namespace body with the specified visitor.
      * @param visitor Visitor.
      */
     public void visit(final CxxAstVisitor visitor)
     {
-        innerClasses.forEach(innerClass -> {
-            visitor.enterClass(innerClass);
-            innerClass.visit(visitor);
-            visitor.leaveClass(innerClass);
+        namespaces.forEach(namespace -> {
+            visitor.enterNamespace(namespace);
+            namespace.visit(visitor);
+            visitor.leaveNamespace(namespace);
+        });
+
+        classes.forEach(cxxClass -> {
+            visitor.enterClass(cxxClass);
+            cxxClass.visit(visitor);
+            visitor.leaveClass(cxxClass);
         });
     }
 }
