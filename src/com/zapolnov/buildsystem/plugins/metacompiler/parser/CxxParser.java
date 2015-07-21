@@ -21,14 +21,18 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser;
 
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClassType;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxFullyQualifiedName;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxMemberProtection;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxScope;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
-import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /** Parser for C++ files. */
@@ -191,16 +195,32 @@ public final class CxxParser
             return;
         }
 
+        List<CxxParentClass> parentClasses = new ArrayList<>();
         if (token.id == CxxToken.COLON) {
-            nextToken();
-            // FIXME
-            while (token.id != CxxToken.LCURLY && token.id != CxxToken.EOF)
+            do {
                 nextToken();
+
+                boolean virtualInheritance = false;
+                if (token.id == CxxToken.VIRTUAL) {
+                    nextToken();
+                    virtualInheritance = true;
+                }
+
+                CxxMemberProtection protection = parseClassMemberProtection();
+
+                if (!virtualInheritance && token.id == CxxToken.VIRTUAL) {
+                    nextToken();
+                    virtualInheritance = true;
+                }
+
+                CxxFullyQualifiedName parentName = parseFullyQualifiedName();
+                parentClasses.add(new CxxParentClass(parentName, protection, virtualInheritance));
+            } while (token.id == CxxToken.COMMA);
         }
 
         parseLeftCurly();
 
-        CxxClass cxxClass = new CxxClass(name, isTemplateSpecialization);
+        CxxClass cxxClass = new CxxClass(name, parentClasses, isTemplateSpecialization);
         currentScope.addSymbol(cxxClass);
 
         pushScope(cxxClass.scope);
@@ -267,6 +287,27 @@ public final class CxxParser
         default:
             nextToken();
         }
+    }
+
+    /**
+     * Parses class member protection level.
+     * @return Class member protection level.
+     */
+    private CxxMemberProtection parseClassMemberProtection() throws IOException
+    {
+        switch (token.id)
+        {
+        case CxxToken.PRIVATE:
+            nextToken();
+            return CxxMemberProtection.PRIVATE;
+        case CxxToken.PROTECTED:
+            nextToken();
+            return CxxMemberProtection.PROTECTED;
+        case CxxToken.PUBLIC:
+            nextToken();
+            return CxxMemberProtection.PUBLIC;
+        }
+        return null;
     }
 
     /** Parses template declaration. */

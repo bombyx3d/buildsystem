@@ -28,6 +28,7 @@ import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxParser;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxFullyQualifiedName;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
 import com.zapolnov.buildsystem.project.ProjectVisitor;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
@@ -107,6 +108,8 @@ import java.util.Stack;
                         Log.trace(String.format("**************** implementation %s", scopeStack.peek().mergeWith(cxxClass.name).text));
                         break;
                     }
+                    for (CxxParentClass parent : cxxClass.parentClasses())
+                        Log.trace(String.format("   ---- %s%s %s", parent.virtual ? "virtual " : "", parent.protectionLevel.toString(), parent.name.text));
                     scopeStack.push(scopeStack.peek().mergeWith(cxxClass.name));
                 }
                 @Override public void leaveClass(CxxClass cxxClass) {

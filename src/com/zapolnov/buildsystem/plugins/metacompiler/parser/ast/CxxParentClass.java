@@ -28,7 +28,7 @@ public class CxxParentClass implements Serializable
 {
     /** Name of the parent class. */
     public final CxxFullyQualifiedName name;
-    /** Protection level of parent class members (could be `null`). */
+    /** Protection level of parent class members (can be `null`). */
     public final CxxMemberProtection protectionLevel;
     /** Set to `true` for virtual inheritance. */
     public final boolean virtual;
@@ -36,7 +36,7 @@ public class CxxParentClass implements Serializable
     /**
      * Constructor.
      * @param name Name of the parent class.
-     * @param protectionLevel Protection level of parent class members (could be `null`).
+     * @param protectionLevel Protection level of parent class members (can be `null`).
      * @param virtual Set to `true` for virtual inheritance.
      */
     public CxxParentClass(CxxFullyQualifiedName name, CxxMemberProtection protectionLevel, boolean virtual)

@@ -46,7 +46,7 @@ package com.zapolnov.buildsystem.plugins.metacompiler.parser;
 
 LineTerminator          = \r|\n|\r\n
 ExceptLineTerminator    = [^\r\n] | "\\\n"
-Whitespace              = [ \t\v\f] | {LineTerminator}
+Whitespace              = [ \t\f] | {LineTerminator}
 
 Identifier              = [a-zA-Z$_] [a-zA-Z0-9$_]*
 

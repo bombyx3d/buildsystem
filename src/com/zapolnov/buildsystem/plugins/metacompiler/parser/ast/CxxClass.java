@@ -33,7 +33,7 @@ public class CxxClass extends CxxSymbol implements Serializable
     /** A scope for this class. */
     public final CxxScope scope = new CxxScope();
     /** List of parent classes. */
-    private final List<CxxParentClass> parentClasses = new ArrayList<>();
+    private final List<CxxParentClass> parentClasses;
     /** Type of this class. */
     public CxxClassType type = CxxClassType.DEFAULT;
     /** Set to `true` if this class is a template specialization. */
@@ -42,21 +42,14 @@ public class CxxClass extends CxxSymbol implements Serializable
     /**
      * Constructor.
      * @param name Name of the class.
+     * @param parentClasses List of parent classes.
      * @param isTemplateSpecialization Set to `true` if this class is a template specialization.
      */
-    public CxxClass(CxxFullyQualifiedName name, boolean isTemplateSpecialization)
+    public CxxClass(CxxFullyQualifiedName name, List<CxxParentClass> parentClasses, boolean isTemplateSpecialization)
     {
         super(name);
+        this.parentClasses = new ArrayList<>(parentClasses);
         this.isTemplateSpecialization = isTemplateSpecialization;
-    }
-
-    /**
-     * Adds parent class to this class.
-     * @param parent Parent class.
-     */
-    public void addParentClass(CxxParentClass parent)
-    {
-        parentClasses.add(parent);
     }
 
     /**
