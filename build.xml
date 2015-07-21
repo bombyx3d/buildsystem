@@ -24,7 +24,6 @@ THE SOFTWARE.
 <project default="build">
 
     <taskdef name="jflex" classname="jflex.anttask.JFlexTask" classpath="lib/jflex/jflex-1.6.1.jar" />
-    <taskdef name="cup" classname="java_cup.anttask.CUPTask" classpath="lib/cup/java-cup-11b.jar" />
 
     <target name="build">
         <!-- Create output directory -->
@@ -34,16 +33,6 @@ THE SOFTWARE.
             file="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxLexer.flex"
             destdir="src_generated"
             nobak="on"
-        />
-        <!-- Generate code for parsers -->
-        <cup
-            srcfile="src/com/zapolnov/buildsystem/plugins/metacompiler/parser/CxxParser.cup"
-            destdir="src_generated/com/zapolnov/buildsystem/plugins/metacompiler/parser"
-            package="com.zapolnov.buildsystem.plugins.metacompiler.parser"
-            parser="CxxParser"
-            symbols="CxxToken"
-            interface="on"
-            nosummary="on"
         />
         <!-- Compile source code -->
         <javac
@@ -83,7 +72,7 @@ THE SOFTWARE.
             <zipgroupfileset
                 dir="lib"
                 includes="**/*.jar"
-                excludes="jflex/jflex-1.6.1.jar,cup/java-cup-11b.jar"
+                excludes="jflex/jflex-1.6.1.jar"
             />
         </jar>
     </target>

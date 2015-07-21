@@ -22,9 +22,9 @@
 package com.zapolnov.buildsystem.plugins.metacompiler;
 
 import com.zapolnov.buildsystem.build.FileParser;
-import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxLexer;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxParser;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
+import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -50,10 +50,11 @@ public class CxxAnalyzer implements FileParser
     {
         syntaxTree = new CxxTranslationUnit();
         try {
-            CxxLexer lexer = new CxxLexer(new FileReader(file), file.toString());
-            CxxParser parser = new CxxParser(lexer, CxxLexer.SymbolFactory.instance);
-            syntaxTree = (CxxTranslationUnit)parser.parse().value;
-        } catch (CxxParser.ParseError ignored) {
+            CxxParser parser = new CxxParser(new FileReader(file));
+            syntaxTree = parser.parseTranslationUnit();
+        } catch (CxxParser.Error error) {
+            throw new CxxParser.Error(error.token,
+                String.format("%s%s", FileUtils.getCanonicalPath(file), error.getMessage()), error);
         }
     }
 

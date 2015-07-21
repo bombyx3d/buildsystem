@@ -21,48 +21,26 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser;
 
-import java_cup.runtime.Symbol;
-import java_cup.runtime.ComplexSymbolFactory;
-
 %%
 
 %unicode
 %class CxxLexer
 %public
-%implements CxxToken
-%cupsym CxxToken
-%cup
+%final
+%type CxxToken
 %char
 %line
 %column
 
+%eofclose
 %eofval{
-    return symbol(EOF);
+    return symbol(CxxToken.EOF);
 %eofval}
 
-%ctorarg String fileName
-%init{
-    this.fileName = fileName;
-%init}
-
 %{
-    public static class SymbolFactory extends ComplexSymbolFactory
+    private CxxToken symbol(int type)
     {
-        public static final SymbolFactory instance = new SymbolFactory();
-    }
-
-    private final String fileName;
-
-    private Symbol symbol(int type)
-    {
-        ComplexSymbolFactory.Location location = new ComplexSymbolFactory.Location(fileName, yyline, yycolumn, yychar);
-        return SymbolFactory.instance.newSymbol(yytext(), type, location, location);
-    }
-
-    private Symbol symbol(int type, Object value)
-    {
-        ComplexSymbolFactory.Location location = new ComplexSymbolFactory.Location(fileName, yyline, yycolumn, yychar);
-        return SymbolFactory.instance.newSymbol(yytext(), type, location, location, value);
+        return new CxxToken(type, yyline + 1, yycolumn + 1, yytext());
     }
 %}
 
@@ -81,23 +59,34 @@ Identifier              = [a-zA-Z$_] [a-zA-Z0-9$_]*
 
     "#" {ExceptLineTerminator}* {LineTerminator}?   {}
 
-    ","                                             { return symbol(COMMA); }
-    ":"                                             { return symbol(COLON); }
-    ";"                                             { return symbol(SEMICOLON); }
-    "{"                                             { return symbol(LCURLY); }
-    "}"                                             { return symbol(RCURLY); }
+    "<"                                             { return symbol(CxxToken.LESS); }
+    ">"                                             { return symbol(CxxToken.GREATER); }
+    "("                                             { return symbol(CxxToken.LPAREN); }
+    ")"                                             { return symbol(CxxToken.RPAREN); }
+    "{"                                             { return symbol(CxxToken.LCURLY); }
+    "}"                                             { return symbol(CxxToken.RCURLY); }
+    ","                                             { return symbol(CxxToken.COMMA); }
+    "="                                             { return symbol(CxxToken.EQUAL); }
+    ":"                                             { return symbol(CxxToken.COLON); }
+    "::"                                            { return symbol(CxxToken.SCOPE); }
+    ";"                                             { return symbol(CxxToken.SEMICOLON); }
 
-    "namespace"                                     { return symbol(NAMESPACE); }
-    "class"                                         { return symbol(CLASS); }
-    "struct"                                        { return symbol(STRUCT); }
-    "virtual"                                       { return symbol(VIRTUAL); }
-    "public"                                        { return symbol(PUBLIC); }
-    "protected"                                     { return symbol(PROTECTED); }
-    "private"                                       { return symbol(PRIVATE); }
+    "class"                                         { return symbol(CxxToken.CLASS); }
+    "namespace"                                     { return symbol(CxxToken.NAMESPACE); }
+    "private"                                       { return symbol(CxxToken.PRIVATE); }
+    "protected"                                     { return symbol(CxxToken.PROTECTED); }
+    "public"                                        { return symbol(CxxToken.PUBLIC); }
+    "struct"                                        { return symbol(CxxToken.STRUCT); }
+    "template"                                      { return symbol(CxxToken.TEMPLATE); }
+    "typename"                                      { return symbol(CxxToken.TYPENAME); }
+    "virtual"                                       { return symbol(CxxToken.VIRTUAL); }
 
-    {Identifier}                                    { return symbol(IDENTIFIER, yytext()); }
+    "Z_INTERFACE"                                   { return symbol(CxxToken.Z_INTERFACE); }
+    "Z_IMPLEMENTATION"                              { return symbol(CxxToken.Z_IMPLEMENTATION); }
 
-    {Whitespace}                                    {}
+    {Identifier}                                    { return symbol(CxxToken.IDENTIFIER); }
+
+    {Whitespace}+                                   {}
 }
 
-[^]                                                 { return symbol(UNKNOWN); }
+[^]                                                 { return symbol(CxxToken.UNRECOGNIZED); }

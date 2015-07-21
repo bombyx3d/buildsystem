@@ -27,71 +27,41 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Body of a namespace. */
-public class CxxNamespaceBody implements Serializable
+/** A scope. */
+public class CxxScope implements Serializable
 {
-    /** List of inner namespaces. */
-    private final List<CxxNamespace> namespaces = new ArrayList<>();
-    /** List of classes. */
-    private final List<CxxClass> classes = new ArrayList<>();
+    /** List of symbols in this scope. */
+    private final List<CxxSymbol> symbols = new ArrayList<>();
 
     /** Constructor. */
-    public CxxNamespaceBody()
+    public CxxScope()
     {
     }
 
     /**
-     * Adds an inner namespace to this namespace.
-     * @param member Namespace to add.
+     * Adds a symbol into this scope.
+     * @param symbol Symbol to add.
      */
-    public void addNamespace(CxxNamespace member)
+    public void addSymbol(CxxSymbol symbol)
     {
-        namespaces.add(member);
+        symbols.add(symbol);
     }
 
     /**
-     * Adds a class to this namespace.
-     * @param member Class to add.
+     * Retrieves a list of symbols in this scope.
+     * @return List of symbols.
      */
-    public void addClass(CxxClass member)
+    public List<CxxSymbol> symbols()
     {
-        classes.add(member);
+        return Collections.unmodifiableList(symbols);
     }
 
     /**
-     * Retrieves a list of inner namespaces in this namespace.
-     * @return List of inner namespaces in this namespace.
-     */
-    public List<CxxNamespace> namespaces()
-    {
-        return Collections.unmodifiableList(namespaces);
-    }
-
-    /**
-     * Retrieves a list of classes in this namespace.
-     * @return List of classes in this namespace.
-     */
-    public List<CxxClass> classes()
-    {
-        return Collections.unmodifiableList(classes);
-    }
-
-    /**
-     * Visits this namespace body with the specified visitor.
+     * Visits this scope with the specified visitor.
      * @param visitor Visitor.
      */
     public void visit(final CxxAstVisitor visitor)
     {
-        namespaces.forEach(namespace -> {
-            visitor.enterNamespace(namespace);
-            namespace.visit(visitor);
-            visitor.leaveNamespace(namespace);
-        });
-
-        classes.forEach(cxxClass -> {
-            visitor.enterClass(cxxClass);
-            cxxClass.visit(visitor);
-            visitor.leaveClass(cxxClass);
-        });
+        symbols.forEach(symbol -> symbol.visit(visitor));
     }
 }

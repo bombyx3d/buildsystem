@@ -27,7 +27,7 @@ import java.io.Serializable;
 public class CxxParentClass implements Serializable
 {
     /** Name of the parent class. */
-    public final CxxIdentifier name;
+    public final CxxFullyQualifiedName name;
     /** Protection level of parent class members (could be `null`). */
     public final CxxMemberProtection protectionLevel;
     /** Set to `true` for virtual inheritance. */
@@ -39,7 +39,7 @@ public class CxxParentClass implements Serializable
      * @param protectionLevel Protection level of parent class members (could be `null`).
      * @param virtual Set to `true` for virtual inheritance.
      */
-    public CxxParentClass(CxxIdentifier name, CxxMemberProtection protectionLevel, boolean virtual)
+    public CxxParentClass(CxxFullyQualifiedName name, CxxMemberProtection protectionLevel, boolean virtual)
     {
         this.name = name;
         this.protectionLevel = protectionLevel;

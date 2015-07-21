@@ -21,51 +21,13 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
-import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-/** Body of a class. */
-public class CxxClassBody implements Serializable
+/** A kind of the C++ class. */
+public enum CxxClassType
 {
-    /** List of inner classes. */
-    private final List<CxxClass> innerClasses = new ArrayList<>();
-
-    /** Constructor. */
-    public CxxClassBody()
-    {
-    }
-
-    /**
-     * Adds an inner class to this class.
-     * @param member Class to add.
-     */
-    public void addInnerClass(CxxClass member)
-    {
-        innerClasses.add(member);
-    }
-
-    /**
-     * Retrieves a list of inner classes in this class.
-     * @return List of inner classes in this class.
-     */
-    public List<CxxClass> innerClasses()
-    {
-        return Collections.unmodifiableList(innerClasses);
-    }
-
-    /**
-     * Visits this class body with the specified visitor.
-     * @param visitor Visitor.
-     */
-    public void visit(final CxxAstVisitor visitor)
-    {
-        innerClasses.forEach(innerClass -> {
-            visitor.enterClass(innerClass);
-            innerClass.visit(visitor);
-            visitor.leaveClass(innerClass);
-        });
-    }
+    /** Class is a usual C++ class. */
+    DEFAULT,
+    /** Class is an interface class (has the Z_INTERFACE macro). */
+    INTERFACE,
+    /** Class is an implementation class (has the Z_IMPLEMENTATION macro). */
+    IMPLEMENTATION,
 }

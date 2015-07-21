@@ -21,20 +21,55 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxToken;
 import java.io.Serializable;
 
-/** An identifier. */
-public class CxxIdentifier implements Serializable
+/** AST node for a fully qualified name. */
+public class CxxFullyQualifiedName implements Serializable
 {
-    /** Name of the identifier. */
+    /** First token of the name. */
+    public final CxxToken firstToken;
+    /** Text of the name. */
     public final String text;
 
     /**
      * Constructor.
-     * @param text Name of the identifier.
+     * @param firstToken First token of the name.
+     * @param text Text of the name.
      */
-    public CxxIdentifier(String text)
+    public CxxFullyQualifiedName(CxxToken firstToken, String text)
     {
+        this.firstToken = firstToken;
         this.text = text;
+    }
+
+    /**
+     * Retrieves last component of this fully qualified name.
+     * @return Last component of this fully qualified name.
+     */
+    public String lastComponent()
+    {
+        if (text == null || text.isEmpty())
+            return "";
+
+        String[] parts = text.split("::");
+        int last = parts.length - 1;
+        return (last >= 0 ? parts[last] : "");
+    }
+
+    /**
+     * Merges this name with the specified name.
+     * @param other Fully qualified name to merge with.
+     * @return Merged name.
+     */
+    public CxxFullyQualifiedName mergeWith(CxxFullyQualifiedName other)
+    {
+        if (other.text.startsWith("::"))
+            return other;
+
+        if (firstToken == null && text.isEmpty())
+            return other;
+
+        return new CxxFullyQualifiedName(firstToken, text + "::" + other.text);
     }
 }

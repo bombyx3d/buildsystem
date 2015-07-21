@@ -21,8 +21,8 @@
  */
 package com.zapolnov.buildsystem.tests;
 
-import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxLexer;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxParser;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxMemberProtection;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
 import java.io.StringReader;
@@ -31,169 +31,170 @@ import org.junit.Test;
 
 public class CxxParserTest extends Assert
 {
-    private CxxTranslationUnit parse(String source, boolean printErrors) throws Exception
+    private CxxTranslationUnit parse(String source) throws Exception
     {
-        try {
-            CxxLexer lexer = new CxxLexer(new StringReader(source), source);
-            CxxParser parser = new CxxParser(lexer, CxxLexer.SymbolFactory.instance);
-            parser.printErrors = printErrors;
-            return (CxxTranslationUnit)parser.parse().value;
-        } catch (CxxParser.ParseError ignored) {
-            return new CxxTranslationUnit();
-        }
+        CxxParser parser = new CxxParser(new StringReader(source));
+        return parser.parseTranslationUnit();
     }
 
     @Test public void testBasicFunctionality() throws Exception
     {
         CxxTranslationUnit unit;
 
-        unit = parse("", true);
-        assertTrue(unit.classes().isEmpty());
+        unit = parse("");
+        assertTrue(unit.symbols().isEmpty());
 
-        unit = parse("/* A comment.\nNew line. */", true);
-        assertTrue(unit.classes().isEmpty());
+        unit = parse("/* A comment.\nNew line. */");
+        assertTrue(unit.symbols().isEmpty());
 
-        unit = parse("//", true);
-        assertTrue(unit.classes().isEmpty());
+        unit = parse("//");
+        assertTrue(unit.symbols().isEmpty());
 
-        unit = parse("class Test;", false);
-        assertTrue(unit.classes().isEmpty());
+        unit = parse("class Test;");
+        assertTrue(unit.symbols().isEmpty());
 
-        unit = parse("class Test {}", false);
-        assertTrue(unit.classes().isEmpty());
+        boolean exceptionThrown = false;
+        try {
+            parse("class Test {}");
+        } catch (CxxParser.Error error) {
+            exceptionThrown = true;
+            assertEquals(1, error.token.line);
+            assertEquals(14, error.token.column);
+        }
+        assertTrue(exceptionThrown);
 
-        unit = parse("// class Test {};", true);
-        assertTrue(unit.classes().isEmpty());
+        unit = parse("// class Test {};");
+        assertTrue(unit.symbols().isEmpty());
 
-        unit = parse("class Test {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertTrue(unit.classes().get(0).parentClassList.classList().isEmpty());
+        unit = parse("class Test {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertTrue(((CxxClass) unit.symbols().get(0)).parentClasses().isEmpty());
     }
 
     @Test public void testSingleInheritanceParentClassList() throws Exception
     {
         CxxTranslationUnit unit;
 
-        unit = parse("class Test : Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertNull(unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertNull(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : public Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PUBLIC, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : public Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PUBLIC, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : protected Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PROTECTED, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : protected Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PROTECTED, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : private Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PRIVATE, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : private Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PRIVATE, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : virtual Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertNull(unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : virtual Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertNull(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : public virtual Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PUBLIC, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : public virtual Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PUBLIC, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : protected virtual Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PROTECTED, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : protected virtual Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PROTECTED, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : private virtual Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PRIVATE, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : private virtual Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PRIVATE, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : virtual public Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PUBLIC, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : virtual public Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PUBLIC, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : virtual protected Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PROTECTED, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : virtual protected Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PROTECTED, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
 
-        unit = parse("class Test : virtual private Parent {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(1, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertEquals(CxxMemberProtection.PRIVATE, unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(0).virtual);
+        unit = parse("class Test : virtual private Parent {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(1, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertEquals(CxxMemberProtection.PRIVATE, ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
     }
 
     @Test public void testMultipleInheritanceParentClassList() throws Exception
     {
         CxxTranslationUnit unit;
 
-        unit = parse("class Test : Parent1, Parent2 {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(2, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent1", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertNull(unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(0).virtual);
-        assertEquals("Parent2", unit.classes().get(0).parentClassList.classList().get(1).name.text);
-        assertNull(unit.classes().get(0).parentClassList.classList().get(1).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(1).virtual);
+        unit = parse("class Test : Parent1, Parent2 {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(2, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent1", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertNull(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
+        assertEquals("Parent2", ((CxxClass)unit.symbols().get(0)).parentClasses().get(1).name.text);
+        assertNull(((CxxClass)unit.symbols().get(0)).parentClasses().get(1).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(1).virtual);
 
-        unit = parse("class Test : Parent1, virtual public Parent2, private Parent3, protected virtual Parent4 {};", true);
-        assertEquals(1, unit.classes().size());
-        assertEquals("Test", unit.classes().get(0).name.text);
-        assertEquals(4, unit.classes().get(0).parentClassList.classList().size());
-        assertEquals("Parent1", unit.classes().get(0).parentClassList.classList().get(0).name.text);
-        assertNull(unit.classes().get(0).parentClassList.classList().get(0).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(0).virtual);
-        assertEquals("Parent2", unit.classes().get(0).parentClassList.classList().get(1).name.text);
-        assertEquals(CxxMemberProtection.PUBLIC, unit.classes().get(0).parentClassList.classList().get(1).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(1).virtual);
-        assertEquals("Parent3", unit.classes().get(0).parentClassList.classList().get(2).name.text);
-        assertEquals(CxxMemberProtection.PRIVATE, unit.classes().get(0).parentClassList.classList().get(2).protectionLevel);
-        assertFalse(unit.classes().get(0).parentClassList.classList().get(2).virtual);
-        assertEquals("Parent4", unit.classes().get(0).parentClassList.classList().get(3).name.text);
-        assertEquals(CxxMemberProtection.PROTECTED, unit.classes().get(0).parentClassList.classList().get(3).protectionLevel);
-        assertTrue(unit.classes().get(0).parentClassList.classList().get(3).virtual);
+        unit = parse("class Test : Parent1, virtual public Parent2, private Parent3, protected virtual Parent4 {};");
+        assertEquals(1, unit.symbols().size());
+        assertEquals("Test", unit.symbols().get(0).name.text);
+        assertEquals(4, ((CxxClass)unit.symbols().get(0)).parentClasses().size());
+        assertEquals("Parent1", ((CxxClass)unit.symbols().get(0)).parentClasses().get(0).name.text);
+        assertNull(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(0).virtual);
+        assertEquals("Parent2", ((CxxClass)unit.symbols().get(0)).parentClasses().get(1).name.text);
+        assertEquals(CxxMemberProtection.PUBLIC, ((CxxClass)unit.symbols().get(0)).parentClasses().get(1).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(1).virtual);
+        assertEquals("Parent3", ((CxxClass)unit.symbols().get(0)).parentClasses().get(2).name.text);
+        assertEquals(CxxMemberProtection.PRIVATE, ((CxxClass)unit.symbols().get(0)).parentClasses().get(2).protectionLevel);
+        assertFalse(((CxxClass)unit.symbols().get(0)).parentClasses().get(2).virtual);
+        assertEquals("Parent4", ((CxxClass)unit.symbols().get(0)).parentClasses().get(3).name.text);
+        assertEquals(CxxMemberProtection.PROTECTED, ((CxxClass)unit.symbols().get(0)).parentClasses().get(3).protectionLevel);
+        assertTrue(((CxxClass)unit.symbols().get(0)).parentClasses().get(3).virtual);
     }
 }

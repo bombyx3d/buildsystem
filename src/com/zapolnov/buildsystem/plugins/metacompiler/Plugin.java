@@ -24,7 +24,9 @@ package com.zapolnov.buildsystem.plugins.metacompiler;
 import com.zapolnov.buildsystem.build.ProjectBuilder;
 import com.zapolnov.buildsystem.plugins.AbstractPlugin;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxParser;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxFullyQualifiedName;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
 import com.zapolnov.buildsystem.project.ProjectVisitor;
@@ -60,6 +62,8 @@ import java.util.Stack;
                     if (FileUtils.isHeaderFile(file) || FileUtils.isCSourceFile(file) || FileUtils.isCxxSourceFile(file)) {
                         try {
                             scanResults.add(projectBuilder.parseFile(file, new CxxAnalyzer()).syntaxTree());
+                        } catch (CxxParser.Error e) {
+                            throw e;
                         } catch (Throwable t) {
                             throw new RuntimeException(String.format("Unable to parse file \"%s\".",
                                 FileUtils.getCanonicalPath(file)), t);
@@ -74,28 +78,36 @@ import java.util.Stack;
 
         for (CxxTranslationUnit translationUnit : scanResults) {
             translationUnit.visit(new CxxAstVisitor() {
-                final Stack<String> scopeStack = new Stack<>();
+                final Stack<CxxFullyQualifiedName> scopeStack = new Stack<>();
 
                 {
-                    scopeStack.push("");
+                    scopeStack.push(new CxxFullyQualifiedName(null, ""));
                 }
 
                 @Override public void enterNamespace(CxxNamespace namespace) {
                     if (namespace.name == null)
                         scopeStack.push(scopeStack.peek());
-                    else {
-                        // FIXME
-                        Log.trace(String.format("**************** namespace %s", scopeStack.peek() + namespace.name.text));
-                        scopeStack.push(scopeStack.peek() + namespace.name.text + "::");
-                    }
+                    else
+                        scopeStack.push(scopeStack.peek().mergeWith(namespace.name));
                 }
                 @Override public void leaveNamespace(CxxNamespace namespace) {
                     scopeStack.pop();
                 }
                 @Override public void enterClass(CxxClass cxxClass) {
                     // FIXME
-                    Log.trace(String.format("**************** class %s", scopeStack.peek() + cxxClass.name.text));
-                    scopeStack.push(scopeStack.peek() + cxxClass.name.text + "::");
+                    switch (cxxClass.type)
+                    {
+                    case DEFAULT:
+                        Log.trace(String.format("**************** class %s", scopeStack.peek().mergeWith(cxxClass.name).text));
+                        break;
+                    case INTERFACE:
+                        Log.trace(String.format("**************** interface %s", scopeStack.peek().mergeWith(cxxClass.name).text));
+                        break;
+                    case IMPLEMENTATION:
+                        Log.trace(String.format("**************** implementation %s", scopeStack.peek().mergeWith(cxxClass.name).text));
+                        break;
+                    }
+                    scopeStack.push(scopeStack.peek().mergeWith(cxxClass.name));
                 }
                 @Override public void leaveClass(CxxClass cxxClass) {
                     scopeStack.pop();

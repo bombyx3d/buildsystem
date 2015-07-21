@@ -21,46 +21,27 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-/** A list of parent classes in a class declaration. */
-public class CxxParentClassList implements Serializable
+/** Base class for AST nodes for symbols. */
+public abstract class CxxSymbol implements Serializable
 {
-    /** List of parent classes. */
-    private final List<CxxParentClass> parentClasses = new ArrayList<>();
+    /** Name of the symbol (could be `null`). */
+    public final CxxFullyQualifiedName name;
 
-    /** Constructs an empty list. */
-    public CxxParentClassList()
+    /**
+     * Constructor.
+     * @param name Name of the symbol.
+     */
+    public CxxSymbol(CxxFullyQualifiedName name)
     {
+        this.name = name;
     }
 
     /**
-     * Constructs a list with a single parent class.
-     * @param parent Parent class.
+     * Visits this symbol with the specified visitor.
+     * @param visitor Visitor.
      */
-    public CxxParentClassList(CxxParentClass parent)
-    {
-        parentClasses.add(parent);
-    }
-
-    /**
-     * Adds parent class to this list.
-     * @param parent Parent class.
-     */
-    public void add(CxxParentClass parent)
-    {
-        parentClasses.add(parent);
-    }
-
-    /**
-     * Retrieves a list of parent classes.
-     * @return List of parent classes.
-     */
-    public List<CxxParentClass> classList()
-    {
-        return Collections.unmodifiableList(parentClasses);
-    }
+    public abstract void visit(final CxxAstVisitor visitor);
 }

@@ -24,32 +24,29 @@ package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
 import java.io.Serializable;
 
-/** Namespace declaration. */
-public class CxxNamespace implements Serializable
+/** An AST node for a namespace. */
+public class CxxNamespace extends CxxSymbol implements Serializable
 {
-    /** Name of the namespace (`null` for anonymous namespaces). */
-    public final CxxIdentifier name;
-    /** Namespace body. */
-    public final CxxNamespaceBody body;
+    /** A scope for this namespace. */
+    public final CxxScope scope = new CxxScope();
 
     /**
      * Constructor.
      * @param name Name of the namespace (`null` for anonymous namespaces).
-     * @param body Namespace body.
      */
-    public CxxNamespace(CxxIdentifier name, CxxNamespaceBody body)
+    public CxxNamespace(CxxFullyQualifiedName name)
     {
-        this.name = name;
-        this.body = body;
+        super(name);
     }
 
     /**
      * Visits this namespace with the specified visitor.
      * @param visitor Visitor.
      */
-    public void visit(final CxxAstVisitor visitor)
+    @Override public void visit(final CxxAstVisitor visitor)
     {
-        if (body != null)
-            body.visit(visitor);
+        visitor.enterNamespace(this);
+        scope.visit(visitor);
+        visitor.leaveNamespace(this);
     }
 }

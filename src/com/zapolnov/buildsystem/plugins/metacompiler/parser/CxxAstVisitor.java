@@ -21,8 +21,8 @@
  */
 package com.zapolnov.buildsystem.plugins.metacompiler.parser;
 
-import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
+import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxClass;
 
 /** Base class for C++ AST visitors. */
 public abstract class CxxAstVisitor

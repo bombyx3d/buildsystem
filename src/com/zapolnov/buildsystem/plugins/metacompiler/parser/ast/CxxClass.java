@@ -23,41 +23,59 @@ package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-/** Class declaration. */
-public class CxxClass implements Serializable
+/** An AST node for a class. */
+public class CxxClass extends CxxSymbol implements Serializable
 {
-    /** Set to `true` if this class is actually a struct. */
-    public final boolean struct;
-    /** Name of the class. */
-    public final CxxIdentifier name;
+    /** A scope for this class. */
+    public final CxxScope scope = new CxxScope();
     /** List of parent classes. */
-    public final CxxParentClassList parentClassList;
-    /** Class body. */
-    public final CxxClassBody body;
+    private final List<CxxParentClass> parentClasses = new ArrayList<>();
+    /** Type of this class. */
+    public CxxClassType type = CxxClassType.DEFAULT;
+    /** Set to `true` if this class is a template specialization. */
+    public boolean isTemplateSpecialization;
 
     /**
      * Constructor.
-     * @param struct Set to `true` if this class is actually a struct.
      * @param name Name of the class.
-     * @param parentClassList List of parent classes.
-     * @param body Class body.
+     * @param isTemplateSpecialization Set to `true` if this class is a template specialization.
      */
-    public CxxClass(boolean struct, CxxIdentifier name, CxxParentClassList parentClassList, CxxClassBody body)
+    public CxxClass(CxxFullyQualifiedName name, boolean isTemplateSpecialization)
     {
-        this.struct = struct;
-        this.name = name;
-        this.parentClassList = parentClassList;
-        this.body = body;
+        super(name);
+        this.isTemplateSpecialization = isTemplateSpecialization;
+    }
+
+    /**
+     * Adds parent class to this class.
+     * @param parent Parent class.
+     */
+    public void addParentClass(CxxParentClass parent)
+    {
+        parentClasses.add(parent);
+    }
+
+    /**
+     * Retrieves a list of parent classes of this class.
+     * @return List of parent classes.
+     */
+    public List<CxxParentClass> parentClasses()
+    {
+        return Collections.unmodifiableList(parentClasses);
     }
 
     /**
      * Visits this class with the specified visitor.
      * @param visitor Visitor.
      */
-    public void visit(final CxxAstVisitor visitor)
+    @Override public void visit(final CxxAstVisitor visitor)
     {
-        if (body != null)
-            body.visit(visitor);
+        visitor.enterClass(this);
+        scope.visit(visitor);
+        visitor.leaveClass(this);
     }
 }
