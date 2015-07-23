@@ -26,7 +26,6 @@ import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxParser;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
 import com.zapolnov.buildsystem.utility.FileUtils;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -48,9 +47,9 @@ public class CxxAnalyzer implements FileParser
 
     @Override public void parse(File file) throws Exception
     {
-        syntaxTree = new CxxTranslationUnit();
+        syntaxTree = new CxxTranslationUnit(file);
         try {
-            CxxParser parser = new CxxParser(new FileReader(file));
+            CxxParser parser = new CxxParser(file);
             syntaxTree = parser.parseTranslationUnit();
         } catch (CxxParser.Error error) {
             throw new CxxParser.Error(error.token,
@@ -67,6 +66,6 @@ public class CxxAnalyzer implements FileParser
     {
         syntaxTree = (CxxTranslationUnit)stream.readObject();
         if (syntaxTree == null)
-            syntaxTree = new CxxTranslationUnit();
+            syntaxTree = new CxxTranslationUnit(null);
     }
 }

@@ -34,16 +34,25 @@ import com.zapolnov.buildsystem.project.ProjectVisitor;
 import com.zapolnov.buildsystem.project.directives.SourceDirectoriesDirective;
 import com.zapolnov.buildsystem.project.directives.SourceFilesDirective;
 import com.zapolnov.buildsystem.project.directives.TargetPlatformSelectorDirective;
+import com.zapolnov.buildsystem.utility.FileBuilder;
 import com.zapolnov.buildsystem.utility.FileUtils;
-import com.zapolnov.buildsystem.utility.Log;
+import com.zapolnov.buildsystem.utility.StringUtils;
+import com.zapolnov.buildsystem.utility.SystemUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /** Plugin that preprocesses source files and automatically generates some code. */
 @SuppressWarnings("unused") public class Plugin extends AbstractPlugin
 {
+    /** Name of the generated file. */
+    public final String GENERATED_FILE_NAME = "src/meta.cpp";
+
     /** Our "virtual" directive injected into the project file. */
     private final MetaCompilerSourceFilesDirective directive = new MetaCompilerSourceFilesDirective();
 
@@ -60,7 +69,7 @@ import java.util.Stack;
                 if (directive.thirdparty)
                     return;
                 for (File file : directive.sourceFiles()) {
-                    if (FileUtils.isHeaderFile(file) || FileUtils.isCSourceFile(file) || FileUtils.isCxxSourceFile(file)) {
+                    if (FileUtils.isHeaderFile(file)) {
                         try {
                             scanResults.add(projectBuilder.parseFile(file, new CxxAnalyzer()).syntaxTree());
                         } catch (CxxParser.Error e) {
@@ -76,6 +85,10 @@ import java.util.Stack;
                 return directive.targetPlatform == projectBuilder.generator().targetPlatform();
             }
         });
+
+        Set<String> includes = new TreeSet<>();
+        Map<String, String> typeIDs = new TreeMap<>();
+        StringBuilder queryInterfaceMethods = new StringBuilder();
 
         for (CxxTranslationUnit translationUnit : scanResults) {
             translationUnit.visit(new CxxAstVisitor() {
@@ -95,21 +108,43 @@ import java.util.Stack;
                     scopeStack.pop();
                 }
                 @Override public void enterClass(CxxClass cxxClass) {
-                    // FIXME
+                    String className = scopeStack.peek().mergeWith(cxxClass.name).text;
                     switch (cxxClass.type)
                     {
                     case DEFAULT:
-                        Log.trace(String.format("**************** class %s", scopeStack.peek().mergeWith(cxxClass.name).text));
                         break;
                     case INTERFACE:
-                        Log.trace(String.format("**************** interface %s", scopeStack.peek().mergeWith(cxxClass.name).text));
-                        break;
                     case IMPLEMENTATION:
-                        Log.trace(String.format("**************** implementation %s", scopeStack.peek().mergeWith(cxxClass.name).text));
+                        includes.add(FileUtils.getCanonicalPath(cxxClass.translationUnit.file));
+                        String identifier = typeIDs.get(className);
+                        if (identifier == null) {
+                            identifier = "g_tid_" + StringUtils.makeIdentifier(StringUtils.makeIdentifier(className));
+                            typeIDs.put(className, identifier);
+                        }
+                        queryInterfaceMethods.append(String.format(
+                            "\n" +
+                            "void* %s::queryInterface(Engine::TypeID typeID)\n" +
+                            "{\n" +
+                            "    if (typeID == %s)\n" +
+                            "        return this;\n",
+                            className, identifier
+                        ));
+                        if (!cxxClass.parentClasses().isEmpty()) {
+                            queryInterfaceMethods.append("    void* p;\n");
+                            for (CxxParentClass parent : cxxClass.parentClasses()) {
+                                queryInterfaceMethods.append(String.format(
+                                    "    p = %s::queryInterface(typeID);\n" +
+                                    "    if (p != nullptr)\n" +
+                                    "        return p;\n",
+                                    parent.name.text
+                                ));
+                            }
+                        }
+                        queryInterfaceMethods.append(
+                            "    return nullptr;\n" +
+                            "}\n");
                         break;
                     }
-                    for (CxxParentClass parent : cxxClass.parentClasses())
-                        Log.trace(String.format("   ---- %s%s %s", parent.virtual ? "virtual " : "", parent.protectionLevel.toString(), parent.name.text));
                     scopeStack.push(scopeStack.peek().mergeWith(cxxClass.name));
                 }
                 @Override public void leaveClass(CxxClass cxxClass) {
@@ -117,6 +152,31 @@ import java.util.Stack;
                 }
             });
         }
+
+        FileBuilder cxxBuilder = new FileBuilder(projectBuilder.generatorOutputDirectory(), GENERATED_FILE_NAME);
+        cxxBuilder.appendCxxAutogeneratedHeader();
+        directive.addFile(cxxBuilder.file);
+
+        // Write includes
+        for (String include : includes) {
+            String path = FileUtils.getRelativePath(cxxBuilder.file.getParentFile(), new File(include));
+            if (SystemUtils.IS_WINDOWS)
+                path = path.replace('\\', '/');
+            path = path.replace("\"", "\\\"").replace("\\", "\\\\");
+            cxxBuilder.append(String.format("#include \"%s\"\n", path));
+        }
+        cxxBuilder.append('\n');
+
+        // Write type identifiers
+        for (Map.Entry<String, String> it : typeIDs.entrySet()) {
+            cxxBuilder.append(String.format("static const Engine::TypeID %s = Engine::typeOf<%s>();\n",
+                it.getValue(), it.getKey()));
+        }
+
+        // Write queryInterface methods
+        cxxBuilder.append(queryInterfaceMethods.toString());
+
+        cxxBuilder.commit(projectBuilder.database);
     }
 
     @Override public void preGenerate(ProjectBuilder projectBuilder) throws Throwable

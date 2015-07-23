@@ -22,22 +22,33 @@
 package com.zapolnov.buildsystem.plugins.metacompiler.parser.ast;
 
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.CxxAstVisitor;
+import java.io.File;
 import java.io.Serializable;
 
 /** AST node for a translation unit. */
-public class CxxTranslationUnit extends CxxScope implements Serializable
+public class CxxTranslationUnit implements Serializable
 {
-    /** Constructor. */
-    public CxxTranslationUnit()
+    /** Path to the source file. */
+    public final File file;
+    /** Global scope of the translation unit. */
+    public final CxxScope globalScope;
+
+    /**
+     * Constructor.
+     * @param file Path to the source file.
+     */
+    public CxxTranslationUnit(File file)
     {
+        this.file = file;
+        this.globalScope = new CxxScope(this);
     }
 
     /**
      * Visits this translation unit with the specified visitor.
      * @param visitor Visitor.
      */
-    @Override public void visit(final CxxAstVisitor visitor)
+    public void visit(CxxAstVisitor visitor)
     {
-        super.visit(visitor);
+        globalScope.visit(visitor);
     }
 }

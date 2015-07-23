@@ -30,8 +30,10 @@ import java.util.List;
 /** An AST node for a class. */
 public class CxxClass extends CxxSymbol implements Serializable
 {
+    /** Translation unit containing this class. */
+    public final CxxTranslationUnit translationUnit;
     /** A scope for this class. */
-    public final CxxScope scope = new CxxScope();
+    public final CxxScope scope;
     /** List of parent classes. */
     private final List<CxxParentClass> parentClasses;
     /** Type of this class. */
@@ -41,13 +43,17 @@ public class CxxClass extends CxxSymbol implements Serializable
 
     /**
      * Constructor.
+     * @param translationUnit Translation unit containing this class.
      * @param name Name of the class.
      * @param parentClasses List of parent classes.
      * @param isTemplateSpecialization Set to `true` if this class is a template specialization.
      */
-    public CxxClass(CxxFullyQualifiedName name, List<CxxParentClass> parentClasses, boolean isTemplateSpecialization)
+    public CxxClass(CxxTranslationUnit translationUnit, CxxFullyQualifiedName name,
+        List<CxxParentClass> parentClasses, boolean isTemplateSpecialization)
     {
         super(name);
+        this.translationUnit = translationUnit;
+        this.scope = new CxxScope(translationUnit);
         this.parentClasses = new ArrayList<>(parentClasses);
         this.isTemplateSpecialization = isTemplateSpecialization;
     }

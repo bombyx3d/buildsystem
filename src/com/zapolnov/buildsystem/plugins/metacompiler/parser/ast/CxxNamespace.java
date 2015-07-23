@@ -27,16 +27,21 @@ import java.io.Serializable;
 /** An AST node for a namespace. */
 public class CxxNamespace extends CxxSymbol implements Serializable
 {
+    /** Translation unit containing this namespace. */
+    public final CxxTranslationUnit translationUnit;
     /** A scope for this namespace. */
-    public final CxxScope scope = new CxxScope();
+    public final CxxScope scope;
 
     /**
      * Constructor.
+     * @param translationUnit Translation unit containing this namespace.
      * @param name Name of the namespace (`null` for anonymous namespaces).
      */
-    public CxxNamespace(CxxFullyQualifiedName name)
+    public CxxNamespace(CxxTranslationUnit translationUnit, CxxFullyQualifiedName name)
     {
         super(name);
+        this.translationUnit = translationUnit;
+        this.scope = new CxxScope(translationUnit);
     }
 
     /**

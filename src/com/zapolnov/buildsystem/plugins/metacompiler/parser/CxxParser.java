@@ -29,8 +29,9 @@ import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxNamespace;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxParentClass;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxScope;
 import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUnit;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -69,6 +70,8 @@ public final class CxxParser
     }
 
 
+    /** A file being parsed. */
+    private final File file;
     /** A lexer. */
     private final CxxLexer lexer;
     /** Current token. */
@@ -80,11 +83,12 @@ public final class CxxParser
 
     /**
      * Constructor.
-     * @param reader Input file reader.
+     * @param file File to parse.
      */
-    public CxxParser(Reader reader)
+    public CxxParser(File file) throws IOException
     {
-        this.lexer = new CxxLexer(reader);
+        this.file = file;
+        this.lexer = new CxxLexer(new FileReader(file));
     }
 
     /**
@@ -109,8 +113,8 @@ public final class CxxParser
      */
     public CxxTranslationUnit parseTranslationUnit() throws IOException
     {
-        CxxTranslationUnit translationUnit = new CxxTranslationUnit();
-        pushScope(translationUnit);
+        CxxTranslationUnit translationUnit = new CxxTranslationUnit(file);
+        pushScope(translationUnit.globalScope);
         try {
             nextToken();
             while (token.id != CxxToken.EOF)
@@ -134,7 +138,7 @@ public final class CxxParser
 
         parseLeftCurly();
 
-        CxxNamespace namespace = new CxxNamespace(name);
+        CxxNamespace namespace = new CxxNamespace(currentScope.translationUnit, name);
         currentScope.addSymbol(namespace);
 
         pushScope(namespace.scope);
@@ -220,7 +224,7 @@ public final class CxxParser
 
         parseLeftCurly();
 
-        CxxClass cxxClass = new CxxClass(name, parentClasses, isTemplateSpecialization);
+        CxxClass cxxClass = new CxxClass(currentScope.translationUnit, name, parentClasses, isTemplateSpecialization);
         currentScope.addSymbol(cxxClass);
 
         pushScope(cxxClass.scope);

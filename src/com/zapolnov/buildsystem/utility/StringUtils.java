@@ -152,6 +152,56 @@ public class StringUtils
     }
 
     /**
+     * Checks whether given character is suitable for use as a first symbol of an identifier.
+     * @param ch Character to check.
+     * @return `true` if character is suitable, `false` otherwise.
+     */
+    public static boolean isIdentifierStart(char ch)
+    {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
+    }
+
+    /**
+     * Checks whether given character is suitable for use as a non-first symbol of an identifier.
+     * @param ch Character to check.
+     * @return `true` if character is suitable, `false` otherwise.
+     */
+    public static boolean isIdentifier(char ch)
+    {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_';
+    }
+
+    /**
+     * Makes given string suitable for use as an identifier.
+     * This method replaces all symbols except underscore, english letters and digits with an underscore.
+     * @param string String to convert to identifier.
+     * @return String suitable for use as an identifier.
+     */
+    public static String makeIdentifier(String string)
+    {
+        int length = string.length();
+        if (length == 0)
+            return "_";
+
+        StringBuilder builder = new StringBuilder();
+        char firstChar = string.charAt(0);
+        if (!isIdentifierStart(firstChar))
+            builder.append('_');
+        else
+            builder.append(firstChar);
+
+        for (int i = 1; i < length; i++) {
+            char ch = string.charAt(i);
+            if (!isIdentifier(ch))
+                builder.append('_');
+            else
+                builder.append(ch);
+        }
+
+        return builder.toString();
+    }
+
+    /**
      * Retrieves short description of a problem that caused the exception.
      * @param throwable Instance of the exception.
      * @return Short description of a problem.

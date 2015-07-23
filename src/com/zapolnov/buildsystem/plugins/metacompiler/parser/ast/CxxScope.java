@@ -30,12 +30,18 @@ import java.util.List;
 /** A scope. */
 public class CxxScope implements Serializable
 {
+    /** Translation unit containing this scope. */
+    public final CxxTranslationUnit translationUnit;
     /** List of symbols in this scope. */
     private final List<CxxSymbol> symbols = new ArrayList<>();
 
-    /** Constructor. */
-    public CxxScope()
+    /**
+     * Constructor.
+     * @param translationUnit Translation unit containing this scope.
+     */
+    public CxxScope(CxxTranslationUnit translationUnit)
     {
+        this.translationUnit = translationUnit;
     }
 
     /**
