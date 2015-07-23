@@ -32,6 +32,7 @@ import com.zapolnov.buildsystem.plugins.metacompiler.parser.ast.CxxTranslationUn
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -89,6 +90,17 @@ public final class CxxParser
     {
         this.file = file;
         this.lexer = new CxxLexer(new FileReader(file));
+    }
+
+    /**
+     * Constructor.
+     * @param reader File reader.
+     * @param file Name Name of the file.
+     */
+    public CxxParser(Reader reader, File file)
+    {
+        this.file = file;
+        this.lexer = new CxxLexer(reader);
     }
 
     /**
