@@ -28,6 +28,11 @@ public enum CxxClassType
     DEFAULT,
     /** Class is an interface class (has the Z_INTERFACE macro). */
     INTERFACE,
+    /**
+     * Class is an implementation class with a custom variant of the `queryInterface` method
+     * (has the Z_CUSTOM_IMPLEMENTATION macro).
+     */
+    CUSTOM_IMPLEMENTATION,
     /** Class is an implementation class (has the Z_IMPLEMENTATION macro). */
     IMPLEMENTATION,
 }

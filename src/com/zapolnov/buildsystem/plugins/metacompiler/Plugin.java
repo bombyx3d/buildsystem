@@ -108,11 +108,15 @@ import java.util.TreeSet;
                     scopeStack.pop();
                 }
                 @Override public void enterClass(CxxClass cxxClass) {
+                    boolean custom = false;
                     String className = scopeStack.peek().mergeWith(cxxClass.name).text;
                     switch (cxxClass.type)
                     {
                     case DEFAULT:
                         break;
+
+                    case CUSTOM_IMPLEMENTATION:
+                        custom = true;
                     case INTERFACE:
                     case IMPLEMENTATION:
                         includes.add(FileUtils.getCanonicalPath(cxxClass.translationUnit.file));
@@ -140,9 +144,16 @@ import java.util.TreeSet;
                                 ));
                             }
                         }
-                        queryInterfaceMethods.append(
-                            "    return nullptr;\n" +
-                            "}\n");
+                        if (custom) {
+                            queryInterfaceMethods.append(String.format(
+                                "    return %s::_queryCustomInterface(typeID);\n" +
+                                "}\n",
+                                className));
+                        } else {
+                            queryInterfaceMethods.append(
+                                "    return nullptr;\n" +
+                                "}\n");
+                        }
                         break;
                     }
                     scopeStack.push(scopeStack.peek().mergeWith(cxxClass.name));

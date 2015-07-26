@@ -275,22 +275,34 @@ public final class CxxParser
             name = parseZInterface();
             if (cxxClass.type != CxxClassType.DEFAULT)
                 throw new Error(firstToken, "Unexpected Z_INTERFACE.");
-            else if (!name.text.equals(cxxClass.name.lastComponent()))
-                throw new Error(name.firstToken, "Name in Z_INTERFACE() does not match the class name.");
             else if (cxxClass.isTemplateSpecialization)
                 throw new Error(name.firstToken, "Z_INTERFACE() is not supported in template specializations.");
+            else if (!name.text.equals(cxxClass.name.lastComponent()))
+                throw new Error(name.firstToken, "Name in Z_INTERFACE() does not match the class name.");
             else
                 cxxClass.type = CxxClassType.INTERFACE;
+            break;
+
+        case CxxToken.Z_CUSTOM_IMPLEMENTATION:
+            name = parseZCustomImplementation();
+            if (cxxClass.type != CxxClassType.DEFAULT)
+                throw new Error(firstToken, "Unexpected Z_CUSTOM_IMPLEMENTATION.");
+            else if (cxxClass.isTemplateSpecialization)
+                throw new Error(name.firstToken, "Z_CUSTOM_IMPLEMENTATION() is not supported in template specializations.");
+            else if (!name.text.equals(cxxClass.name.lastComponent()))
+                throw new Error(name.firstToken, "Name in Z_CUSTOM_IMPLEMENTATION() does not match the class name.");
+            else
+                cxxClass.type = CxxClassType.CUSTOM_IMPLEMENTATION;
             break;
 
         case CxxToken.Z_IMPLEMENTATION:
             name = parseZImplementation();
             if (cxxClass.type != CxxClassType.DEFAULT)
                 throw new Error(firstToken, "Unexpected Z_IMPLEMENTATION.");
-            else if (!name.text.equals(cxxClass.name.lastComponent()))
-                throw new Error(name.firstToken, "Name in Z_IMPLEMENTATION() does not match the class name.");
             else if (cxxClass.isTemplateSpecialization)
                 throw new Error(name.firstToken, "Z_IMPLEMENTATION() is not supported in template specializations.");
+            else if (!name.text.equals(cxxClass.name.lastComponent()))
+                throw new Error(name.firstToken, "Name in Z_IMPLEMENTATION() does not match the class name.");
             else
                 cxxClass.type = CxxClassType.IMPLEMENTATION;
             break;
@@ -343,6 +355,21 @@ public final class CxxParser
      * @return Name of the interface.
      */
     private CxxFullyQualifiedName parseZInterface() throws IOException
+    {
+        nextToken();
+
+        parseLeftParenthesis();
+        CxxFullyQualifiedName name = parseFullyQualifiedName();
+        parseRightParenthesis();
+
+        return name;
+    }
+
+    /**
+     * Parses the Z_CUSTOM_IMPLEMENTATION macro in class declaration.
+     * @return Name of the implementation.
+     */
+    private CxxFullyQualifiedName parseZCustomImplementation() throws IOException
     {
         nextToken();
 
