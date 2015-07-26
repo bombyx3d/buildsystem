@@ -283,18 +283,6 @@ public final class CxxParser
                 cxxClass.type = CxxClassType.INTERFACE;
             break;
 
-        case CxxToken.Z_CUSTOM_IMPLEMENTATION:
-            name = parseZCustomImplementation();
-            if (cxxClass.type != CxxClassType.DEFAULT)
-                throw new Error(firstToken, "Unexpected Z_CUSTOM_IMPLEMENTATION.");
-            else if (cxxClass.isTemplateSpecialization)
-                throw new Error(name.firstToken, "Z_CUSTOM_IMPLEMENTATION() is not supported in template specializations.");
-            else if (!name.text.equals(cxxClass.name.lastComponent()))
-                throw new Error(name.firstToken, "Name in Z_CUSTOM_IMPLEMENTATION() does not match the class name.");
-            else
-                cxxClass.type = CxxClassType.CUSTOM_IMPLEMENTATION;
-            break;
-
         case CxxToken.Z_IMPLEMENTATION:
             name = parseZImplementation();
             if (cxxClass.type != CxxClassType.DEFAULT)
@@ -305,6 +293,30 @@ public final class CxxParser
                 throw new Error(name.firstToken, "Name in Z_IMPLEMENTATION() does not match the class name.");
             else
                 cxxClass.type = CxxClassType.IMPLEMENTATION;
+            break;
+
+        case CxxToken.Z_SINGLETON_IMPLEMENTATION:
+            name = parseZSingletonImplementation();
+            if (cxxClass.type != CxxClassType.DEFAULT)
+                throw new Error(firstToken, "Unexpected Z_SINGLETON_IMPLEMENTATION.");
+            else if (cxxClass.isTemplateSpecialization)
+                throw new Error(name.firstToken, "Z_SINGLETON_IMPLEMENTATION() is not supported in template specializations.");
+            else if (!name.text.equals(cxxClass.name.lastComponent()))
+                throw new Error(name.firstToken, "Name in Z_SINGLETON_IMPLEMENTATION() does not match the class name.");
+            else
+                cxxClass.type = CxxClassType.SINGLETON_IMPLEMENTATION;
+            break;
+
+        case CxxToken.Z_CUSTOM_IMPLEMENTATION:
+            name = parseZCustomImplementation();
+            if (cxxClass.type != CxxClassType.DEFAULT)
+                throw new Error(firstToken, "Unexpected Z_CUSTOM_IMPLEMENTATION.");
+            else if (cxxClass.isTemplateSpecialization)
+                throw new Error(name.firstToken, "Z_CUSTOM_IMPLEMENTATION() is not supported in template specializations.");
+            else if (!name.text.equals(cxxClass.name.lastComponent()))
+                throw new Error(name.firstToken, "Name in Z_CUSTOM_IMPLEMENTATION() does not match the class name.");
+            else
+                cxxClass.type = CxxClassType.CUSTOM_IMPLEMENTATION;
             break;
 
         case CxxToken.LCURLY:
@@ -370,6 +382,21 @@ public final class CxxParser
      * @return Name of the implementation.
      */
     private CxxFullyQualifiedName parseZCustomImplementation() throws IOException
+    {
+        nextToken();
+
+        parseLeftParenthesis();
+        CxxFullyQualifiedName name = parseFullyQualifiedName();
+        parseRightParenthesis();
+
+        return name;
+    }
+
+    /**
+     * Parses the Z_SINGLETON_IMPLEMENTATION macro in class declaration.
+     * @return Name of the implementation.
+     */
+    private CxxFullyQualifiedName parseZSingletonImplementation() throws IOException
     {
         nextToken();
 

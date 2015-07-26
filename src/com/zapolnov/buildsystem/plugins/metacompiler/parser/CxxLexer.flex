@@ -82,6 +82,7 @@ Identifier              = [a-zA-Z$_] [a-zA-Z0-9$_]*
     "virtual"                                       { return symbol(CxxToken.VIRTUAL); }
 
     "Z_INTERFACE"                                   { return symbol(CxxToken.Z_INTERFACE); }
+    "Z_SINGLETON_IMPLEMENTATION"                    { return symbol(CxxToken.Z_SINGLETON_IMPLEMENTATION); }
     "Z_CUSTOM_IMPLEMENTATION"                       { return symbol(CxxToken.Z_CUSTOM_IMPLEMENTATION); }
     "Z_IMPLEMENTATION"                              { return symbol(CxxToken.Z_IMPLEMENTATION); }
 

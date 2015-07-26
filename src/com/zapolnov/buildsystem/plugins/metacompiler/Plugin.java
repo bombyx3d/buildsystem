@@ -40,6 +40,7 @@ import com.zapolnov.buildsystem.utility.StringUtils;
 import com.zapolnov.buildsystem.utility.SystemUtils;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,9 +87,10 @@ import java.util.TreeSet;
             }
         });
 
-        Set<String> includes = new TreeSet<>();
-        Map<String, String> typeIDs = new TreeMap<>();
-        StringBuilder queryInterfaceMethods = new StringBuilder();
+        final Map<CxxClass, String> singletons = new LinkedHashMap<>();
+        final Map<CxxClass, String> interfaces = new LinkedHashMap<>();
+        final Map<CxxClass, String> customInterfaces = new LinkedHashMap<>();
+        final Set<String> includes = new TreeSet<>();
 
         for (CxxTranslationUnit translationUnit : scanResults) {
             translationUnit.visit(new CxxAstVisitor() {
@@ -108,52 +110,26 @@ import java.util.TreeSet;
                     scopeStack.pop();
                 }
                 @Override public void enterClass(CxxClass cxxClass) {
-                    boolean custom = false;
                     String className = scopeStack.peek().mergeWith(cxxClass.name).text;
                     switch (cxxClass.type)
                     {
                     case DEFAULT:
                         break;
 
-                    case CUSTOM_IMPLEMENTATION:
-                        custom = true;
                     case INTERFACE:
                     case IMPLEMENTATION:
                         includes.add(FileUtils.getCanonicalPath(cxxClass.translationUnit.file));
-                        String identifier = typeIDs.get(className);
-                        if (identifier == null) {
-                            identifier = "g_tid_" + StringUtils.makeIdentifier(StringUtils.makeIdentifier(className));
-                            typeIDs.put(className, identifier);
-                        }
-                        queryInterfaceMethods.append(String.format(
-                            "\n" +
-                            "void* %s::queryInterface(Engine::TypeID typeID)\n" +
-                            "{\n" +
-                            "    if (typeID == %s)\n" +
-                            "        return this;\n",
-                            className, identifier
-                        ));
-                        if (!cxxClass.parentClasses().isEmpty()) {
-                            queryInterfaceMethods.append("    void* p;\n");
-                            for (CxxParentClass parent : cxxClass.parentClasses()) {
-                                queryInterfaceMethods.append(String.format(
-                                    "    p = %s::queryInterface(typeID);\n" +
-                                    "    if (p != nullptr)\n" +
-                                    "        return p;\n",
-                                    parent.name.text
-                                ));
-                            }
-                        }
-                        if (custom) {
-                            queryInterfaceMethods.append(String.format(
-                                "    return %s::_queryCustomInterface(typeID);\n" +
-                                "}\n",
-                                className));
-                        } else {
-                            queryInterfaceMethods.append(
-                                "    return nullptr;\n" +
-                                "}\n");
-                        }
+                        interfaces.put(cxxClass, className);
+                        break;
+
+                    case SINGLETON_IMPLEMENTATION:
+                        includes.add(FileUtils.getCanonicalPath(cxxClass.translationUnit.file));
+                        singletons.put(cxxClass, className);
+                        break;
+
+                    case CUSTOM_IMPLEMENTATION:
+                        includes.add(FileUtils.getCanonicalPath(cxxClass.translationUnit.file));
+                        customInterfaces.put(cxxClass, className);
                         break;
                     }
                     scopeStack.push(scopeStack.peek().mergeWith(cxxClass.name));
@@ -178,16 +154,87 @@ import java.util.TreeSet;
         }
         cxxBuilder.append('\n');
 
+        // Generate code for queryInterface() methods
+        final StringBuilder queryInterfaceMethods = new StringBuilder();
+        final Map<String, String> typeIDs = new TreeMap<>();
+        for (Map.Entry<CxxClass, String> it : interfaces.entrySet())
+            generateQueryInterfaceMethod(queryInterfaceMethods, it.getValue(), it.getKey(), typeIDs, false);
+        for (Map.Entry<CxxClass, String> it : singletons.entrySet())
+            generateQueryInterfaceMethod(queryInterfaceMethods, it.getValue(), it.getKey(), typeIDs, false);
+        for (Map.Entry<CxxClass, String> it : customInterfaces.entrySet())
+            generateQueryInterfaceMethod(queryInterfaceMethods, it.getValue(), it.getKey(), typeIDs, true);
+
         // Write type identifiers
         for (Map.Entry<String, String> it : typeIDs.entrySet()) {
             cxxBuilder.append(String.format("static const Engine::TypeID %s = Engine::typeOf<%s>();\n",
                 it.getValue(), it.getKey()));
         }
 
-        // Write queryInterface methods
+        // Write queryInterface() methods
         cxxBuilder.append(queryInterfaceMethods.toString());
 
+        // Write initializer
+        cxxBuilder.append(
+            "\n" +
+            "void Engine::Core::Initializer::init(Core& core)\n" +
+            "{\n" +
+            "    (void)core;        // Prevent compiler warnings\n"
+        );
+        for (Map.Entry<CxxClass, String> it : singletons.entrySet()) {
+            cxxBuilder.append(String.format(
+                "\n" +
+                "    core.addSingleton(new %s);\n",
+                it.getValue()
+            ));
+        }
+        cxxBuilder.append(
+            "}\n"
+        );
+
         cxxBuilder.commit(projectBuilder.database);
+    }
+
+    private void generateQueryInterfaceMethod(StringBuilder output, String className, CxxClass cxxClass,
+        Map<String, String> typeIDs, boolean custom)
+    {
+        String identifier = typeIDs.get(className);
+        if (identifier == null) {
+            identifier = "g_tid_" + StringUtils.makeIdentifier(StringUtils.makeIdentifier(className));
+            typeIDs.put(className, identifier);
+        }
+
+        output.append(String.format(
+            "\n" +
+            "void* %s::queryInterface(Engine::TypeID typeID)\n" +
+            "{\n" +
+            "    if (typeID == %s)\n" +
+            "        return this;\n",
+            className, identifier
+        ));
+
+        if (!cxxClass.parentClasses().isEmpty()) {
+            output.append("    void* p;\n");
+            for (CxxParentClass parent : cxxClass.parentClasses()) {
+                output.append(String.format(
+                    "    p = %s::queryInterface(typeID);\n" +
+                    "    if (p != nullptr)\n" +
+                    "        return p;\n",
+                    parent.name.text
+                ));
+            }
+        }
+
+        if (custom) {
+            output.append(String.format(
+                "    return %s::_queryCustomInterface(typeID);\n" +
+                "}\n",
+                className));
+        } else {
+            output.append(
+                "    return nullptr;\n" +
+                "}\n");
+        }
+
     }
 
     @Override public void preGenerate(ProjectBuilder projectBuilder) throws Throwable

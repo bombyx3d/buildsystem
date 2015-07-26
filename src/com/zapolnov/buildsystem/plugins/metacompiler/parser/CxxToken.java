@@ -78,10 +78,12 @@ public final class CxxToken implements Serializable
 
     /** The 'Z_INTERFACE' identifier. */
     public static final int Z_INTERFACE = 200;
-    /** The 'Z_CUSTOM_IMPLEMENTATION' identifier. */
-    public static final int Z_CUSTOM_IMPLEMENTATION = 201;
     /** The 'Z_IMPLEMENTATION' identifier. */
-    public static final int Z_IMPLEMENTATION = 202;
+    public static final int Z_IMPLEMENTATION = 201;
+    /** The 'Z_SINGLETON_IMPLEMENTATION' identifier. */
+    public static final int Z_SINGLETON_IMPLEMENTATION = 202;
+    /** The 'Z_CUSTOM_IMPLEMENTATION' identifier. */
+    public static final int Z_CUSTOM_IMPLEMENTATION = 203;
 
 
     /** Kind of the token. */
