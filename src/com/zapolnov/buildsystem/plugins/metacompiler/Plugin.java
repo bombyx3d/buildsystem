@@ -180,12 +180,14 @@ import java.util.TreeSet;
             "{\n" +
             "    (void)core;        // Prevent compiler warnings\n"
         );
-        for (Map.Entry<CxxClass, String> it : singletons.entrySet()) {
-            cxxBuilder.append(String.format(
-                "\n" +
-                "    core.addSingleton(new %s);\n",
-                it.getValue()
-            ));
+        if (!singletons.isEmpty()) {
+            cxxBuilder.append('\n');
+            for (Map.Entry<CxxClass, String> it : singletons.entrySet()) {
+                cxxBuilder.append(String.format(
+                    "    core.addSingleton(new %s);\n",
+                    it.getValue()
+                ));
+            }
         }
         cxxBuilder.append(
             "}\n"
@@ -197,11 +199,15 @@ import java.util.TreeSet;
     private void generateQueryInterfaceMethod(StringBuilder output, String className, CxxClass cxxClass,
         Map<String, String> typeIDs, boolean custom)
     {
+        // Global variable
+
         String identifier = typeIDs.get(className);
         if (identifier == null) {
             identifier = "g_tid_" + StringUtils.makeIdentifier(StringUtils.makeIdentifier(className));
             typeIDs.put(className, identifier);
         }
+
+        // queryInterface()
 
         output.append(String.format(
             "\n" +
@@ -235,6 +241,35 @@ import java.util.TreeSet;
                 "}\n");
         }
 
+        // queryAllInterfaces()
+
+        output.append(String.format(
+            "\n" +
+            "void %s::queryAllInterfaces(InterfaceList& out)\n" +
+            "{\n",
+            className
+        ));
+
+        for (CxxParentClass parent : cxxClass.parentClasses()) {
+           output.append(String.format(
+                "    %s::queryAllInterfaces(out);\n",
+                parent.name.text
+            ));
+        }
+
+        output.append(String.format(
+            "    out.emplace_back(%s, this);\n",
+            identifier
+        ));
+
+        if (custom) {
+            output.append(String.format(
+                "    %s::_queryAllCustomInterfaces(out);\n",
+                className
+            ));
+        }
+
+        output.append("}\n");
     }
 
     @Override public void preGenerate(ProjectBuilder projectBuilder) throws Throwable
