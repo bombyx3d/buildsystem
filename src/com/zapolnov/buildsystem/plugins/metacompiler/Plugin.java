@@ -245,7 +245,7 @@ import java.util.TreeSet;
 
         output.append(String.format(
             "\n" +
-            "void %s::queryAllInterfaces(InterfaceList& out)\n" +
+            "void %s::queryAllInterfaces(Engine::IUnknown::InterfaceList& out)\n" +
             "{\n",
             className
         ));
